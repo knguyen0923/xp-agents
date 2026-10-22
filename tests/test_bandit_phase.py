@@ -7,7 +7,7 @@ import pytest
 
 from xp.bandit.phase import build_factories, build_tagteam, make_per_seed_fn, run_phase
 from xp.bandit.tagteam import TagTeamAgent
-from xp.errors import ConfigMismatchError
+from xp.errors import ConfigMismatchError, ProtocolError
 from xp.protocol.phase import Phase, load_config
 from xp.protocol.results import load_results, read_tune
 
@@ -21,7 +21,7 @@ def test_real_config_is_valid_and_grids_are_equal_size():
     assert n(cfg["agents"]["kairi"]) == n(cfg["agents"]["kaiser"])
 
 
-def test_per_seed_fn_is_deterministic_and_per_seed_independent_of_batching(tiny_cfg):
+def test_per_seed_fn_is_deterministic(tiny_cfg):
     f = build_factories(tiny_cfg)["kairi"]
     fn = make_per_seed_fn(tiny_cfg, f)
     params = {"epsilon": 0.1, "alpha": 0.3}
@@ -85,3 +85,83 @@ def test_report_cli_blocks_provisional_then_writes_with_flag(tiny_cfg, tmp_path)
     report_main(argv + ["--allow-provisional"])
     for name in ("curves.csv", "gaps.csv", "crossovers.csv", "pair_vs_best_single.csv", "degradation.png"):
         assert (tmp_path / "figs" / name).exists()
+
+
+def test_run_phase_rejects_unequal_grid_sizes_before_any_work(tiny_cfg, tmp_path):
+    tiny_cfg["agents"]["kairi"]["grid"]["epsilon"] = [0.05, 0.1, 0.2]
+    with pytest.raises(ProtocolError, match="grid"):
+        run_phase(tiny_cfg, tmp_path)
+    assert not (tmp_path / "bandit").exists()
+
+
+def test_run_phase_writes_manifest_and_rejects_changed_hash(tiny_cfg, tmp_path):
+    import json
+    import sys
+
+    run_phase(tiny_cfg, tmp_path)
+    m = json.loads((tmp_path / "bandit" / "manifest.json").read_text())
+    assert m["config_hash"] == Phase.from_config(tiny_cfg).config_hash
+    assert m["cfg"] == tiny_cfg
+    assert "git_commit" in m and (m["git_commit"] is None or len(m["git_commit"]) == 40)
+    assert m["versions"]["python"] == sys.version.split()[0]
+    assert set(m["versions"]) == {"python", "numpy", "pandas"}
+    run_phase(tiny_cfg, tmp_path)  # same hash: overwrite is fine
+    tiny_cfg["horizon"] = 60
+    with pytest.raises(ConfigMismatchError):
+        run_phase(tiny_cfg, tmp_path)
+
+
+def _report_setup(tiny_cfg, tmp_path):
+    import yaml
+
+    cfg_path = tmp_path / "cfg.yaml"
+    cfg_path.write_text(yaml.safe_dump(tiny_cfg))
+    run_phase(tiny_cfg, tmp_path / "res")
+    argv = ["--phase", "bandit", "--config", str(cfg_path), "--out", str(tmp_path / "res"),
+            "--figs", str(tmp_path / "figs"), "--allow-provisional"]
+    return argv, tmp_path / "res" / "bandit"
+
+
+def test_report_rejects_missing_cell(tiny_cfg, tmp_path):
+    from xp.report import main as report_main
+
+    argv, res = _report_setup(tiny_cfg, tmp_path)
+    (res / "kaiser__jump_rate-0.05.csv").unlink()
+    with pytest.raises(ProtocolError, match="kaiser"):
+        report_main(argv)
+    assert not (tmp_path / "figs").exists()
+
+
+def test_report_rejects_short_cell(tiny_cfg, tmp_path):
+    import pandas as pd
+
+    from xp.report import main as report_main
+
+    argv, res = _report_setup(tiny_cfg, tmp_path)
+    f = res / "tt_meta__jump_rate-0.01.csv"
+    pd.read_csv(f, dtype={"config_hash": str}).iloc[:5].to_csv(f, index=False)
+    with pytest.raises(ProtocolError, match="tt_meta"):
+        report_main(argv)
+
+
+def test_report_rejects_wrong_config_hash(tiny_cfg, tmp_path):
+    import pandas as pd
+
+    from xp.report import main as report_main
+
+    argv, res = _report_setup(tiny_cfg, tmp_path)
+    f = res / "kairi__jump_rate-0.01.csv"
+    df = pd.read_csv(f, dtype={"config_hash": str})
+    df["config_hash"] = "deadbeef0000"
+    df.to_csv(f, index=False)
+    with pytest.raises(ConfigMismatchError):
+        report_main(argv)
+
+
+def test_report_rejects_phase_mismatch(tiny_cfg, tmp_path):
+    from xp.report import main as report_main
+
+    argv, _ = _report_setup(tiny_cfg, tmp_path)
+    argv[1] = "other"
+    with pytest.raises(ProtocolError, match="phase"):
+        report_main(argv)

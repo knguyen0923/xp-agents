@@ -5,10 +5,31 @@ from pathlib import Path
 
 import pandas as pd
 
+from xp.errors import ConfigMismatchError, ProtocolError
 from xp.plots.curves import plot_degradation
 from xp.protocol.phase import Phase, load_config
 from xp.protocol.results import load_results, require_final
 from xp.stats.summary import crossings, curve_table, gap_table, pair_table, pair_vs_best_single
+
+
+EXPECTED_AGENTS = ("kairi", "kaiser", "tt_fixed", "tt_triggered", "tt_meta")
+
+
+def validate_results(df: pd.DataFrame, phase: Phase) -> None:
+    """Results must come from this config and cover every agent x knob cell completely."""
+    hashes = set(df["config_hash"])
+    if hashes != {phase.config_hash}:
+        raise ConfigMismatchError(f"results were written under configs {sorted(hashes)}, current config is {phase.config_hash}")
+    counts = df.groupby(["agent", "knob"]).size()
+    expected = len(phase.eval_seeds)
+    problems = []
+    for agent in EXPECTED_AGENTS:
+        for knob in phase.sweep:
+            n = int(counts.get((agent, knob), 0))
+            if n != expected:
+                problems.append(f"{agent} {phase.knob_name}={knob:g}: {n}/{expected} rows")
+    if problems:
+        raise ProtocolError("incomplete results, " + "; ".join(problems))
 
 
 def main(argv=None) -> None:
@@ -20,10 +41,14 @@ def main(argv=None) -> None:
     parser.add_argument("--allow-provisional", action="store_true", help="draft only: include provisional results")
     args = parser.parse_args(argv)
 
-    phase = Phase.from_config(load_config(args.config))
+    cfg = load_config(args.config)
+    phase = Phase.from_config(cfg)
+    if args.phase != cfg["phase"]:
+        raise ProtocolError(f"--phase {args.phase!r} does not match the config's phase {cfg['phase']!r}")
     df = load_results(args.out, args.phase)
     if df.empty:
         raise SystemExit(f"no results found under {args.out}/{args.phase}")
+    validate_results(df, phase)
     require_final(df, allow_provisional=args.allow_provisional)
 
     figs = Path(args.figs)
