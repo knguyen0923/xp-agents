@@ -68,3 +68,20 @@ def test_tagteam_inherits_provisional_from_base_agents(tiny_cfg, tmp_path):
     run_phase(tiny_cfg, tmp_path)
     df = load_results(tmp_path, "bandit")
     assert df.loc[df["agent"] == "tt_fixed", "provisional"].all()  # no own tuning, base is provisional
+
+
+def test_report_cli_blocks_provisional_then_writes_with_flag(tiny_cfg, tmp_path):
+    import yaml
+
+    from xp.errors import ProvisionalResultError
+    from xp.report import main as report_main
+
+    cfg_path = tmp_path / "cfg.yaml"
+    cfg_path.write_text(yaml.safe_dump(tiny_cfg))
+    run_phase(tiny_cfg, tmp_path / "res")
+    argv = ["--phase", "bandit", "--config", str(cfg_path), "--out", str(tmp_path / "res"), "--figs", str(tmp_path / "figs")]
+    with pytest.raises(ProvisionalResultError):
+        report_main(argv)
+    report_main(argv + ["--allow-provisional"])
+    for name in ("curves.csv", "gaps.csv", "crossovers.csv", "pair_vs_best_single.csv", "degradation.png"):
+        assert (tmp_path / "figs" / name).exists()
