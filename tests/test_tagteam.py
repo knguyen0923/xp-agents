@@ -61,6 +61,19 @@ def test_meta_bandit_tries_both_then_prefers_better_agent():
     assert chosen[-4:] == [1, 1, 1, 1]
 
 
+def test_meta_bandit_with_zero_bonus_tries_both_then_picks_higher_block_mean():
+    c = MetaBandit(gamma=1.0, c=0.0, block=2)
+    c.reset(1)
+    chosen = []
+    for t in range(20):
+        w = c.who(t)
+        chosen.append(int(w[0]))
+        reward = 1.0 if w[0] == 1 else 0.0  # Kaiser is better
+        c.observe(t, w, np.array([reward]), np.zeros(1))
+    assert chosen[0] == 0 and chosen[2] == 1  # untried agents have an infinite index
+    assert chosen[4:] == [1] * 16 and np.isfinite(c.sum).all()
+
+
 class _Spy(KairiAgent):
     def __init__(self, *a, **kw):
         super().__init__(*a, **kw)
