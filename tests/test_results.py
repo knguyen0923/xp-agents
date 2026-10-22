@@ -33,19 +33,26 @@ def _df(phase, agent="kairi", knob=0.01, provisional=False):
     )
 
 
+def _full_df(phase, agent="kairi", knob=0.01, provisional=False):
+    df = _df(phase, agent, knob, provisional)
+    n = len(phase.eval_seeds)
+    return pd.DataFrame({**df.iloc[0].to_dict(), "seed": list(phase.eval_seeds), "value": np.linspace(0.1, 0.9, n)})[COLUMNS]
+
+
 def test_unit_roundtrip_and_done(tiny_cfg, tmp_path):
     phase = Phase.from_config(tiny_cfg)
     assert not unit_done(tmp_path, phase, "kairi", 0.01)
-    write_unit(tmp_path, phase, "kairi", 0.01, _df(phase))
+    df = _full_df(phase)
+    write_unit(tmp_path, phase, "kairi", 0.01, df)
     assert unit_done(tmp_path, phase, "kairi", 0.01)
     out = load_results(tmp_path, "bandit")
     assert list(out.columns) == COLUMNS
-    assert len(out) == 2
+    assert len(out) == len(phase.eval_seeds)
 
 
 def test_hash_mismatch_raises(tiny_cfg, tmp_path):
     phase = Phase.from_config(tiny_cfg)
-    write_unit(tmp_path, phase, "kairi", 0.01, _df(phase))
+    write_unit(tmp_path, phase, "kairi", 0.01, _full_df(phase))
     tiny_cfg["horizon"] = 99
     other = Phase.from_config(tiny_cfg)
     with pytest.raises(ConfigMismatchError):
@@ -96,11 +103,11 @@ def test_numeric_looking_hash_resumes_and_roundtrips(tiny_cfg, tmp_path):
     import dataclasses
 
     phase = dataclasses.replace(Phase.from_config(tiny_cfg), config_hash="000123456789")
-    df = _df(phase)
+    df = _full_df(phase)
     write_unit(tmp_path, phase, "kairi", 0.01, df)
     assert unit_done(tmp_path, phase, "kairi", 0.01)
     out = load_results(tmp_path, "bandit")
-    assert out["config_hash"].tolist() == ["000123456789", "000123456789"]
+    assert out["config_hash"].tolist() == ["000123456789"] * len(phase.eval_seeds)
     assert all(isinstance(h, str) for h in out["config_hash"])
     assert out["provisional"].dtype == bool
 
@@ -117,3 +124,38 @@ def test_write_tune_accepts_numpy_scalars(tiny_cfg, tmp_path):
     back = read_tune(tmp_path, phase, "kairi")
     assert back.best_params["epsilon"] == 0.5
     assert back.best_params["window"] == 10
+
+
+def test_unit_done_is_false_for_empty_header_only_or_short_file(tiny_cfg, tmp_path):
+    phase = Phase.from_config(tiny_cfg)  # expects 20 eval seeds
+    path = tmp_path / "bandit" / "kairi__jump_rate-0.01.csv"
+    path.parent.mkdir(parents=True)
+    path.write_text("")
+    assert not unit_done(tmp_path, phase, "kairi", 0.01)
+    path.write_text(",".join(COLUMNS) + "\n")
+    assert not unit_done(tmp_path, phase, "kairi", 0.01)
+    write_unit(tmp_path, phase, "kairi", 0.01, _df(phase))  # only 2 of 20 rows
+    assert not unit_done(tmp_path, phase, "kairi", 0.01)
+
+
+def test_unit_done_true_for_complete_file(tiny_cfg, tmp_path):
+    phase = Phase.from_config(tiny_cfg)
+    df = _df(phase)
+    df = pd.concat([df] * (len(phase.eval_seeds) // 2), ignore_index=True)
+    write_unit(tmp_path, phase, "kairi", 0.01, df)
+    assert unit_done(tmp_path, phase, "kairi", 0.01)
+
+
+def test_writes_are_atomic_and_leave_no_temp_files(tiny_cfg, tmp_path, monkeypatch):
+    import os
+
+    phase = Phase.from_config(tiny_cfg)
+    replaced = []
+    real = os.replace
+    monkeypatch.setattr(os, "replace", lambda a, b: (replaced.append(str(b)), real(a, b))[1])
+    write_unit(tmp_path, phase, "kairi", 0.01, _df(phase))
+    write_tune(tmp_path, phase, "kairi", TuneResult({"epsilon": 0.05}, 0.4, [], pd.DataFrame({"epsilon": [0.05]})))
+    assert len(replaced) == 3  # unit csv, tune json, tune csv
+    assert sorted(p.name for p in (tmp_path / "bandit").rglob("*") if p.is_file()) == [
+        "kairi.csv", "kairi.json", "kairi__jump_rate-0.01.csv"
+    ]

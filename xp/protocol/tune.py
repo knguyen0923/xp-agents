@@ -6,10 +6,19 @@ from typing import Callable, Dict, List, Optional
 import numpy as np
 import pandas as pd
 
+from xp.errors import ProtocolError
 from xp.protocol.phase import Phase
 from xp.protocol.results import TuneResult
 
 PerSeedFn = Callable[[np.ndarray, float, dict, int], np.ndarray]
+
+
+def checked_chunk_result(values, chunk) -> np.ndarray:
+    """A per-seed function must return one value per seed in the chunk, as a 1-D array."""
+    arr = np.asarray(values)
+    if arr.ndim != 1 or len(arr) != len(chunk):
+        raise ProtocolError(f"per-seed function returned shape {arr.shape} for a chunk of {len(chunk)} seeds")
+    return arr
 
 
 def grid_points(grid: Dict[str, list]) -> List[dict]:
@@ -37,6 +46,9 @@ def tune(score_fn: Callable[[dict], float], grid: Dict[str, list], natural_limit
     """Exhaustive grid search; lower score is better."""
     points = grid_points(grid)
     rows = [{**p, "score": float(score_fn(p))} for p in points]
+    for row, p in zip(rows, points):
+        if not np.isfinite(row["score"]):
+            raise ProtocolError(f"non-finite tuning score {row['score']} for params {p}")
     table = pd.DataFrame(rows)
     best_idx = int(table["score"].idxmin())
     best_params = dict(points[best_idx])
@@ -55,5 +67,5 @@ def score_params(phase: Phase, per_seed_fn: PerSeedFn, params: dict) -> float:
     for chunk_index, start in enumerate(range(0, len(seeds), phase.chunk)):
         chunk = seeds[start:start + phase.chunk]
         phase.assert_tune_seeds(chunk)
-        values.append(np.asarray(per_seed_fn(chunk, phase.familiar, params, chunk_index)))
+        values.append(checked_chunk_result(per_seed_fn(chunk, phase.familiar, params, chunk_index), chunk))
     return float(np.concatenate(values).mean())

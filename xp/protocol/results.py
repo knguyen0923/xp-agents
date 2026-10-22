@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -44,16 +45,29 @@ def _tune_paths(out_dir, phase: Phase, agent: str):
     return base / f"{agent}.json", base / f"{agent}.csv"
 
 
+def _atomic_write(path: Path, writer) -> None:
+    """Write via a temp file in the same directory, then os.replace, so a crash never leaves a partial file."""
+    tmp = path.with_name(path.name + ".tmp")
+    writer(tmp)
+    os.replace(tmp, path)
+
+
 def unit_done(out_dir, phase: Phase, agent: str, knob: float) -> bool:
     path = _unit_path(out_dir, phase, agent, knob)
     if not path.exists():
         return False
-    hashes = list(pd.read_csv(path, usecols=["config_hash"], dtype={"config_hash": str})["config_hash"].unique())
+    try:
+        hashes_col = pd.read_csv(path, usecols=["config_hash"], dtype={"config_hash": str})["config_hash"]
+    except (pd.errors.EmptyDataError, ValueError):
+        return False  # empty or unreadable file: treat as not done
+    if hashes_col.empty:
+        return False
+    hashes = list(hashes_col.unique())
     if hashes != [phase.config_hash]:
         raise ConfigMismatchError(
             f"{path} was written under config {hashes}, current config is {phase.config_hash}"
         )
-    return True
+    return len(hashes_col) == len(phase.eval_seeds)
 
 
 def write_unit(out_dir, phase: Phase, agent: str, knob: float, df: pd.DataFrame) -> None:
@@ -61,7 +75,7 @@ def write_unit(out_dir, phase: Phase, agent: str, knob: float, df: pd.DataFrame)
         raise ValueError(f"results columns must be {COLUMNS}, got {list(df.columns)}")
     path = _unit_path(out_dir, phase, agent, knob)
     path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(path, index=False)
+    _atomic_write(path, lambda tmp: df.to_csv(tmp, index=False))
 
 
 def load_results(out_dir, phase_name: str) -> pd.DataFrame:
@@ -81,8 +95,8 @@ def write_tune(out_dir, phase: Phase, agent: str, result: TuneResult) -> None:
         "best_score": None if pd.isna(result.best_score) else result.best_score,
         "boundary_dims": result.boundary_dims,
     }
-    json_path.write_text(json.dumps(record, indent=2, default=_json_default))
-    result.table.to_csv(csv_path, index=False)
+    _atomic_write(json_path, lambda tmp: tmp.write_text(json.dumps(record, indent=2, default=_json_default)))
+    _atomic_write(csv_path, lambda tmp: result.table.to_csv(tmp, index=False))
 
 
 def read_tune(out_dir, phase: Phase, agent: str):

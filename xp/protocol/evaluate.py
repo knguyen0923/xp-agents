@@ -5,7 +5,7 @@ import pandas as pd
 
 from xp.protocol.phase import Phase
 from xp.protocol.results import COLUMNS
-from xp.protocol.tune import PerSeedFn
+from xp.protocol.tune import PerSeedFn, checked_chunk_result
 
 
 def evaluate_unit(
@@ -23,7 +23,7 @@ def evaluate_unit(
     for chunk_index, start in enumerate(range(0, len(seeds), phase.chunk)):
         chunk = seeds[start:start + phase.chunk]
         phase.assert_eval_seeds(chunk)
-        values.append(np.asarray(per_seed_fn(chunk, knob, params, chunk_index)))
+        values.append(checked_chunk_result(per_seed_fn(chunk, knob, params, chunk_index), chunk))
     df = pd.DataFrame(
         {
             "phase": phase.name,

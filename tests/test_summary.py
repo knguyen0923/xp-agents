@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from xp.stats.summary import crossings, curve_table, gap_table, pair_table, pair_vs_best_single
 
@@ -69,3 +70,10 @@ def test_pair_vs_best_single_picks_better_single_per_knob():
     assert row0["winner"] == "A"
     row2 = out[out.knob == 0.2].iloc[0]  # best single is B (0.5); team (0.35) is better
     assert row2["winner"] == "T"
+
+
+def test_values_rejects_cells_with_different_seeds():
+    a = _rows("A", 0.0, np.zeros(len(SEEDS)))
+    b = _rows("B", 0.0, np.zeros(len(SEEDS))).iloc[:-1]
+    with pytest.raises(ValueError, match="same eval seeds"):
+        curve_table(pd.concat([a, b], ignore_index=True), n_boot=50)

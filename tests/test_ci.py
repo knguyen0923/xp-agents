@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from xp.stats.ci import bootstrap_ci, paired_diff_ci
 
@@ -43,3 +44,17 @@ def test_paired_diff_ci_detects_shift():
     mean, lo, hi = paired_diff_ci(a, b, n_boot=1000)
     assert abs(mean - 0.5) < 1e-9
     assert lo > 0.4 and hi < 0.6  # pairing removes the shared noise
+    _, ulo, uhi = bootstrap_ci(a, n_boot=1000)
+    assert (hi - lo) < 0.5 * (uhi - ulo)  # much narrower than ignoring the pairing
+
+
+def test_bootstrap_ci_rejects_empty_input():
+    with pytest.raises(ValueError):
+        bootstrap_ci([])
+
+
+def test_paired_diff_ci_rejects_length_mismatch():
+    with pytest.raises(ValueError):
+        paired_diff_ci(np.arange(5.0), np.arange(3.0))
+    with pytest.raises(ValueError):
+        paired_diff_ci(np.arange(5.0), np.array([1.0]))  # must not broadcast

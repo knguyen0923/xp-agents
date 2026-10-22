@@ -65,16 +65,37 @@ def test_score_params_uses_only_tune_seeds_in_chunks(tiny_cfg):
     assert calls == [(list(range(10)), phase.familiar, 0)]
 
 
-def test_score_params_rejects_per_seed_fn_that_is_handed_wrong_pool(tiny_cfg):
+def test_score_params_hands_per_seed_fn_only_tune_seeds_in_chunks(tiny_cfg):
     tiny_cfg["seeds"]["chunk"] = 4
     phase = Phase.from_config(tiny_cfg)
-    seen = []
+    seen, offsets = [], []
 
     def fn(seeds, knob, params, offset):
-        seen.append(offset)
+        seen.extend(int(s) for s in seeds)
+        offsets.append(offset)
         return np.zeros(len(seeds))
 
     score_params(phase, fn, {})
-    assert seen == [0, 1, 2]
+    assert offsets == [0, 1, 2]
+    assert sorted(seen) == list(phase.tune_seeds)
+    assert not set(seen) & set(phase.eval_seeds)
     with pytest.raises(ProtocolError):
         phase.assert_tune_seeds(np.array(phase.eval_seeds[:2]))
+
+
+@pytest.mark.parametrize("bad", [
+    lambda seeds: np.zeros(len(seeds) - 1),
+    lambda seeds: np.zeros((len(seeds), 1)),
+    lambda seeds: np.float64(0.0),
+])
+def test_score_params_rejects_malformed_per_seed_result(tiny_cfg, bad):
+    phase = Phase.from_config(tiny_cfg)
+    with pytest.raises(ProtocolError):
+        score_params(phase, lambda seeds, knob, params, offset: bad(seeds), {})
+
+
+def test_tune_rejects_non_finite_scores_naming_params():
+    with pytest.raises(ProtocolError, match="0.3"):
+        tune(lambda p: float("nan") if p["x"] == 0.3 else p["x"], {"x": [0.1, 0.3]})
+    with pytest.raises(ProtocolError):
+        tune(lambda p: float("inf"), {"x": [0.1, 0.3]})

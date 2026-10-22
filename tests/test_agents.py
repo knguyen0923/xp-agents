@@ -78,3 +78,19 @@ def test_both_beat_random_on_stationary_world():
     kairi = run_agent(KairiAgent(5, 0.1, 0.1, seed=0), w).mean()
     kaiser = run_agent(KaiserAgent(5, 1.0, 1.0), w).mean()
     assert kairi < rand and kaiser < rand
+
+
+def _two_arm_state(agent):
+    agent.reset(1)
+    # arm 0: higher empirical mean but pulled very often; arm 1: lower mean, pulled once
+    agent.cnt[:] = [[100.0, 1.0]]
+    agent.sum[:] = [[60.0, 0.5]]  # means 0.6 and 0.5
+
+
+def test_kaiser_positive_bonus_prefers_rarely_pulled_arm():
+    big = KaiserAgent(k=2, gamma=1.0, c=1.0)
+    _two_arm_state(big)
+    assert big.select(0).tolist() == [1]
+    greedy = KaiserAgent(k=2, gamma=1.0, c=0.0)
+    _two_arm_state(greedy)
+    assert greedy.select(0).tolist() == [0]
