@@ -14,14 +14,14 @@ seeds:
 agents:
   kairi:
     grid:
-      epsilon: [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.4]
+      epsilon: [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
       alpha: [0.02, 0.05, 0.1, 0.2, 0.4, 0.7, 1.0]
     natural_limits:
       alpha: [null, 1.0]
   kaiser:
     grid:
       gamma: [0.9, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0]
-      c: [0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 4.0]
+      c: [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
     natural_limits:
       gamma: [null, 1.0]
 tagteam:
@@ -29,10 +29,13 @@ tagteam:
     block: 50
   triggered:
     grid:
-      delta: [0.8, 1.0, 1.2, 1.5, 2.0]
-      h: [2.0, 4.0, 8.0, 16.0]
-      window: [10, 25, 50, 100]
-    natural_limits: {}
+      delta: [0.0, 0.1, 0.2, 0.4, 0.8]
+      h: [0.0, 1.0, 2.0, 4.0, 8.0]
+      window: [10, 25, 50, 100, 2000]
+    natural_limits:
+      delta: [0.0, null]
+      h: [0.0, null]
+      window: [null, 2000]
   meta:
     block: 50
     grid:

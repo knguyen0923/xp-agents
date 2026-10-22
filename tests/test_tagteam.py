@@ -15,25 +15,37 @@ def test_fixed_schedule_alternates_in_blocks():
     assert c.who(0).shape == (2,)
 
 
-def test_change_triggered_starts_with_kairi_and_fires_on_big_residuals():
-    c = ChangeTriggered(delta=1.0, h=3.0, window=4)
+def test_change_triggered_starts_with_kairi_and_fires_on_big_residual_jumps():
+    c = ChangeTriggered(delta=0.1, h=3.0, window=4)
     c.reset(2)
     assert c.who(0).tolist() == [0, 0]
     pred = np.zeros(2)
-    # env 0 sees huge residuals, env 1 sees tiny ones
-    for t in range(3):
-        c.observe(t, c.who(t), np.array([5.0, 0.1]), pred)
-    assert c.who(3).tolist() == [1, 0]
+    # env 0: small residuals, then a big jump; env 1: small residuals throughout
+    for t in range(20):
+        c.observe(t, c.who(t), np.array([0.2, 0.2]), pred)
+    assert c.who(20).tolist() == [0, 0]
+    c.observe(20, c.who(20), np.array([8.0, 0.2]), pred)
+    assert c.who(21).tolist() == [1, 0]
 
 
-def test_change_triggered_returns_to_kairi_after_window():
+def test_change_triggered_does_not_fire_on_constant_residual():
+    c = ChangeTriggered(delta=0.05, h=1.0, window=4)
+    c.reset(1)
+    for t in range(500):
+        c.observe(t, c.who(t), np.array([0.9]), np.zeros(1))
+        assert c.who(t + 1).tolist() == [0]
+
+
+def test_change_triggered_returns_to_kairi_after_exactly_window_steps():
     c = ChangeTriggered(delta=0.0, h=1.0, window=2)
     c.reset(1)
-    c.observe(0, c.who(0), np.array([2.0]), np.zeros(1))  # fires immediately
-    assert c.who(1).tolist() == [1]
-    c.observe(1, c.who(1), np.array([0.0]), np.zeros(1))
+    c.observe(0, c.who(0), np.array([0.0]), np.zeros(1))
+    c.observe(1, c.who(1), np.array([4.0]), np.zeros(1))  # fires: x - mean = 4 - 2 > h
+    assert c.who(2).tolist() == [1]
     c.observe(2, c.who(2), np.array([0.0]), np.zeros(1))
-    assert c.who(3).tolist() == [0]
+    assert c.who(3).tolist() == [1]
+    c.observe(3, c.who(3), np.array([0.0]), np.zeros(1))
+    assert c.who(4).tolist() == [0]
 
 
 def test_meta_bandit_tries_both_then_prefers_better_agent():

@@ -53,8 +53,9 @@ Full runs go to Colab via `notebooks/run_phase.ipynb`; do not burn the laptop on
 
 - `xp/protocol/` is phase-agnostic: `Phase` spec, tuner, evaluator, results store. It must never
   import from a phase package (`xp.bandit`, later `xp.minigrid`).
-- `xp/bandit/` is vectorized NumPy. The world realization is pre-generated per seed, so results
-  are deterministic regardless of batching. Agents run vectorized across seeds.
+- `xp/bandit/` is vectorized NumPy. The world realization is pre-generated per seed, so the world
+  is deterministic regardless of batching. Agent randomness is deterministic per config but
+  depends on chunk composition. Agents run vectorized across seeds.
 - `xp/stats/` and `xp/plots/` read only the tidy results table
   (`phase, agent, knob, seed, metric, value, provisional, config_hash`).
 

@@ -22,8 +22,13 @@ class FixedSchedule:
 
 
 class ChangeTriggered:
-    """Kairi by default; a CUSUM change detector on |reward - pred| hands control to
-    Kaiser for `window` steps."""
+    """Kairi by default; a Page-Hinkley change detector on x_t = |reward - pred| hands control
+    to Kaiser for `window` steps.
+
+    Per environment, the reference is the running mean m_t of x since reset, so the detector
+    is insensitive to the baseline residual level. g = max(0, g + x_t - m_t - delta); it fires
+    when g > h, then sets remaining = window and resets g (the running mean keeps going).
+    `delta` is a margin above the baseline residual level."""
 
     def __init__(self, delta: float, h: float, window: int):
         self.delta = delta
@@ -33,12 +38,17 @@ class ChangeTriggered:
     def reset(self, n_envs: int) -> None:
         self.g = np.zeros(n_envs)
         self.remaining = np.zeros(n_envs, dtype=int)
+        self.count = 0
+        self.mean = np.zeros(n_envs)
 
     def who(self, t: int) -> np.ndarray:
         return (self.remaining > 0).astype(int)
 
     def observe(self, t, who, rewards, pred) -> None:
-        self.g = np.maximum(0.0, self.g + np.abs(rewards - pred) - self.delta)
+        x = np.abs(rewards - pred)
+        self.count += 1
+        self.mean = self.mean + (x - self.mean) / self.count
+        self.g = np.maximum(0.0, self.g + x - self.mean - self.delta)
         fire = self.g > self.h
         self.remaining = np.where(fire, self.window, np.maximum(self.remaining - 1, 0))
         self.g = np.where(fire, 0.0, self.g)
