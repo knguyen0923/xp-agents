@@ -1,0 +1,42 @@
+phase: bandit
+k: 10
+sigma: 1.0
+horizon: 2000
+knob:
+  name: jump_rate
+  familiar: 0.001
+  sweep: [0.0, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02]
+seeds:
+  tune: [0, 100]
+  eval: [10000, 11000]
+  chunk: 250
+  agent_seed: 777
+agents:
+  kairi:
+    grid:
+      epsilon: [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.4]
+      alpha: [0.02, 0.05, 0.1, 0.2, 0.4, 0.7, 1.0]
+    natural_limits:
+      alpha: [null, 1.0]
+  kaiser:
+    grid:
+      gamma: [0.9, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0]
+      c: [0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 4.0]
+    natural_limits:
+      gamma: [null, 1.0]
+tagteam:
+  fixed:
+    block: 50
+  triggered:
+    grid:
+      delta: [0.8, 1.0, 1.2, 1.5, 2.0]
+      h: [2.0, 4.0, 8.0, 16.0]
+      window: [10, 25, 50, 100]
+    natural_limits: {}
+  meta:
+    block: 50
+    grid:
+      gamma: [0.8, 0.9, 0.95, 0.99, 1.0]
+      c: [0.05, 0.1, 0.2, 0.5, 1.0, 2.0]
+    natural_limits:
+      gamma: [null, 1.0]
