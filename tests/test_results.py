@@ -90,3 +90,30 @@ def test_require_final_blocks_provisional(tiny_cfg):
     with pytest.raises(ProvisionalResultError):
         require_final(_df(phase, provisional=True))
     require_final(_df(phase, provisional=True), allow_provisional=True)
+
+
+def test_numeric_looking_hash_resumes_and_roundtrips(tiny_cfg, tmp_path):
+    import dataclasses
+
+    phase = dataclasses.replace(Phase.from_config(tiny_cfg), config_hash="000123456789")
+    df = _df(phase)
+    write_unit(tmp_path, phase, "kairi", 0.01, df)
+    assert unit_done(tmp_path, phase, "kairi", 0.01)
+    out = load_results(tmp_path, "bandit")
+    assert out["config_hash"].tolist() == ["000123456789", "000123456789"]
+    assert all(isinstance(h, str) for h in out["config_hash"])
+    assert out["provisional"].dtype == bool
+
+
+def test_write_tune_accepts_numpy_scalars(tiny_cfg, tmp_path):
+    phase = Phase.from_config(tiny_cfg)
+    result = TuneResult(
+        {"epsilon": np.float32(0.5), "window": np.int64(10)},
+        np.float64(0.4),
+        ["epsilon"],
+        pd.DataFrame({"epsilon": [0.5]}),
+    )
+    write_tune(tmp_path, phase, "kairi", result)
+    back = read_tune(tmp_path, phase, "kairi")
+    assert back.best_params["epsilon"] == 0.5
+    assert back.best_params["window"] == 10

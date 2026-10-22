@@ -4,6 +4,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from xp.errors import ConfigMismatchError, ProvisionalResultError
@@ -28,6 +29,12 @@ class TuneResult:
         return cls(dict(params), float("nan"), [], pd.DataFrame())
 
 
+def _json_default(obj):
+    if isinstance(obj, np.generic):
+        return obj.item()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
+
 def _unit_path(out_dir, phase: Phase, agent: str, knob: float) -> Path:
     return Path(out_dir) / phase.name / f"{agent}__{phase.knob_name}-{knob:g}.csv"
 
@@ -41,7 +48,7 @@ def unit_done(out_dir, phase: Phase, agent: str, knob: float) -> bool:
     path = _unit_path(out_dir, phase, agent, knob)
     if not path.exists():
         return False
-    hashes = list(pd.read_csv(path, usecols=["config_hash"])["config_hash"].unique())
+    hashes = list(pd.read_csv(path, usecols=["config_hash"], dtype={"config_hash": str})["config_hash"].unique())
     if hashes != [phase.config_hash]:
         raise ConfigMismatchError(
             f"{path} was written under config {hashes}, current config is {phase.config_hash}"
@@ -61,7 +68,8 @@ def load_results(out_dir, phase_name: str) -> pd.DataFrame:
     files = sorted((Path(out_dir) / phase_name).glob("*__*.csv"))
     if not files:
         return pd.DataFrame(columns=COLUMNS)
-    return pd.concat([pd.read_csv(f) for f in files], ignore_index=True)[COLUMNS]
+    dtypes = {"config_hash": str, "agent": str, "metric": str}
+    return pd.concat([pd.read_csv(f, dtype=dtypes) for f in files], ignore_index=True)[COLUMNS]
 
 
 def write_tune(out_dir, phase: Phase, agent: str, result: TuneResult) -> None:
@@ -73,7 +81,7 @@ def write_tune(out_dir, phase: Phase, agent: str, result: TuneResult) -> None:
         "best_score": None if pd.isna(result.best_score) else result.best_score,
         "boundary_dims": result.boundary_dims,
     }
-    json_path.write_text(json.dumps(record, indent=2))
+    json_path.write_text(json.dumps(record, indent=2, default=_json_default))
     result.table.to_csv(csv_path, index=False)
 
 
