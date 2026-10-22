@@ -1204,7 +1204,10 @@ def read_tune(out_dir, phase: Phase, agent: str):
             f"{json_path} was written under config {record['config_hash']}, "
             f"current config is {phase.config_hash}"
         )
-    table = pd.read_csv(csv_path) if csv_path.exists() and csv_path.stat().st_size > 1 else pd.DataFrame()
+    try:
+        table = pd.read_csv(csv_path)
+    except (FileNotFoundError, pd.errors.EmptyDataError):
+        table = pd.DataFrame()
     score = float("nan") if record["best_score"] is None else record["best_score"]
     return TuneResult(record["best_params"], score, record["boundary_dims"], table)
 
@@ -2078,7 +2081,7 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 - Consumes: `bootstrap_ci`, `paired_diff_ci`, results DataFrame (`COLUMNS`), `require_final`.
 - Produces (`xp.stats.summary`; all take the tidy results DataFrame `df`, filter `metric == "regret"` by default, and require each (agent, knob) to cover the same seed set):
   - `curve_table(df, n_boot=2000, seed=0) -> DataFrame[agent, knob, mean, lo, hi]`
-  - `gap_table(df, familiar, n_boot=2000, seed=0) -> DataFrame[agent, knob, gap, lo, hi]` (per-seed `value(knob) - value(familiar)`, paired by seed, excludes the familiar row's trivial zero? No: it includes it, gap is exactly 0 with CI [0, 0])
+  - `gap_table(df, familiar, n_boot=2000, seed=0) -> DataFrame[agent, knob, gap, lo, hi]` (per-seed `value(knob) - value(familiar)`, paired by seed; the familiar row is included and is exactly 0 with CI [0, 0])
   - `pair_table(df, a, b, n_boot=2000, seed=0) -> DataFrame[knob, diff, lo, hi, winner]` where `diff = a - b` paired by seed; `winner` is `a` if `hi < 0`, `b` if `lo > 0`, else `"tie"` (lower regret wins)
   - `crossings(pair: DataFrame) -> list[tuple[float, float]]`: knob intervals between consecutive non-tie winners that differ
   - `pair_vs_best_single(df, team, singles=("kairi","kaiser"), n_boot=2000, seed=0) -> DataFrame[knob, diff, lo, hi, winner]` comparing `team` against whichever single agent has the lower mean regret at that knob (`winner` is `team`, the best single's name, or `"tie"`)
@@ -2316,6 +2319,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+import pandas as pd
+
 from xp.plots.curves import plot_degradation
 from xp.protocol.phase import Phase, load_config
 from xp.protocol.results import load_results, require_final
@@ -2346,8 +2351,6 @@ def main(argv=None) -> None:
     pair = pair_table(df, "kairi", "kaiser")
     pair["crossover_intervals"] = str(crossings(pair))
     pair.to_csv(figs / "crossovers.csv", index=False)
-
-    import pandas as pd
 
     team_rows = []
     for team in sorted(a for a in df["agent"].unique() if a.startswith("tt_")):
