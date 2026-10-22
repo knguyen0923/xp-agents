@@ -45,7 +45,7 @@ def _tune_paths(out_dir, phase: Phase, agent: str):
     return base / f"{agent}.json", base / f"{agent}.csv"
 
 
-def _atomic_write(path: Path, writer) -> None:
+def atomic_write(path: Path, writer) -> None:
     """Write via a temp file in the same directory, then os.replace, so a crash never leaves a partial file."""
     tmp = path.with_name(path.name + ".tmp")
     writer(tmp)
@@ -75,7 +75,7 @@ def write_unit(out_dir, phase: Phase, agent: str, knob: float, df: pd.DataFrame)
         raise ValueError(f"results columns must be {COLUMNS}, got {list(df.columns)}")
     path = _unit_path(out_dir, phase, agent, knob)
     path.parent.mkdir(parents=True, exist_ok=True)
-    _atomic_write(path, lambda tmp: df.to_csv(tmp, index=False))
+    atomic_write(path, lambda tmp: df.to_csv(tmp, index=False))
 
 
 def load_results(out_dir, phase_name: str) -> pd.DataFrame:
@@ -95,8 +95,8 @@ def write_tune(out_dir, phase: Phase, agent: str, result: TuneResult) -> None:
         "best_score": None if pd.isna(result.best_score) else result.best_score,
         "boundary_dims": result.boundary_dims,
     }
-    _atomic_write(json_path, lambda tmp: tmp.write_text(json.dumps(record, indent=2, default=_json_default)))
-    _atomic_write(csv_path, lambda tmp: result.table.to_csv(tmp, index=False))
+    atomic_write(json_path, lambda tmp: tmp.write_text(json.dumps(record, indent=2, default=_json_default)))
+    atomic_write(csv_path, lambda tmp: result.table.to_csv(tmp, index=False))
 
 
 def read_tune(out_dir, phase: Phase, agent: str):

@@ -17,7 +17,7 @@
 - Python floor is 3.9 (amends the spec's "3.11+"; the laptop has 3.9.6, Colab has 3.10+). Every module starts with `from __future__ import annotations`. No `match`, no `X | Y` in runtime-evaluated annotations, no `zip(strict=)`.
 - Dependencies are pinned in `requirements.txt`: numpy==2.0.2, pandas==2.2.3, pyyaml==6.0.2, matplotlib==3.9.2, pytest==8.3.3.
 - Bandit: K=10 arms, noise sd 1, arm means drawn from N(0,1), horizon T=2000, knob = jump rate λ, sweep `[0, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02]`, familiar λ=0.001.
-- Seeds: tune pool `[0, 100)`, eval pool `[10000, 11000)`, chunk size 250, agent seed 777. Tune and eval pools must be disjoint.
+- Seeds: tune pool `[0, 500)`, eval pool `[10000, 11000)`, chunk size 250, agent seed 777. Tune and eval pools must be disjoint.
 - Metric: per-step cumulative dynamic regret against the per-step best arm (mean regret per step per seed). Gap = regret(λ) − regret(familiar). Paired seeds.
 - Kairi = ε-greedy with constant step size α. Kaiser = discounted UCB (γ, c). Tag-team block length 50.
 - Protocol rules raise exceptions (never warn): disjoint seed pools; boundary optimum marks a run `provisional` and blocks final reports; config-hash mismatch on a resumable unit raises.

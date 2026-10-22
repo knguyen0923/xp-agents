@@ -15,7 +15,7 @@ from xp.bandit.world import make_world, run_agent
 from xp.errors import ConfigMismatchError, ProtocolError
 from xp.protocol.evaluate import evaluate_unit
 from xp.protocol.phase import Phase
-from xp.protocol.results import TuneResult, read_tune, unit_done, write_tune, write_unit
+from xp.protocol.results import atomic_write, TuneResult, read_tune, unit_done, write_tune, write_unit
 from xp.protocol.tune import PerSeedFn, score_params, tune
 
 AgentBuilder = Callable[[dict, int], object]
@@ -95,7 +95,7 @@ def write_manifest(cfg: dict, phase: Phase, out_dir) -> None:
             "pandas": pd.__version__,
         },
     }
-    path.write_text(json.dumps(manifest, indent=2, default=str))
+    atomic_write(path, lambda tmp: tmp.write_text(json.dumps(manifest, indent=2, default=str)))
 
 
 def run_phase(cfg: dict, out_dir) -> None:
