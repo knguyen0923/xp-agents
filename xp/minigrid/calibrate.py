@@ -50,7 +50,7 @@ def main(argv=None) -> None:
     with open(args.out, "w") as f:
         json.dump({"suggestion": suggestion, "curves": curves}, f, indent=2)
     state = "reached" if suggestion["reached"] else "NOT reached; using the cap"
-    print(f"suggested budget S = {suggestion['steps']} steps (80% target {state}); set budget.steps in the config")
+    print(f"suggested budget S = {suggestion['steps']} steps ({cfg['budget']['target_success']:.0%} target {state}); set budget.steps in the config")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -170,8 +171,22 @@ def read_tune_job(out_dir, phase: Phase, agent: str, params: dict, seed: int):
     return float(record["score"])
 
 
-def write_tune_job(out_dir, phase: Phase, agent: str, params: dict, seed: int, score: float) -> None:
+def read_tune_job_extra(out_dir, phase: Phase, agent: str, params: dict, seed: int) -> Optional[dict]:
+    """Extra diagnostics stored with a tuning job (e.g. training AUC), or None."""
+    path = _tune_job_path(out_dir, phase, agent, params, seed)
+    if not path.exists():
+        return None
+    record = json.loads(path.read_text())
+    if record["config_hash"] != phase.config_hash:
+        raise ConfigMismatchError(f"{path} was written under config {record['config_hash']}, current config is {phase.config_hash}")
+    return record.get("extra")
+
+
+def write_tune_job(out_dir, phase: Phase, agent: str, params: dict, seed: int, score: float,
+                   extra: Optional[dict] = None) -> None:
     path = _tune_job_path(out_dir, phase, agent, params, seed)
     path.parent.mkdir(parents=True, exist_ok=True)
     record = {"config_hash": phase.config_hash, "params": params, "seed": seed, "score": float(score)}
+    if extra is not None:
+        record["extra"] = extra
     atomic_write(path, lambda tmp: tmp.write_text(json.dumps(record, default=_json_default)))

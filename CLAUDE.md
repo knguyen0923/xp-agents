@@ -51,7 +51,7 @@ python -m xp.run --phase minigrid --config configs/minigrid.yaml --out results -
 python -m xp.report --phase minigrid --config configs/minigrid.yaml --out results --figs figs
 ```
 
-Full runs go to Colab via `notebooks/run_phase.ipynb`; do not burn the laptop on them.
+Full runs go to Colab via `notebooks/run_phase.ipynb` (Phase 1) and `notebooks/run_minigrid.ipynb` (Phase 2); do not burn the laptop on them.
 
 ## Architecture
 

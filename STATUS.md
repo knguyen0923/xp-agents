@@ -14,7 +14,7 @@ progress," read it first.
   `docs/superpowers/plans/2026-10-22-xp-foundation-and-bandit.md`, fix-wave report
   `docs/superpowers/plans/2026-10-22-fix-wave-report.md`. 88 fast tests pass. Probe on disjoint
   seeds: no agent flagged provisional with the committed grids.
-- **Not done:** the real Phase 1 run (Colab, `notebooks/run_phase.ipynb`) and the README results.
+- **Not done:** only the Phase 1 README results remain (the Colab run is complete).
   First Colab attempt failed because notebook variables (`$PHASE`) were empty after a runtime
   restart; the notebook cells are now self-contained (commit `dd396d0`).
   Colab is on Python 3.13, where pinned `numpy==2.0.2` compiled from source and tripped resolver
@@ -26,7 +26,7 @@ progress," read it first.
   Untested: whether results match across numpy versions; rerun the Colab setup cell to confirm.
 - Phase 2 (MiniGrid DoorKey, PPO vs PPO+RND): plan `docs/superpowers/plans/2026-10-23-phase2-minigrid.md` executed through Task 8 on branch `feat/phase2-minigrid` (not pushed, not merged): `xp/minigrid/` implemented and tested (114 tests), Colab launcher `notebooks/run_minigrid.ipynb`, CLAUDE.md updated. Remaining work = Task 9 (calibrate the budget, full run, report, README results), which needs the user's laptop-vs-Colab decision. The spike scripts were removed; their numbers are in the plan and the spec amendment.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), default branch `main`.
-  `origin/main` includes the requirements fix (`0734460`); the STATUS refresh and `c1b33f4` are local only (push needs the user's yes).
+  `origin/main` includes the requirements fix (`0734460`); `c1b33f4` is on `origin/main`; the `feat/phase2-minigrid` branch is local only (push needs the user's yes).
 
 ## Last updated
 
