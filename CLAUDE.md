@@ -45,6 +45,10 @@ pip install -r requirements.txt -e .
 pytest                                   # fast suite, seconds; fine to run locally
 python -m xp.run --phase bandit --config configs/bandit.yaml --out results   # full run: use Colab
 python -m xp.report --phase bandit --config configs/bandit.yaml --out results --figs figs
+pip install -r requirements-minigrid.txt -e .   # Phase 2 only: adds torch + minigrid
+python -m xp.minigrid.calibrate --config configs/minigrid.yaml --out calibration.json --workers 3
+python -m xp.run --phase minigrid --config configs/minigrid.yaml --out results --workers 3
+python -m xp.report --phase minigrid --config configs/minigrid.yaml --out results --figs figs
 ```
 
 Full runs go to Colab via `notebooks/run_phase.ipynb`; do not burn the laptop on them.
@@ -56,6 +60,9 @@ Full runs go to Colab via `notebooks/run_phase.ipynb`; do not burn the laptop on
 - `xp/bandit/` is vectorized NumPy. The world realization is pre-generated per seed, so the world
   is deterministic regardless of batching. Agent randomness is deterministic per config but
   depends on chunk composition. Agents run vectorized across seeds.
+- `xp/minigrid/` is PyTorch PPO (`Learner`; Kaiser adds RND). The unit of work is one trained agent per
+  (agent, training seed); tuning scores and per-seed results are cached by config hash. Train, validation and
+  test layouts come from disjoint seed pools (`xp/minigrid/env.py`). Never import it from `xp.protocol`.
 - `xp/stats/` and `xp/plots/` read only the tidy results table
   (`phase, agent, knob, seed, metric, value, provisional, config_hash`).
 
