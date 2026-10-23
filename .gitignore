@@ -10,3 +10,4 @@ figs/
 .coverage
 .vscode/
 .superpowers/
+.DS_Store
