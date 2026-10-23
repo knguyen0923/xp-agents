@@ -30,7 +30,9 @@ progress," read it first.
   suspected cause is a positive, episodic intrinsic bonus that penalizes reaching the goal; fix
   is a non-episodic intrinsic stream with its own value head. Diagnostic v1 (150k, stale clone, no ep_len/bonus) was inconclusive: even coef 0.0 had not learned
   by 150k, so it cannot separate bonus effect from slow sparse-reward learning (also single seed).
-  v2 cells (control PPO + coef 0.1/0.01, 250k) added; rerun clone cell first. Diagnostic cells added (`79ceda6`,
+  v2 result: control PPO reaches 100% (80% at 143,360 steps); RND at coef 0.1 and 0.01 both 0%.
+  Implemented non-episodic intrinsic stream + second value head (untested locally, no torch);
+  v3 cells test it on Colab. v2 cells (control PPO + coef 0.1/0.01, 250k) added; rerun clone cell first. Diagnostic cells added (`79ceda6`,
   local, not pushed); run on Colab before writing the plan.
   A throwaway spike (`spikes/spike_minigrid.py`, `notebooks/spike_minigrid.ipynb`) is written and
   smoke-tested; notebook shell args hardcoded (`b0898e4`, pushed); its Colab results decide the plan's grids and budgets.

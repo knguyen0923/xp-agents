@@ -74,7 +74,7 @@ class VecEnv:
 
 
 class ActorCritic(nn.Module):
-    def __init__(self):
+    def __init__(self, intrinsic: bool = False):
         super().__init__()
         self.conv = nn.Sequential(
             nn.Conv2d(3, 16, 2), nn.ReLU(), nn.Conv2d(16, 32, 2), nn.ReLU(),
@@ -83,10 +83,29 @@ class ActorCritic(nn.Module):
         self.fc = nn.Sequential(nn.Linear(64 * 4 * 4, 64), nn.Tanh())
         self.pi = nn.Linear(64, N_ACTIONS)
         self.v = nn.Linear(64, 1)
+        # Separate head for the non-episodic intrinsic return; only built for RND runs so the plain-PPO
+        # random stream (and results) are unchanged.
+        self.v_int = nn.Linear(64, 1) if intrinsic else None
+
+    def heads(self, x):
+        h = self.fc(self.conv(x))
+        v_int = self.v_int(h).squeeze(-1) if self.v_int is not None else None
+        return self.pi(h), self.v(h).squeeze(-1), v_int
 
     def forward(self, x):
-        h = self.fc(self.conv(x))
-        return self.pi(h), self.v(h).squeeze(-1)
+        logits, v, _ = self.heads(x)
+        return logits, v
+
+
+def gae(rewards, values, next_value, nonterm, gamma, lam):
+    adv = torch.zeros_like(rewards)
+    last = 0.0
+    for t in reversed(range(rewards.shape[0])):
+        nv = next_value if t == rewards.shape[0] - 1 else values[t + 1]
+        delta = rewards[t] + gamma * nv * nonterm[t] - values[t]
+        last = delta + gamma * lam * nonterm[t] * last
+        adv[t] = last
+    return adv
 
 
 def _cnn(out: int) -> nn.Sequential:
@@ -138,7 +157,7 @@ def train(args, device):
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     env = VecEnv(args.train_size, args.n_envs, seed=args.seed * 1000)
-    net = ActorCritic().to(device)
+    net = ActorCritic(intrinsic=args.rnd).to(device)
     opt = torch.optim.Adam(net.parameters(), lr=args.lr, eps=1e-5)
     rnd = RND().to(device) if args.rnd else None
     rnd_opt = torch.optim.Adam(rnd.pred.parameters(), lr=1e-4) if rnd else None
@@ -152,6 +171,7 @@ def train(args, device):
     rew_buf = np.zeros((t_len, n), dtype=np.float32)
     done_buf = np.zeros((t_len, n), dtype=np.float32)
     val_buf = torch.zeros((t_len, n), device=device)
+    vint_buf = torch.zeros((t_len, n), device=device)
 
     curve = []
     steps_to_80 = None
@@ -161,10 +181,12 @@ def train(args, device):
         for t in range(t_len):
             obs_buf[t] = env.obs
             with torch.no_grad():
-                logits, value = net(prep(env.obs, device))
+                logits, value, value_int = net.heads(prep(env.obs, device))
                 dist = Categorical(logits=logits)
                 action = dist.sample()
             act_buf[t], logp_buf[t], val_buf[t] = action, dist.log_prob(action), value
+            if rnd is not None:
+                vint_buf[t] = value_int
             _, rew_buf[t], done_buf[t] = env.step(action.cpu().numpy())
 
         rewards = rew_buf.copy()
@@ -175,7 +197,7 @@ def train(args, device):
                 intrinsic = rnd.error(x).cpu().numpy()
             rnd.int_rms.update(intrinsic)
             intrinsic = intrinsic / np.sqrt(rnd.int_rms.var + 1e-8)
-            rewards = rewards + args.rnd_coef * intrinsic.reshape(t_len, n).astype(np.float32)
+            int_rewards = intrinsic.reshape(t_len, n).astype(np.float32)  # kept apart from rewards: non-episodic stream
             bonus_mean = float(args.rnd_coef * intrinsic.mean())
             perm = np.random.permutation(len(next_seq))
             for s in range(0, len(perm), 256):
@@ -186,33 +208,36 @@ def train(args, device):
                 rnd_opt.step()
 
         with torch.no_grad():
-            _, next_value = net(prep(env.obs, device))
+            _, next_value, next_vint = net.heads(prep(env.obs, device))
         rewards_t = torch.as_tensor(rewards, device=device)
-        dones_t = torch.as_tensor(done_buf, device=device)
-        adv = torch.zeros_like(rewards_t)
-        last = 0.0
-        for t in reversed(range(t_len)):
-            nv = next_value if t == t_len - 1 else val_buf[t + 1]
-            nonterm = 1.0 - dones_t[t]
-            delta = rewards_t[t] + args.gamma * nv * nonterm - val_buf[t]
-            last = delta + args.gamma * args.lam * nonterm * last
-            adv[t] = last
-        returns = adv + val_buf
+        nonterm = 1.0 - torch.as_tensor(done_buf, device=device)
+        adv_ext = gae(rewards_t, val_buf, next_value, nonterm, args.gamma, args.lam)
+        returns = adv_ext + val_buf
+        adv = adv_ext
+        if rnd is not None:
+            # RND paper: intrinsic return is not cut at episode ends, so reaching the goal costs no future bonus.
+            adv_int = gae(torch.as_tensor(int_rewards, device=device), vint_buf, next_vint,
+                          torch.ones_like(nonterm), args.gamma, args.lam)
+            returns_int = adv_int + vint_buf
+            adv = adv_ext + args.rnd_coef * adv_int
 
         b_obs = prep(obs_buf.reshape(-1, 7, 7, 3), device)
         b_act, b_logp = act_buf.reshape(-1), logp_buf.reshape(-1)
         b_adv, b_ret = adv.reshape(-1), returns.reshape(-1)
+        b_ret_int = returns_int.reshape(-1) if rnd is not None else None
         for _ in range(args.epochs):
             perm = torch.randperm(batch, device=device)
             for s in range(0, batch, batch // args.minibatches):
                 idx = perm[s:s + batch // args.minibatches]
-                logits, value = net(b_obs[idx])
+                logits, value, value_int = net.heads(b_obs[idx])
                 dist = Categorical(logits=logits)
                 ratio = (dist.log_prob(b_act[idx]) - b_logp[idx]).exp()
                 a = b_adv[idx]
                 a = (a - a.mean()) / (a.std() + 1e-8)
                 pg = -torch.min(ratio * a, ratio.clamp(1 - args.clip, 1 + args.clip) * a).mean()
                 vf = 0.5 * (value - b_ret[idx]).pow(2).mean()
+                if rnd is not None:
+                    vf = vf + 0.5 * (value_int - b_ret_int[idx]).pow(2).mean()
                 loss = pg + args.vf_coef * vf - args.ent_coef * dist.entropy().mean()
                 opt.zero_grad()
                 loss.backward()
