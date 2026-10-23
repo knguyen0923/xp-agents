@@ -1,0 +1,53 @@
+phase: minigrid
+knob:
+  name: grid_size
+  familiar: 6
+  sweep: [5, 6, 8, 12]
+seeds:
+  tune: [0, 3]
+  eval: [100, 110]
+  chunk: 1
+  agent_seed: 0
+budget:
+  steps: 1000000
+  target_success: 0.8
+  cap: 2000000
+eval:
+  layouts: 200
+fewshot:
+  sizes: [8, 12]
+  steps: 200000
+ppo:
+  n_envs: 8
+  n_steps: 128
+  epochs: 4
+  minibatches: 4
+  lr: 0.00025
+  gamma: 0.99
+  lam: 0.95
+  clip: 0.2
+  vf_coef: 0.5
+  rnd_lr: 0.0001
+agents:
+  kairi:
+    grid:
+      ent_coef: [0.0, 0.001, 0.003, 0.01, 0.03, 0.1]
+    natural_limits:
+      ent_coef: [0.0, null]
+  kaiser:
+    fixed:
+      ent_coef: 0.01
+    grid:
+      rnd_coef: [0.0, 0.001, 0.003, 0.01, 0.03, 0.1]
+    natural_limits:
+      rnd_coef: [0.0, null]
+report:
+  metric: success
+  lower_is_better: false
+  agents: [kairi, kaiser]
+  extra_metrics:
+    success_fewshot: false
+    steps_to_80: true
+  xlabel: grid size (dashed line = familiar)
+  ylabel: success rate on unseen layouts (95% CI)
+  title: DoorKey success vs grid size

@@ -39,3 +39,26 @@ _TINY = {
 @pytest.fixture
 def tiny_cfg():
     return copy.deepcopy(_TINY)
+
+
+_TINY_MG = {
+    "phase": "minigrid",
+    "knob": {"name": "grid_size", "familiar": 5, "sweep": [5, 6]},
+    "seeds": {"tune": [0, 2], "eval": [10, 12], "chunk": 1, "agent_seed": 0},
+    "budget": {"steps": 256, "target_success": 0.8, "cap": 2000},
+    "eval": {"layouts": 3},
+    "fewshot": {"sizes": [6], "steps": 64},
+    "ppo": {"n_envs": 2, "n_steps": 16, "epochs": 2, "minibatches": 2, "lr": 0.00025, "gamma": 0.99, "lam": 0.95,
+            "clip": 0.2, "vf_coef": 0.5, "rnd_lr": 0.0001},
+    "agents": {
+        "kairi": {"grid": {"ent_coef": [0.0, 0.01]}, "natural_limits": {"ent_coef": [0.0, None]}},
+        "kaiser": {"fixed": {"ent_coef": 0.01}, "grid": {"rnd_coef": [0.0, 0.01]},
+                   "natural_limits": {"rnd_coef": [0.0, None]}},
+    },
+    "report": {"metric": "success", "lower_is_better": False, "agents": ["kairi", "kaiser"]},
+}
+
+
+@pytest.fixture
+def tiny_mg_cfg():
+    return copy.deepcopy(_TINY_MG)
