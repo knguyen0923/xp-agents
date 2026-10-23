@@ -31,8 +31,15 @@ progress," read it first.
   is a non-episodic intrinsic stream with its own value head. Diagnostic v1 (150k, stale clone, no ep_len/bonus) was inconclusive: even coef 0.0 had not learned
   by 150k, so it cannot separate bonus effect from slow sparse-reward learning (also single seed).
   v2 result: control PPO reaches 100% (80% at 143,360 steps); RND at coef 0.1 and 0.01 both 0%.
-  Implemented non-episodic intrinsic stream + second value head (untested locally, no torch);
-  v3 cells test it on Colab. v2 cells (control PPO + coef 0.1/0.01, 250k) added; rerun clone cell first. Diagnostic cells added (`79ceda6`,
+  Root cause found locally (scratch venv, ~2-3k sps, 2-3x Colab): intrinsic returns were scaled by
+  per-step reward std, so the intrinsic value targets were huge and, via the shared trunk and global
+  grad clip, crushed the policy gradient (even coef 0.0 stayed at 0%). Fix in `spikes/spike_minigrid.py`:
+  non-episodic intrinsic stream, second value head, bonus scaled by std of the discounted return.
+  Result (250k steps, seeds 0/1, eval success at 6x6): coef 0 = 88/56%, 0.001 = 46/98%, 0.01 = 42/88%,
+  0.1 = 0/0% (intrinsic advantage noise dominates; needs tuning). Plain PPO is high-variance across
+  seeds (seed 0 only 12% at 250k locally, seed 1 47%), so Phase 2 needs many seeds and longer budgets.
+  The bonus decays to ~0 and RND shows no visible benefit over coef 0 on DoorKey-6.
+  Superseded diagnostics v1-v3 cells remain in the notebook. v2 cells (control PPO + coef 0.1/0.01, 250k) added; rerun clone cell first. Diagnostic cells added (`79ceda6`,
   local, not pushed); run on Colab before writing the plan.
   A throwaway spike (`spikes/spike_minigrid.py`, `notebooks/spike_minigrid.ipynb`) is written and
   smoke-tested; notebook shell args hardcoded (`b0898e4`, pushed); its Colab results decide the plan's grids and budgets.

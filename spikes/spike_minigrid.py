@@ -141,7 +141,8 @@ class RND(nn.Module):
         for p in self.target.parameters():
             p.requires_grad_(False)
         self.obs_rms = RunningMeanStd((3,))
-        self.int_rms = RunningMeanStd(())
+        self.ret_rms = RunningMeanStd(())  # std of the discounted intrinsic return (forward filter)
+        self.ret = None
 
     def norm_obs(self, obs_np: np.ndarray, device) -> torch.Tensor:
         flat = obs_np.reshape(-1, 3).astype(np.float64)
@@ -175,7 +176,7 @@ def train(args, device):
 
     curve = []
     steps_to_80 = None
-    bonus_mean, prev_eps, prev_steps = 0.0, 0, 0
+    bonus_mean, ret_int_abs, prev_eps, prev_steps = 0.0, 0.0, 0, 0
     t0 = time.perf_counter()
     for u in range(updates):
         for t in range(t_len):
@@ -195,10 +196,14 @@ def train(args, device):
             x = rnd.norm_obs(next_seq.astype(np.float32), device)
             with torch.no_grad():
                 intrinsic = rnd.error(x).cpu().numpy()
-            rnd.int_rms.update(intrinsic)
-            intrinsic = intrinsic / np.sqrt(rnd.int_rms.var + 1e-8)
-            int_rewards = intrinsic.reshape(t_len, n).astype(np.float32)  # kept apart from rewards: non-episodic stream
-            bonus_mean = float(args.rnd_coef * intrinsic.mean())
+            raw = intrinsic.reshape(t_len, n)
+            if rnd.ret is None:
+                rnd.ret = np.zeros(n)
+            for t in range(t_len):  # scale by the std of the discounted intrinsic return (as in the RND paper), so
+                rnd.ret = rnd.ret * args.gamma + raw[t]  # the intrinsic value targets stay O(1)
+                rnd.ret_rms.update(rnd.ret)
+            int_rewards = (raw / np.sqrt(rnd.ret_rms.var + 1e-8)).astype(np.float32)  # non-episodic stream, kept apart
+            bonus_mean = float(args.rnd_coef * int_rewards.mean())
             perm = np.random.permutation(len(next_seq))
             for s in range(0, len(perm), 256):
                 idx = perm[s:s + 256]
@@ -219,6 +224,7 @@ def train(args, device):
             adv_int = gae(torch.as_tensor(int_rewards, device=device), vint_buf, next_vint,
                           torch.ones_like(nonterm), args.gamma, args.lam)
             returns_int = adv_int + vint_buf
+            ret_int_abs = float(returns_int.abs().mean())
             adv = adv_ext + args.rnd_coef * adv_int
 
         b_obs = prep(obs_buf.reshape(-1, 7, 7, 3), device)
@@ -251,11 +257,11 @@ def train(args, device):
             ep_len = (steps - prev_steps) / max(1, len(env.recent) - prev_eps)  # env steps per finished episode
             prev_eps, prev_steps = len(env.recent), steps
             curve.append({"steps": steps, "success_100": succ, "return_100": ret, "seconds": elapsed,
-                          "ep_len": ep_len, "bonus_per_step": bonus_mean})
+                          "ep_len": ep_len, "bonus_per_step": bonus_mean, "int_return_abs": ret_int_abs})
             if steps_to_80 is None and succ == succ and succ >= 0.8:
                 steps_to_80 = steps
             print(f"[train] steps={steps} success100={succ:.2f} return100={ret:.2f} "
-                  f"ep_len={ep_len:.0f} bonus/step={bonus_mean:.3f} elapsed={elapsed:.0f}s sps={steps / elapsed:.0f}", flush=True)
+                  f"ep_len={ep_len:.0f} bonus/step={bonus_mean:.3f} |R_int|={ret_int_abs:.1f} elapsed={elapsed:.0f}s sps={steps / elapsed:.0f}", flush=True)
 
     elapsed = time.perf_counter() - t0
     total_steps = updates * batch
