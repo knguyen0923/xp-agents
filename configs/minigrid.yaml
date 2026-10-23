@@ -48,6 +48,8 @@ report:
   extra_metrics:
     success_fewshot: false
     steps_to_80: true
+    return: false
+    return_fewshot: false
   xlabel: grid size (dashed line = familiar)
-  ylabel: success rate on unseen layouts (95% CI)
+  ylabel: success rate on held-out layout seeds (95% CI)
   title: DoorKey success vs grid size

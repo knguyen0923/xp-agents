@@ -53,3 +53,18 @@ def test_assert_tune_seeds_rejects_eval_seed(tiny_cfg):
     phase.assert_tune_seeds(np.array([0, 1]))
     with pytest.raises(ProtocolError):
         phase.assert_tune_seeds(np.array([105]))
+
+
+def test_bandit_config_hash_is_pinned():
+    from pathlib import Path
+    from xp.protocol.phase import load_config
+
+    cfg = load_config(Path(__file__).resolve().parents[1] / "configs" / "bandit.yaml")
+    assert config_hash(cfg) == "50ea69897efe"  # Phase 1 results on Drive depend on this
+
+
+def test_report_block_is_not_hashed(tiny_cfg):
+    a = {**tiny_cfg, "report": {"ylabel": "a"}}
+    b = {**tiny_cfg, "report": {"ylabel": "b"}}
+    assert config_hash(a) == config_hash(b) == config_hash(tiny_cfg)
+    assert config_hash({**tiny_cfg, "horizon": 99}) != config_hash(tiny_cfg)

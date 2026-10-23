@@ -24,3 +24,8 @@ def test_committed_grids_are_equal_size_and_in_the_fewshot_sizes():
     assert sizes["kairi"] == sizes["kaiser"]
     assert set(cfg["fewshot"]["sizes"]) <= set(cfg["knob"]["sweep"])  # spec 5.3: few-shot at sizes 8 and 12 only
     assert cfg["eval"]["layouts"] == 200
+
+
+def test_committed_report_block_lists_return_metrics():
+    extra = load_config(CONFIG)["report"]["extra_metrics"]
+    assert "return" in extra and "return_fewshot" in extra

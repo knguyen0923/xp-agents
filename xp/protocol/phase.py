@@ -16,7 +16,8 @@ def load_config(path) -> dict:
 
 
 def config_hash(cfg: dict) -> str:
-    blob = json.dumps(cfg, sort_keys=True, default=str)
+    hashed = {k: v for k, v in cfg.items() if k != "report"}  # presentation only; must not invalidate results
+    blob = json.dumps(hashed, sort_keys=True, default=str)
     return hashlib.sha256(blob.encode()).hexdigest()[:12]
 
 
