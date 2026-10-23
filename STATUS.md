@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 6747b03 -->
+<!-- STATUS_COMMIT: 35974b2 -->
 
 ## Current state
 
@@ -24,10 +24,10 @@ progress," read it first.
   beats it only at lambda>=0.01; `tt_meta`/`tt_triggered` never robustly win). README results
   still to write; need `gaps.csv` and `crossovers.csv` CIs.
   Untested: whether results match across numpy versions; rerun the Colab setup cell to confirm.
-- Phase 2 (MiniGrid DoorKey, PPO vs PPO+RND): plan `docs/superpowers/plans/2026-10-23-phase2-minigrid.md` executed through Task 8 on branch `feat/phase2-minigrid` (not pushed, not merged): `xp/minigrid/` implemented and tested (114 tests), Colab launcher `notebooks/run_minigrid.ipynb`, CLAUDE.md updated. Remaining work = Task 9 (calibrate the budget, full run, report, README results), which needs the user's laptop-vs-Colab decision. The spike scripts were removed; their numbers are in the plan and the spec amendment.
+- Phase 2 (MiniGrid DoorKey, PPO vs PPO+RND): plan `docs/superpowers/plans/2026-10-23-phase2-minigrid.md` executed through Task 8 on branch `feat/phase2-minigrid` (not pushed, not merged): `xp/minigrid/` implemented and tested (123 tests), Colab launcher `notebooks/run_minigrid.ipynb`, CLAUDE.md updated. Remaining work = Task 9 (calibrate the budget, full run, report, README results), which needs the user's laptop-vs-Colab decision. The spike scripts were removed; their numbers are in the plan and the spec amendment.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), default branch `main`.
   `origin/main` includes the requirements fix (`0734460`); `c1b33f4` is on `origin/main`; the `feat/phase2-minigrid` branch is local only (push needs the user's yes).
 
 ## Last updated
 
-2026-10-23 (commit 6747b03)
+2026-10-23 (commit 35974b2)
