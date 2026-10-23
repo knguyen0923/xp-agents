@@ -24,7 +24,7 @@ progress," read it first.
   beats it only at lambda>=0.01; `tt_meta`/`tt_triggered` never robustly win). README results
   still to write; need `gaps.csv` and `crossovers.csv` CIs.
   Untested: whether results match across numpy versions; rerun the Colab setup cell to confirm.
-- Phase 2 (MiniGrid DoorKey, PPO vs PPO+RND): spec section 5.2-5.3 approved, **plan not written**.
+- Phase 2 (MiniGrid DoorKey, PPO vs PPO+RND): spec section 5.2-5.3 approved, **plan written** (`docs/superpowers/plans/2026-10-23-phase2-minigrid.md`, 9 tasks; code prototyped and replayed task by task in a scratch copy, 103+ tests green; not yet executed in the repo).
   Spike results (seed 0, 500k steps): ~860 sps, ~10 min/run; PPO hit 80% at 143k steps; zero-shot
   from 6x6: size 5/6 = 100%, 8 = 42%, 12 = 0% (floor). PPO+RND got 0% everywhere (below random):
   suspected cause is a positive, episodic intrinsic bonus that penalizes reaching the goal; fix
