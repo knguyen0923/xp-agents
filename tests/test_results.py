@@ -159,3 +159,40 @@ def test_writes_are_atomic_and_leave_no_temp_files(tiny_cfg, tmp_path, monkeypat
     assert sorted(p.name for p in (tmp_path / "bandit").rglob("*") if p.is_file()) == [
         "kairi.csv", "kairi.json", "kairi__jump_rate-0.01.csv"
     ]
+
+
+def test_seed_job_roundtrip_and_hash_guard(tmp_path, tiny_cfg):
+    import pandas as pd
+    import pytest
+
+    from xp.errors import ConfigMismatchError
+    from xp.protocol.phase import Phase
+    from xp.protocol.results import COLUMNS, seed_job_done, write_seed_job
+
+    phase = Phase.from_config(tiny_cfg)
+    df = pd.DataFrame([["bandit", "kairi", 1.0, 100, "success", 0.5, False, phase.config_hash]], columns=COLUMNS)
+    assert not seed_job_done(tmp_path, phase, "kairi", 100)
+    write_seed_job(tmp_path, phase, "kairi", 100, df)
+    assert seed_job_done(tmp_path, phase, "kairi", 100)
+    other = Phase.from_config({**tiny_cfg, "horizon": 51})
+    with pytest.raises(ConfigMismatchError):
+        seed_job_done(tmp_path, other, "kairi", 100)
+    with pytest.raises(ValueError):
+        write_seed_job(tmp_path, phase, "kairi", 101, df.rename(columns={"value": "v"}))
+
+
+def test_tune_job_roundtrip_and_hash_guard(tmp_path, tiny_cfg):
+    import pytest
+
+    from xp.errors import ConfigMismatchError
+    from xp.protocol.phase import Phase
+    from xp.protocol.results import read_tune_job, write_tune_job
+
+    phase = Phase.from_config(tiny_cfg)
+    params = {"ent_coef": 0.01, "rnd_coef": 0.0}
+    assert read_tune_job(tmp_path, phase, "kaiser", params, 3) is None
+    write_tune_job(tmp_path, phase, "kaiser", params, 3, 0.25)
+    assert read_tune_job(tmp_path, phase, "kaiser", params, 3) == 0.25
+    other = Phase.from_config({**tiny_cfg, "horizon": 51})
+    with pytest.raises(ConfigMismatchError):
+        read_tune_job(tmp_path, other, "kaiser", params, 3)

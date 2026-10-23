@@ -126,3 +126,52 @@ def require_final(df: pd.DataFrame, allow_provisional: bool = False) -> None:
             f"provisional (grid-boundary) results for agents {sorted(bad)}: "
             "widen their grids and rerun, or pass allow_provisional for a draft"
         )
+
+
+def _job_path(out_dir, phase: Phase, agent: str, seed: int) -> Path:
+    return Path(out_dir) / phase.name / f"{agent}__seed-{seed}.csv"
+
+
+def seed_job_done(out_dir, phase: Phase, agent: str, seed: int) -> bool:
+    """A per-(agent, training seed) job is done when its atomically written file exists under this config."""
+    path = _job_path(out_dir, phase, agent, seed)
+    if not path.exists():
+        return False
+    try:
+        hashes = list(pd.read_csv(path, usecols=["config_hash"], dtype={"config_hash": str})["config_hash"].unique())
+    except (pd.errors.EmptyDataError, ValueError):
+        return False
+    if hashes != [phase.config_hash]:
+        raise ConfigMismatchError(f"{path} was written under config {hashes}, current config is {phase.config_hash}")
+    return True
+
+
+def write_seed_job(out_dir, phase: Phase, agent: str, seed: int, df: pd.DataFrame) -> None:
+    if list(df.columns) != COLUMNS:
+        raise ValueError(f"results columns must be {COLUMNS}, got {list(df.columns)}")
+    path = _job_path(out_dir, phase, agent, seed)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write(path, lambda tmp: df.to_csv(tmp, index=False))
+
+
+def _tune_job_path(out_dir, phase: Phase, agent: str, params: dict, seed: int) -> Path:
+    key = "_".join(f"{k}-{params[k]:g}" for k in sorted(params))
+    return Path(out_dir) / phase.name / "tuning" / "jobs" / f"{agent}__{key}__seed-{seed}.json"
+
+
+def read_tune_job(out_dir, phase: Phase, agent: str, params: dict, seed: int):
+    """Cached tuning score for one (agent, params, tune seed), or None."""
+    path = _tune_job_path(out_dir, phase, agent, params, seed)
+    if not path.exists():
+        return None
+    record = json.loads(path.read_text())
+    if record["config_hash"] != phase.config_hash:
+        raise ConfigMismatchError(f"{path} was written under config {record['config_hash']}, current config is {phase.config_hash}")
+    return float(record["score"])
+
+
+def write_tune_job(out_dir, phase: Phase, agent: str, params: dict, seed: int, score: float) -> None:
+    path = _tune_job_path(out_dir, phase, agent, params, seed)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    record = {"config_hash": phase.config_hash, "params": params, "seed": seed, "score": float(score)}
+    atomic_write(path, lambda tmp: tmp.write_text(json.dumps(record, default=_json_default)))
