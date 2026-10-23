@@ -15,7 +15,10 @@ GRID = "#e1e0d9"
 AXIS = "#c3c2b7"
 
 
-def plot_degradation(curves, familiar: float, out_path, title: str = "Regret vs jump rate") -> None:
+def plot_degradation(
+    curves, familiar: float, out_path, title: str = "Regret vs jump rate",
+    xlabel: str = "jump rate λ (dashed line = familiar)", ylabel: str = "mean per-step regret (95% CI)",
+) -> None:
     knobs = sorted(curves["knob"].unique())
     pos = {k: i for i, k in enumerate(knobs)}
     agents = sorted(curves["agent"].unique())  # colour follows the entity (sorted name), not its rank
@@ -39,8 +42,8 @@ def plot_degradation(curves, familiar: float, out_path, title: str = "Regret vs 
     ax.axvline(pos[familiar], linestyle="--", linewidth=1, color=MUTED)
     ax.set_xticks(range(len(knobs)))
     ax.set_xticklabels([f"{k:g}" for k in knobs])
-    ax.set_xlabel("jump rate λ (dashed line = familiar)", color=INK_2)
-    ax.set_ylabel("mean per-step regret (95% CI)", color=INK_2)
+    ax.set_xlabel(xlabel, color=INK_2)
+    ax.set_ylabel(ylabel, color=INK_2)
     ax.set_title(title, color=INK, loc="left", fontsize=12)
     ax.grid(axis="y", color=GRID, linewidth=0.8)
     ax.set_axisbelow(True)

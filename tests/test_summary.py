@@ -77,3 +77,12 @@ def test_values_rejects_cells_with_different_seeds():
     b = _rows("B", 0.0, np.zeros(len(SEEDS))).iloc[:-1]
     with pytest.raises(ValueError, match="same eval seeds"):
         curve_table(pd.concat([a, b], ignore_index=True), n_boot=50)
+
+
+def test_higher_is_better_flips_the_winner():
+    df = pd.concat([_rows("A", 0.0, 0.9 + np.zeros(len(SEEDS)) + 0.01 * np.sin(SEEDS)),
+                    _rows("B", 0.0, 0.1 + np.zeros(len(SEEDS)) + 0.01 * np.sin(SEEDS))], ignore_index=True)
+    df["metric"] = "success"
+    lower = pair_table(df, "A", "B", n_boot=200, metric="success", lower_is_better=True)
+    higher = pair_table(df, "A", "B", n_boot=200, metric="success", lower_is_better=False)
+    assert lower.iloc[0]["winner"] == "B" and higher.iloc[0]["winner"] == "A"
