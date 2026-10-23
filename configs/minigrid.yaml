@@ -9,7 +9,7 @@ seeds:
   chunk: 1
   agent_seed: 0
 budget:
-  steps: 1000000
+  steps: 2000000
   target_success: 0.8
   cap: 2000000
 eval:
