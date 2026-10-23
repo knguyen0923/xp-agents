@@ -31,7 +31,7 @@ progress," read it first.
   is a non-episodic intrinsic stream with its own value head. Diagnostic cells added (`79ceda6`,
   local, not pushed); run on Colab before writing the plan.
   A throwaway spike (`spikes/spike_minigrid.py`, `notebooks/spike_minigrid.ipynb`) is written and
-  smoke-tested; notebook shell args hardcoded (`79ceda6`, local, not pushed); its Colab results decide the plan's grids and budgets.
+  smoke-tested; notebook shell args hardcoded (`b0898e4`, pushed); its Colab results decide the plan's grids and budgets.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), default branch `main`.
   `origin/main` includes the requirements fix (`0734460`); the STATUS refresh and `c1b33f4` are local only (push needs the user's yes).
 
