@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 9928aec -->
+<!-- STATUS_COMMIT: e13d3c1 -->
 
 ## Current state
 
@@ -25,10 +25,10 @@ progress," read it first.
   still to write; need `gaps.csv` and `crossovers.csv` CIs.
   Untested: whether results match across numpy versions; rerun the Colab setup cell to confirm.
 - Phase 2 (MiniGrid DoorKey, PPO vs PPO+RND): plan `docs/superpowers/plans/2026-10-23-phase2-minigrid.md` executed through Task 8 and merged into `main` (pushed): `xp/minigrid/` implemented and tested (123 tests), Colab launcher `notebooks/run_minigrid.ipynb`, CLAUDE.md updated. Remaining work = Task 9 (calibrate the budget, full run, report, README results), which the user chose to run locally on the laptop later (go-ahead needed before starting; see RESUME.md). The spike scripts were removed; their numbers are in the plan and the spec amendment.
-- Phase 2 calibration (`python -m xp.minigrid.calibrate ... --workers 3`) was started locally on 2026-10-23 and may have finished; check for `calibration.json` (git-untracked). Next: set `budget.steps`, commit, ask before the ~2h full run. `README.md` Phase 2 results and "where each agent loses" are TODO.
+- Phase 2 calibration finished locally (2026-10-23): 80% target NOT reached, so `budget.steps` = 2,000,000 (the cap), committed in `e13d3c1`. `calibration.json` is untracked. Next: get the user's go-ahead, then the full run (~4h at `--workers 5`), report, README Phase 2 results. Write the unmet 80% target into the limitations.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), default branch `main`.
   `origin/main` includes the requirements fix (`0734460`); `c1b33f4` is on `origin/main`; the `feat/phase2-minigrid` branch is local only (push needs the user's yes).
 
 ## Last updated
 
-2026-10-23 (commit 9928aec)
+2026-10-23 (commit e13d3c1)
