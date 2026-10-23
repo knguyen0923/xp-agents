@@ -155,6 +155,7 @@ def train(args, device):
 
     curve = []
     steps_to_80 = None
+    bonus_mean, prev_eps, prev_steps = 0.0, 0, 0
     t0 = time.perf_counter()
     for u in range(updates):
         for t in range(t_len):
@@ -175,6 +176,7 @@ def train(args, device):
             rnd.int_rms.update(intrinsic)
             intrinsic = intrinsic / np.sqrt(rnd.int_rms.var + 1e-8)
             rewards = rewards + args.rnd_coef * intrinsic.reshape(t_len, n).astype(np.float32)
+            bonus_mean = float(args.rnd_coef * intrinsic.mean())
             perm = np.random.permutation(len(next_seq))
             for s in range(0, len(perm), 256):
                 idx = perm[s:s + 256]
@@ -221,11 +223,14 @@ def train(args, device):
             succ, ret = env.recent_stats()
             steps = (u + 1) * batch
             elapsed = time.perf_counter() - t0
-            curve.append({"steps": steps, "success_100": succ, "return_100": ret, "seconds": elapsed})
+            ep_len = (steps - prev_steps) / max(1, len(env.recent) - prev_eps)  # env steps per finished episode
+            prev_eps, prev_steps = len(env.recent), steps
+            curve.append({"steps": steps, "success_100": succ, "return_100": ret, "seconds": elapsed,
+                          "ep_len": ep_len, "bonus_per_step": bonus_mean})
             if steps_to_80 is None and succ == succ and succ >= 0.8:
                 steps_to_80 = steps
             print(f"[train] steps={steps} success100={succ:.2f} return100={ret:.2f} "
-                  f"elapsed={elapsed:.0f}s sps={steps / elapsed:.0f}", flush=True)
+                  f"ep_len={ep_len:.0f} bonus/step={bonus_mean:.3f} elapsed={elapsed:.0f}s sps={steps / elapsed:.0f}", flush=True)
 
     elapsed = time.perf_counter() - t0
     total_steps = updates * batch
