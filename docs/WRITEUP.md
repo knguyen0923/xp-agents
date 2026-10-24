@@ -12,9 +12,10 @@ results are never reported; we widened grids and reran when it happened (reverse
 
 ## Results
 **Changing bandit (10 arms, sigma 1, horizon 2000, tuned at jump rate 0.001).** Kaiser beats Kairi at all seven jump rates (regret per step 0.033 to 0.072 lower, every CI excludes 0).
-The advantage holds when tuning at the high jump rate and across reward noise 0.25 to 4. Kairi wins in two shifts far from the tuned point: 50 arms (by 0.054 [0.037, 0.071]) and arm drift
-0.1 per step (by 0.209 [0.132, 0.283]), with the crossovers between 20 and 50 arms and between drift 0.02 and 0.1. Tag-team agents that switch between the two help mainly where the single
-agents fail; `tt_meta` is the most reliable.
+The advantage holds when tuning at the high jump rate and across reward noise 0.25 to 4. Kairi wins in two shifts far from the tuned point with frozen settings: 50 arms (by 0.054 [0.037, 0.071]) and arm drift 0.1 per step (by 0.209 [0.132, 0.283]), crossovers between 20 and 50 arms and between
+drift 0.02 and 0.1. A post-hoc ablation retuning both agents at those points reverses both: Kaiser then wins by 0.086 [0.070, 0.103] at 50 arms and 0.168 [0.156, 0.179] at drift 0.1, and a regret-over-time split
+shows Kaiser's frozen loss at 50 arms accrues after step 500, not from initial exploration. So the Kairi wins are Kaiser's tuned settings being brittle, not exploration hurting. Tag-team agents that switch between the
+two help mainly where the single agents fail; `tt_meta` is the most reliable.
 
 **MiniGrid DoorKey (tuned on 6x6, tested at 5, 6, 8, 12, 10 seeds).** With tuned settings Kairi is at or above Kaiser everywhere, and the gap excludes 0 at sizes 8 and 12. That gap is not robust:
 Kaiser at a different tuning-tied RND coefficient, or at Kairi's entropy coefficient, is statistically indistinguishable from Kairi at every size. The supported conclusion is no measurable benefit
@@ -24,14 +25,14 @@ from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two o
 | regime | winner |
 |---|---|
 | bandit, jump rate 0 to 0.02, noise 0.25 to 4, up to 20 arms, drift up to 0.02 | Kaiser |
-| bandit, 50 arms (5x tuned), drift 0.1 (10x tuned) | Kairi |
+| bandit, 50 arms (5x tuned), drift 0.1 (10x tuned), settings frozen | Kairi |
+| same two points with both agents retuned there (post-hoc) | Kaiser |
 | MiniGrid DoorKey 5 to 12 | tie (RND no measurable benefit) |
 
 ## Limitations
-One bandit family and horizon; agents are frozen after tuning once (no per-shift retuning); no multiplicity correction across knob values; the explanations for the Kairi wins (optimism cost with
-many arms, undiscounted Kaiser under fast drift) are untested. MiniGrid: one familiar size, a 2M-step budget that missed the 80% calibration target, 10 eval seeds, and Kaiser's entropy
+One bandit family and horizon; agents are frozen after tuning once (no per-shift retuning); no multiplicity correction across knob values; the ablations that explain the Kairi wins are post-hoc, cover only those two shifts, and use oracle retuning the protocol does not allow. MiniGrid: one familiar size, a 2M-step budget that missed the 80% calibration target, 10 eval seeds, and Kaiser's entropy
 coefficient was fixed (not tuned) in the main run, which the matched-entropy check addresses post-hoc. See `docs/FINDINGS.md`.
 
 ## Future work
-A harder-exploration world where exploration is the bottleneck (to test whether RND pays off there), ablations of the two Kairi-win explanations, and a deep-RL tag-team agent. Crafter and Showdown
+A harder-exploration world where exploration is the bottleneck (to test whether RND pays off there) and a deep-RL tag-team agent. Crafter and Showdown
 remain out of scope.

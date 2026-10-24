@@ -12,11 +12,12 @@ Kairi winning some regimes is a valid result. Design: `docs/superpowers/specs/20
 
 ## Summary
 
-- **Bandit:** Kaiser (discounted UCB) beats Kairi (epsilon-greedy) at every jump rate, under reversed tuning, and under reward-noise shifts. Kairi wins only far from the tuned point:
-  many more arms than tuned (k = 50 vs 10) and fast arm drift (0.1 vs 0.01), with crossovers in (20, 50) arms and (0.02, 0.1) drift.
+- **Bandit:** Kaiser (discounted UCB) beats Kairi (epsilon-greedy) at every jump rate, under reversed tuning, and under reward-noise shifts. Kairi wins only when the frozen agents face a world far from
+  the tuned point: many more arms than tuned (k = 50 vs 10) and fast arm drift (0.1 vs 0.01). Post-hoc ablations show these wins are tuning brittleness, not a cost of exploration: retuned for the shifted
+  world, Kaiser wins at both points.
 - **MiniGrid DoorKey:** the RND bonus gave no measurable benefit. Kairi (PPO) looked better at sizes 8 and 12 with the tuned settings, but that gap disappears at other tuning-tied settings and with
   matched entropy (10 seeds), so the supported claim is a tie, not "RND hurts".
-- **Map:** the exploration bonus helps in a changing bandit near the tuned conditions, breaks far from them (many arms, fast drift), and does not help in this sparse-but-learnable gridworld.
+- **Map:** the exploration bonus helps in a changing bandit; Kaiser's *tuned settings* are more brittle than Kairi's under large shifts (retune them when the world changes a lot); and it does not help in this sparse-but-learnable gridworld.
 - Short write-up: `docs/WRITEUP.md`; full analysis with evidence and caveats: `docs/FINDINGS.md`; design: `docs/superpowers/specs/2026-10-22-xp-design.md`.
 
 ## Protocol
@@ -74,9 +75,13 @@ Kairi − Kaiser regret per step, paired 95% CI; positive = Kaiser better.
 | **arms k** | **arm drift** |
 | ![k](figs/shifts/k/degradation.png) | ![drift](figs/shifts/drift/degradation.png) |
 
-Kaiser's advantage is robust to reversing the tuning direction and to reward noise. Kairi wins when the world is far from the tuned point in a way that raises the
-cost of optimism: many more arms than tuned (k = 50) or fast arm drift. Explanations are plausible but untested; see `docs/FINDINGS.md`. First runs for the reversed and
+Kaiser's advantage is robust to reversing the tuning direction and to reward noise. Kairi wins only at k = 50 and drift 0.1, far from the tuned point. First runs for the reversed and
 drift shifts were provisional (grid edges); grids were widened and rerun.
+
+**Ablation (post-hoc, outside the protocol; `docs/FINDINGS.md`, `figs/ablations/`).** Retuning both agents at the shifted point (k = 50, drift = 0.1; `configs/bandit-{k-at50,drift-at01}.yaml`) reverses both Kairi wins:
+Kaiser wins at k = 50 by 0.086 [0.070, 0.103] and at drift 0.1 by 0.168 [0.156, 0.179] (Kaiser `gamma` moves from 0.98 to 0.995 at k = 50 and from 1.0 to 0.99 under drift). A regret-over-time split at k = 50
+shows Kaiser is ahead through step 500 and loses only afterwards, so the "initial UCB exploration cost grows with k" explanation is not supported. So the Kairi wins reflect Kaiser's frozen tuning being
+more brittle, not exploration hurting.
 
 ## Phase 2 — MiniGrid DoorKey
 
@@ -153,13 +158,13 @@ The tuned-only figure from the protocol report is `figs/degradation.png`; the fi
 ## Where each agent loses
 
 - **Bandit (Phase 1):** over the jump-rate sweep Kairi (epsilon-greedy) is never the best single agent; Kaiser's discounted UCB wins at every jump rate, and only `tt_fixed` beats it, at high lambda (>= 0.01).
-  In the extra shifts Kairi wins at k = 50 arms and at drift 0.1 (far beyond the tuned k = 10 / drift 0.01); Kaiser is better everywhere else.
+  In the extra shifts Kairi wins at k = 50 arms and at drift 0.1 (far beyond the tuned k = 10 / drift 0.01) with frozen settings; retuned at those points, Kaiser wins (ablation above). Kaiser is better everywhere else.
 - **MiniGrid (Phase 2):** Kaiser (PPO + RND) never beats plain PPO. It ties at sizes 5 and 6 and, at its tuned setting, loses at 8 and 12, but that loss does not survive
   either robustness check: Kaiser at a different tied `rnd_coef`, or at Kairi's entropy coefficient, is statistically indistinguishable from Kairi at every size (10 seeds).
   The supported conclusion is "no measurable RND benefit on DoorKey", not "RND hurts". RND adds per-step cost (Kaiser seed jobs took ~2.5x as long). A plausible but
   untested reason for no benefit: extrinsic reward is reachable with plain exploration. The agents break down together as size grows (size 12 near the floor).
   MiniGrid is closed here; a 30-seed rerun with matched entropy was planned and shelved (`docs/superpowers/plans/2026-10-24-phase2-step-a.md`).
-- So the exploration bonus helps in the nonstationary bandit near the tuned conditions, breaks down far from them (many arms, fast drift), and does not help in this sparse-but-learnable MiniGrid family.
+- So the exploration bonus helps in the nonstationary bandit; Kaiser's frozen tuned settings break down far from the tuned point (many arms, fast drift) but not once retuned there; and it does not help in this sparse-but-learnable MiniGrid family.
 
 ## Future work
 
