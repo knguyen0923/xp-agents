@@ -30,14 +30,21 @@ seeds. Metric: regret per step (lower is better). Three tag-team agents (`tt_fix
 
 ### Results
 
-- Kaiser has the lowest regret of the two single agents at every λ; Kairi is never best.
-  Kairi − Kaiser gap: 0.033 at λ = 0, peak 0.072 at λ = 0.005, 0.060 at λ = 0.02.
+- **Kaiser beats Kairi at every jump rate and the curves do not cross.** Kairi − Kaiser regret per step (95% CI):
+
+  | λ | 0 | 0.0005 | 0.001 (familiar) | 0.002 | 0.005 | 0.01 | 0.02 |
+  |---|---|---|---|---|---|---|---|
+  | diff | 0.033 [0.028, 0.038] | 0.051 [0.044, 0.059] | 0.053 [0.045, 0.061] | 0.064 [0.055, 0.074] | 0.072 [0.061, 0.082] | 0.068 [0.058, 0.078] | 0.060 [0.051, 0.069] |
+
+  All seven intervals exclude 0 (winner: Kaiser each time); Kairi is never best.
+- **Degradation from the familiar λ** (regret increase over each agent's own value at λ = 0.001): at λ = 0.02, Kairi +0.552
+  [0.540, 0.564], Kaiser +0.546 [0.538, 0.553], `tt_fixed` +0.498 [0.490, 0.506]; at λ = 0.005, Kairi +0.219 [0.206, 0.231]
+  vs Kaiser +0.200 [0.193, 0.208]. These CIs are per agent against its own baseline; head-to-head comparisons are the table above.
 - `tt_fixed` (fixed 50-step blocks) is worse than Kaiser for λ ≤ 0.002, tied at 0.005, and better
   at 0.01 (−0.020) and 0.02 (−0.029); those CIs exclude 0.
 - `tt_meta` never beats Kaiser.
 - `tt_triggered` ties Kaiser except one win at λ = 0.005 (−0.0098), likely noise (1 of 21 comparisons).
 
-<!-- TODO: confirm Kairi-vs-Kaiser gap CIs and crossover statements from gaps.csv / crossovers.csv -->
 
 ## Phase 2 — MiniGrid DoorKey
 
