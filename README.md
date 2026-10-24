@@ -94,6 +94,14 @@ only for the AUC-selected `rnd_coef`; under other tied settings the two are stat
 eval score would not be protocol-legal, so the tuned result stays the headline and this is reported as sensitivity. One Kaiser seed fails
 outright in two of the three settings (seed 101 at 0.001, seed 105 at 0.003); none fails at 0.01 or in any Kairi run.
 
+**Matched-entropy check (post-hoc, outside the protocol).** In the main run Kaiser's `ent_coef` is fixed at 0.01 while Kairi tuned 0.03, so Kaiser's
+deficit could be an entropy effect. `scripts/entropy_fair.py` with `configs/minigrid-entfair.yaml` sets Kaiser's `ent_coef` to 0.03, re-tunes `rnd_coef`
+on the same grid with tune seeds only (five of six values tie at 0.000; the AUC tie-break picks 0.01, not provisional), and evaluates on the same 10 eval
+seeds. Kairi is not rerun. Paired Kairi − Kaiser success (95% CI): size 5 and 6, 0.000 (both agents 1.000); size 8, 0.043 [−0.053, 0.142]; size 12,
+−0.037 [−0.159, 0.040]. No seed fails outright, and few-shot is about equal (size 8: 1.00 vs 1.00; size 12: 0.72 vs 0.73). With matched entropy Kaiser is
+statistically indistinguishable from Kairi at every size, so the tuned-setting deficit above is better read as an entropy/tuning effect than as evidence that RND
+hurts. It is not evidence that RND helps either; n = 10 and the size 8/12 intervals are wide.
+
 Figure: `figs/degradation.png`.
 
 ## Limitations
