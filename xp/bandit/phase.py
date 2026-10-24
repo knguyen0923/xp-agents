@@ -15,30 +15,53 @@ from xp.protocol.phase import Phase
 from xp.protocol.results import TuneResult, read_tune, unit_done, write_tune, write_unit
 from xp.protocol.tune import PerSeedFn, score_params, tune
 
-AgentBuilder = Callable[[dict, int], object]
+AgentBuilder = Callable[..., object]  # (params, seed, k=None) -> agent; k defaults to cfg["k"]
+
+KNOBS = ("jump_rate", "sigma", "k", "drift")
+
+
+def world_params(cfg: dict, knob_value: float) -> dict:
+    """World parameters at one knob value: everything comes from the config except the swept knob.
+
+    `jump_rate` defaults to the knob only when it is the swept knob; otherwise it is the config's top-level `jump_rate`
+    (default 0). `drift` is the per-step random-walk std of the arm means (default 0).
+    """
+    name = cfg["knob"]["name"]
+    if name not in KNOBS:
+        raise ProtocolError(f"unknown bandit knob {name!r}; expected one of {KNOBS}")
+    params = {"lam": float(cfg.get("jump_rate", 0.0)), "k": int(cfg["k"]), "sigma": float(cfg["sigma"]),
+              "drift": float(cfg.get("drift", 0.0))}
+    if name == "jump_rate":
+        params["lam"] = float(knob_value)
+    elif name == "k":
+        params["k"] = int(round(knob_value))
+    elif name == "sigma":
+        params["sigma"] = float(knob_value)
+    else:
+        params["drift"] = float(knob_value)
+    return params
 
 
 def build_factories(cfg: dict) -> Dict[str, AgentBuilder]:
-    k = cfg["k"]
     return {
-        "kairi": lambda p, s: KairiAgent(k, p["epsilon"], p["alpha"], s),
-        "kaiser": lambda p, s: KaiserAgent(k, p["gamma"], p["c"], s),
+        "kairi": lambda p, s, k=None: KairiAgent(cfg["k"] if k is None else k, p["epsilon"], p["alpha"], s),
+        "kaiser": lambda p, s, k=None: KaiserAgent(cfg["k"] if k is None else k, p["gamma"], p["c"], s),
     }
 
 
 def make_per_seed_fn(cfg: dict, build_agent: AgentBuilder) -> PerSeedFn:
     def fn(seeds, knob, params, chunk_index):
-        world = make_world(seeds, knob, cfg["horizon"], cfg["k"], cfg["sigma"])
-        agent = build_agent(params, cfg["seeds"]["agent_seed"] + chunk_index)
+        w = world_params(cfg, knob)
+        world = make_world(seeds, w["lam"], cfg["horizon"], w["k"], w["sigma"], w["drift"])
+        agent = build_agent(params, cfg["seeds"]["agent_seed"] + chunk_index, w["k"])
         return run_agent(agent, world)
 
     return fn
 
 
 def build_tagteam(cfg: dict, rule: str, base: dict) -> AgentBuilder:
-    k = cfg["k"]
-
-    def build(params: dict, seed: int) -> TagTeamAgent:
+    def build(params: dict, seed: int, k=None) -> TagTeamAgent:
+        k = cfg["k"] if k is None else k
         kairi = KairiAgent(k, base["kairi"]["epsilon"], base["kairi"]["alpha"], seed)
         kaiser = KaiserAgent(k, base["kaiser"]["gamma"], base["kaiser"]["c"], seed)
         if rule == "fixed":

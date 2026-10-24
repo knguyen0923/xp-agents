@@ -76,3 +76,25 @@ def test_regret_of_fixed_arm_is_nonnegative_and_positive_on_average():
     regret = run_agent(_FixedArm(), w)
     assert np.all(regret >= 0)
     assert regret.mean() > 0.1
+
+
+def test_drift_zero_changes_nothing():
+    a = make_world(np.arange(4), 0.02, 60, 3, 1.0)
+    b = make_world(np.arange(4), 0.02, 60, 3, 1.0, drift=0.0)
+    assert np.array_equal(a.means, b.means) and np.array_equal(a.noise, b.noise)
+
+
+def test_drift_is_a_random_walk_coupled_to_the_same_noise_and_start():
+    still = make_world(np.arange(300), 0.0, 400, 3, 1.0)
+    drifting = make_world(np.arange(300), 0.0, 400, 3, 1.0, drift=0.05)
+    assert np.array_equal(still.noise, drifting.noise)
+    assert np.array_equal(still.means[:, 0, :], drifting.means[:, 0, :])  # same start; the walk begins after step 0
+    steps = np.diff(drifting.means, axis=1)
+    assert abs(steps.std() - 0.05) < 0.005 and abs(steps.mean()) < 0.005
+    assert (drifting.means[:, -1, :] - drifting.means[:, 0, :]).std() > 0.5 * 0.05 * np.sqrt(399)
+
+
+def test_drift_is_deterministic_independent_of_batching():
+    a = make_world(np.array([3, 4, 5]), 0.0, 50, 3, 1.0, drift=0.1)
+    b = make_world(np.array([4]), 0.0, 50, 3, 1.0, drift=0.1)
+    assert np.array_equal(a.means[1], b.means[0])

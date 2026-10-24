@@ -165,3 +165,44 @@ def test_report_rejects_phase_mismatch(tiny_cfg, tmp_path):
     argv[1] = "other"
     with pytest.raises(ProtocolError, match="phase"):
         report_main(argv)
+
+
+@pytest.mark.parametrize("name,value,expected", [
+    ("jump_rate", 0.05, {"lam": 0.05, "k": 3, "sigma": 1.0, "drift": 0.0}),
+    ("sigma", 2.0, {"lam": 0.01, "k": 3, "sigma": 2.0, "drift": 0.0}),
+    ("k", 7.0, {"lam": 0.01, "k": 7, "sigma": 1.0, "drift": 0.0}),
+    ("drift", 0.02, {"lam": 0.0, "k": 3, "sigma": 1.0, "drift": 0.02}),
+])
+def test_world_params_override_only_the_knob(tiny_cfg, name, value, expected):
+    from xp.bandit.phase import world_params
+
+    tiny_cfg["knob"]["name"] = name
+    tiny_cfg["jump_rate"] = 0.0 if name == "drift" else 0.01
+    assert world_params(tiny_cfg, value) == expected
+
+
+def test_world_params_rejects_unknown_knob(tiny_cfg):
+    from xp.bandit.phase import world_params
+
+    tiny_cfg["knob"]["name"] = "bogus"
+    with pytest.raises(ProtocolError):
+        world_params(tiny_cfg, 1.0)
+
+
+def test_k_knob_changes_the_arm_count_of_world_and_agents(tiny_cfg):
+    tiny_cfg["knob"] = {"name": "k", "familiar": 3, "sweep": [2, 3, 6]}
+    tiny_cfg["jump_rate"] = 0.01
+    for agent in ("kairi", "kaiser"):
+        fn = make_per_seed_fn(tiny_cfg, build_factories(tiny_cfg)[agent])
+        params = {"epsilon": 0.1, "alpha": 0.3} if agent == "kairi" else {"gamma": 0.95, "c": 1.0}
+        for k in (2.0, 6.0):
+            out = fn(np.array([100, 101]), k, params, 0)
+            assert out.shape == (2,) and np.isfinite(out).all()
+
+
+def test_sigma_knob_end_to_end(tiny_cfg, tmp_path):
+    tiny_cfg["knob"] = {"name": "sigma", "familiar": 1.0, "sweep": [0.5, 1.0, 2.0]}
+    tiny_cfg["jump_rate"] = 0.01
+    run_phase(tiny_cfg, tmp_path)
+    df = load_results(tmp_path, "bandit")
+    assert set(df["knob"]) == {0.5, 1.0, 2.0}

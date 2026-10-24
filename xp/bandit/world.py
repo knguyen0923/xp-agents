@@ -11,9 +11,11 @@ class World:
     noise: np.ndarray  # (n, T) reward noise (already scaled by sigma)
 
 
-def make_world(seeds, lam: float, horizon: int, k: int, sigma: float) -> World:
+def make_world(seeds, lam: float, horizon: int, k: int, sigma: float, drift: float = 0.0) -> World:
     """Pre-generate one realization per seed. Draw order is fixed and independent
-    of `lam`, so the same seed gives the same noise and coupled jump times."""
+    of `lam`, so the same seed gives the same noise and coupled jump times.
+    `drift` adds a per-arm Gaussian random walk (std `drift` per step, starting after step 0) to the means; its draws come
+    last and only when drift > 0, so worlds without drift are unchanged."""
     seeds = np.asarray(seeds)
     n = len(seeds)
     means = np.empty((n, horizon, k))
@@ -29,6 +31,10 @@ def make_world(seeds, lam: float, horizon: int, k: int, sigma: float) -> World:
         idx = np.maximum.accumulate(np.where(jump, steps, 0))
         source = np.vstack([m0[None, :], new_means])
         means[i] = source[idx]
+        if drift > 0:
+            steps_walk = drift * rng.normal(size=(horizon, k))
+            steps_walk[0] = 0.0
+            means[i] += np.cumsum(steps_walk, axis=0)
     return World(means=means, noise=noise)
 
 
