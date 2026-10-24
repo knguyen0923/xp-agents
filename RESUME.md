@@ -6,8 +6,11 @@ Phase 1 extra shifts DONE (reversed, sigma, k, drift; docs/FINDINGS.md, figs/shi
 Polish DONE (user chose to go straight to it, 2026-10-24): CI exists and is green on Python 3.9 and 3.12; README has a Summary and figures; short write-up `docs/WRITEUP.md`; MiniGrid robustness figure `figs/minigrid_robustness.png`.
 Ablations DONE (2026-10-24, user asked for both optional steps): retuning both agents at k=50 / drift 0.1 reverses both Kairi wins (Kaiser wins by 0.086 and 0.168); regret trace at k=50 refutes the early-exploration-cost explanation. See docs/FINDINGS.md "Ablations", figs/ablations/. Result: the Kairi wins are Kaiser's frozen-tuning brittleness.
 Step B CLOSED as a documented spike (user chose option 1 after the 28-run MultiRoom spike): RND never helped (docs/FINDINGS.md "Step B spike", docs/spikes/multiroom_spike.csv, scripts/spikes/). No environment code was added.
-Nothing is in flight. Optional only if the user asks: a tuned, larger-budget RND probe at 4 rooms with size <= 4 (cheapest test of whether RND can help at all); deep-RL retuning check.
-Known nit: CI actions warn about Node 20 deprecation (bump `actions/checkout`/`setup-python` majors). Local commits after 0a12a29 are not pushed.
+**In flight (started 2026-10-24 17:19, ~4.5 h estimate):** the RND probe, `python scripts/spikes/multiroom_probe.py results/spike-multiroom/probe` (log `results/spike-multiroom/probe.log`).
+4 rooms, max room size 4, 5M steps, plain PPO vs PPO+RND at coef 0.01/0.03/0.1, seeds 0-4 (20 runs). Resumable: rerun the same command if it died (finished jobs are cached as JSON).
+When done: summarise into `docs/spikes/` (CSV like multiroom_spike.csv), add a short FINDINGS/README note (does a bigger budget or higher coef give RND any benefit?), commit. Do not push without the user's yes.
+Not started (needs a design discussion first): deep-RL retuning check (does frozen-tuning brittleness show up in PPO?).
+CI is green on v7 actions (pushed 6e34492); origin/main is up to date through 6e34492.
 Nothing from this session is pushed (needs the user's yes).
 
 ## Agreed direction (brainstorm, 2026-10-24)
