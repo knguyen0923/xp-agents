@@ -38,17 +38,22 @@ def make_world(seeds, lam: float, horizon: int, k: int, sigma: float, drift: flo
     return World(means=means, noise=noise)
 
 
-def run_agent(agent, world: World) -> np.ndarray:
-    """Run `agent` on `world`; return mean per-step dynamic regret per seed."""
+def run_agent_trace(agent, world: World) -> np.ndarray:
+    """Run `agent` on `world`; return the per-step dynamic regret, shape (n, horizon)."""
     n, horizon, _ = world.means.shape
     rows = np.arange(n)
     best = world.means.max(axis=2)
-    total = np.zeros(n)
+    trace = np.zeros((n, horizon))
     agent.reset(n)
     for t in range(horizon):
         actions = agent.select(t)
         mu = world.means[rows, t, actions]
         rewards = mu + world.noise[:, t]
-        total += best[:, t] - mu
+        trace[:, t] = best[:, t] - mu
         agent.update(t, actions, rewards)
-    return total / horizon
+    return trace
+
+
+def run_agent(agent, world: World) -> np.ndarray:
+    """Run `agent` on `world`; return mean per-step dynamic regret per seed."""
+    return run_agent_trace(agent, world).mean(axis=1)

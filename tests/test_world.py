@@ -98,3 +98,13 @@ def test_drift_is_deterministic_independent_of_batching():
     a = make_world(np.array([3, 4, 5]), 0.0, 50, 3, 1.0, drift=0.1)
     b = make_world(np.array([4]), 0.0, 50, 3, 1.0, drift=0.1)
     assert np.array_equal(a.means[1], b.means[0])
+
+
+def test_trace_matches_run_agent_and_is_per_step():
+    from xp.bandit.agents import KairiAgent
+    from xp.bandit.world import run_agent_trace
+
+    w = make_world(np.arange(6), 0.02, 80, 4, 1.0)
+    trace = run_agent_trace(KairiAgent(4, 0.1, 0.3, 5), w)
+    assert trace.shape == (6, 80) and (trace >= 0).all()
+    assert np.allclose(trace.mean(axis=1), run_agent(KairiAgent(4, 0.1, 0.3, 5), w))

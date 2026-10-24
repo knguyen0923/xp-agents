@@ -1,0 +1,52 @@
+phase: bandit
+k: 10
+sigma: 1.0
+horizon: 2000
+jump_rate: 0.001
+knob:
+  name: k
+  familiar: 50
+  sweep: [2, 5, 10, 20, 50]
+seeds:
+  tune: [0, 500]
+  eval: [10000, 11000]
+  chunk: 250
+  agent_seed: 777
+agents:
+  kairi:
+    grid:
+      epsilon: [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+      alpha: [0.02, 0.05, 0.1, 0.2, 0.4, 0.7, 1.0]
+    natural_limits:
+      alpha: [null, 1.0]
+  kaiser:
+    grid:
+      gamma: [0.9, 0.95, 0.98, 0.99, 0.995, 0.999, 1.0]
+      c: [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+    natural_limits:
+      gamma: [null, 1.0]
+tagteam:
+  fixed:
+    block: 50
+  triggered:
+    grid:
+      delta: [0.0, 0.1, 0.2, 0.4, 0.8]
+      h: [0.0, 1.0, 2.0, 4.0, 8.0]
+      window: [1, 2, 5, 10, 25, 100, 2000]
+    natural_limits:
+      delta: [0.0, null]
+      h: [0.0, null]
+      window: [1, 2000]
+  meta:
+    block: 50
+    grid:
+      gamma: [0.5, 0.65, 0.8, 0.9, 0.95, 0.99, 1.0]
+      c: [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+    natural_limits:
+      gamma: [null, 1.0]
+      c: [0.0, null]
+report:
+  metric: regret
+  lower_is_better: true
+  xlabel: number of arms k (dashed line = familiar)
+  title: Regret vs number of arms
