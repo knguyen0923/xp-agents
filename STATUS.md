@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: d6c14f3 -->
+<!-- STATUS_COMMIT: 9a4a91d -->
 
 ## Current state
 
@@ -31,4 +31,4 @@ progress," read it first.
 
 ## Last updated
 
-2026-10-23 (commit d6c14f3)
+2026-10-23 (commit 9a4a91d)
