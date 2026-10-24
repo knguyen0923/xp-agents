@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 111ae8a -->
+<!-- STATUS_COMMIT: 95549af -->
 
 ## Current state
 
@@ -31,8 +31,9 @@ progress," read it first.
 
 - Conclusions and analysis are written up in `docs/FINDINGS.md` (update it as new results land).
 - **MiniGrid is closed** (user decision, 2026-10-24): Kaiser shows no measurable RND benefit on DoorKey; matched-entropy Kaiser ties Kairi at every size (n=10). Step A (30-seed rerun) is shelved.
-- **Next:** see RESUME.md. Cheap Phase 1 shifts (reward noise, arm count, slow drift, reversed tuning) -> exploration-world spike -> polish.
+- Phase 1 extra shifts DONE (reversed tuning, sigma, k, drift; `configs/bandit-*.yaml`, `figs/shifts/`, `docs/FINDINGS.md`): Kaiser robust to reversed tuning and noise; Kairi wins at k=50 and drift 0.1. 136 tests pass.
+- **Next:** see RESUME.md. Exploration-world spike (step B) -> polish.
 
 ## Last updated
 
-2026-10-24 (commit 111ae8a)
+2026-10-24 (commit 95549af)
