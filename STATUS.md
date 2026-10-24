@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 354f9ee -->
+<!-- STATUS_COMMIT: 98fffa6 -->
 
 ## Current state
 
@@ -29,8 +29,8 @@ progress," read it first.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), default branch `main`.
   `origin/main` includes the requirements fix (`0734460`); `c1b33f4` is on `origin/main`; the `feat/phase2-minigrid` branch is local only (push needs the user's yes).
 
-- **Next:** see RESUME.md. Agreed plan: entropy check (Kaiser at Kairi's entropy) -> make Phase 2 conclusive -> cheap Phase 1 shifts -> exploration-world spike -> polish. The entropy-check design awaits the user's go-ahead.
+- **Next:** see RESUME.md. Agreed plan: entropy check (Kaiser at Kairi's entropy) -> make Phase 2 conclusive -> cheap Phase 1 shifts -> exploration-world spike -> polish. The entropy check was approved and is running in the background (`scripts/entropy_fair.py`, `configs/minigrid-entfair.yaml`, committed e074ecc, local only; output `results/ent-fair/`); see RESUME.md.
 
 ## Last updated
 
-2026-10-24 (commit 354f9ee)
+2026-10-24 (commit 98fffa6)
