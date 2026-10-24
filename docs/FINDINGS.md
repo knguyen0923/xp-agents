@@ -89,12 +89,34 @@ Evidence chain, in the order we learned it:
   seed-dependent; test layouts at sizes 5/6 are held-out seeds, not necessarily unseen layouts; size 12 is at the floor zero-shot; the entropy check is post-hoc,
   outside the protocol (the tuned result stays the headline).
 
+## Step B spike: exploration-heavy MiniGrid (MultiRoom), CLOSED 2026-10-24
+Question: does the RND bonus pay off where exploration is the bottleneck? We ran a throwaway feasibility spike instead of a full protocol sweep: plain PPO vs PPO+RND, 2 seeds per cell, 2M steps, `Learner` unchanged
+with the environment factory swapped to MultiRoom (`scripts/spikes/`, table in `docs/spikes/multiroom_spike.csv`; outside the protocol, no tuning). Test success after training (steps to 95% training success):
+
+| setting | plain PPO | PPO+RND |
+|---|---|---|
+| 2 rooms, size ≤ 6 | 1.00, 1.00 (184k, 184k) | 1.00, 1.00 (195k, 328k), coef 0.003 |
+| 3 rooms, size ≤ 6 | 0.00, 0.01 | 0.00, 0.00, coef 0.003 |
+| 4 rooms, size ≤ 6 | 0.00, 0.00 | 0.00, 0.00, coef 0.003 |
+| 3 rooms, size ≤ 4 | 1.00, 1.00 (195k, 461k) | 1.00, 1.00 (287k, 614k), coef 0.03 |
+| 4 rooms, size ≤ 4 | 0.00, 1.00 (1.77M) | 0.00, 0.00, coef 0.03 |
+| 2 rooms, size ≤ 8 | 1.00, 1.00 (297k, 696k) | 1.00, 0.99 (328k, 881k), coef 0.03 |
+| 2 rooms, size ≤ 10 | 0.99, 1.00 (369k, 512k) | 0.99, 0.99 (1.12M, 881k), coef 0.03 |
+
+- **RND gave no benefit anywhere**: in all 8 seed-matched pairs where both agents solved the level it needed more steps to reach 95%, it never solved a level plain PPO failed, and runs took about 1.2 to 1.8x as long. At the one borderline
+  level (4 rooms, size ≤ 4) plain PPO solved 1 of 2 seeds and RND 0 of 2; with 2 seeds this is not evidence that RND is worse.
+- **Difficulty axis:** room count with small rooms is the usable axis (3 rooms solved, 4 rooms borderline, probably the floor at 5); with size-6 rooms the wall is already at 3 rooms; bigger rooms at 2 rooms only slow PPO mildly.
+- **Consistent with Phase 2:** the bonus gave no measurable benefit on DoorKey either. Together this is evidence for "no RND benefit in sparse-reward MiniGrid at a 2M-step PPO budget".
+- **Why we stopped:** a full sweep (environment code, spec, tuned RND coefficient, 10+ seeds, roughly 6 to 10 hours) would most likely add another tie with the top level at the floor. User decision: close as a documented spike.
+- **Caveats:** 2 seeds per cell, one fixed untuned RND coefficient per setting (0.003 or 0.03), a 2M-step cap (published RND wins on MultiRoom use far larger budgets), one PPO configuration. This does not show that RND cannot help; a larger budget or a tuned
+  coefficient at the 4-small-room level is the cheapest probe if someone reopens it (option "targeted probe" in the step B discussion).
+
 ## Cross-phase picture ("where each agent loses")
 - Kaiser's exploration term pays off in the nonstationary bandit near and moderately beyond the tuned conditions (jumps, noise, drift up to ~2x), and showed no measurable
   benefit in the stationary-but-sparse MiniGrid DoorKey family.
 - **Kairi wins only when frozen agents face a world far from the tuned point (5x more arms, 10x faster drift), and the ablations show this is tuning brittleness, not a cost of exploration:** retuned for the
   shifted world, Kaiser wins at both points. So the defensible map is "Kaiser's tuned settings break under large shifts; its approach does not", plus MiniGrid where RND gives no measurable benefit.
-- Open: does RND pay off in a world where exploration is the bottleneck (step B), and is the frozen-tuning brittleness also visible in deep RL?
+- Open: the frozen-tuning brittleness has not been tested in deep RL, and RND has not been tested at larger budgets or with a tuned coefficient (the step B spike found no benefit at 2M steps).
 
 ## Methodological lessons (worth carrying forward)
 - Give both agents equal treatment on every non-tuned hyperparameter, or tune it for both (entropy was fixed for one and tuned for the other).
@@ -103,4 +125,4 @@ Evidence chain, in the order we learned it:
 - Seed-level failures (one outright failure in 10) move means a lot; always report them with the CI.
 
 ## Next
-Step B (exploration-heavy world) is the one open item.
+Nothing required; step B was closed as a documented spike.

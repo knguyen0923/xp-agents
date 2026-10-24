@@ -143,6 +143,12 @@ hurts. It is not evidence that RND helps either; n = 10 and the size 8/12 interv
 
 The tuned-only figure from the protocol report is `figs/degradation.png`; the figure above adds the matched-entropy Kaiser (`scripts/plot_minigrid_robustness.py`).
 
+### Exploration-heavy spike (MultiRoom, post-hoc, outside the protocol)
+
+To check whether RND helps where exploration is the bottleneck, we ran 28 short runs (2 seeds, 2M steps; `scripts/spikes/`, `docs/spikes/multiroom_spike.csv`) of plain PPO and PPO+RND on MultiRoom with 2 to 4 rooms and several room sizes.
+RND was never faster (8 of 8 seed-matched pairs where both solved the level), never solved a level plain PPO failed, and cost about 1.2 to 1.8x the time; at the one borderline level (4 rooms of size ≤ 4) plain PPO solved 1 of 2 seeds and RND 0 of 2.
+Few seeds, untuned RND coefficient, 2M-step cap: evidence for "no benefit at this scale", not for "RND cannot help". Details in `docs/FINDINGS.md`.
+
 ## Limitations
 
 - Phase 1: the `tt_*` agents go beyond the original two-agent design; Kaiser and `tt_triggered` tie at low λ.
@@ -163,12 +169,12 @@ The tuned-only figure from the protocol report is `figs/degradation.png`; the fi
   either robustness check: Kaiser at a different tied `rnd_coef`, or at Kairi's entropy coefficient, is statistically indistinguishable from Kairi at every size (10 seeds).
   The supported conclusion is "no measurable RND benefit on DoorKey", not "RND hurts". RND adds per-step cost (Kaiser seed jobs took ~2.5x as long). A plausible but
   untested reason for no benefit: extrinsic reward is reachable with plain exploration. The agents break down together as size grows (size 12 near the floor).
-  MiniGrid is closed here; a 30-seed rerun with matched entropy was planned and shelved (`docs/superpowers/plans/2026-10-24-phase2-step-a.md`).
+  MiniGrid is closed here (the exploration-heavy MultiRoom spike below also found no RND benefit); a 30-seed rerun with matched entropy was planned and shelved (`docs/superpowers/plans/2026-10-24-phase2-step-a.md`).
 - So the exploration bonus helps in the nonstationary bandit; Kaiser's frozen tuned settings break down far from the tuned point (many arms, fast drift) but not once retuned there; and it does not help in this sparse-but-learnable MiniGrid family.
 
 ## Future work
 
-Crafter, Showdown, and a deep-RL tag-team agent.
+Crafter, Showdown, a tuned larger-budget RND probe on MultiRoom, and a deep-RL tag-team agent.
 
 ## Reproducing
 

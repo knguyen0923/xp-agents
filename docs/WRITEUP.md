@@ -19,7 +19,7 @@ two help mainly where the single agents fail; `tt_meta` is the most reliable.
 
 **MiniGrid DoorKey (tuned on 6x6, tested at 5, 6, 8, 12, 10 seeds).** With tuned settings Kairi is at or above Kaiser everywhere, and the gap excludes 0 at sizes 8 and 12. That gap is not robust:
 Kaiser at a different tuning-tied RND coefficient, or at Kairi's entropy coefficient, is statistically indistinguishable from Kairi at every size. The supported conclusion is no measurable benefit
-from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two of three RND settings, so seed-level failures matter.
+from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two of three RND settings, so seed-level failures matter. A post-hoc MultiRoom spike (28 runs, 2 seeds, 2M steps) on an exploration-heavy family found no RND benefit either: it was slower in all 8 seed-matched pairs and never solved a level plain PPO failed.
 
 ## Map: where each agent wins and breaks
 | regime | winner |
@@ -28,11 +28,12 @@ from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two o
 | bandit, 50 arms (5x tuned), drift 0.1 (10x tuned), settings frozen | Kairi |
 | same two points with both agents retuned there (post-hoc) | Kaiser |
 | MiniGrid DoorKey 5 to 12 | tie (RND no measurable benefit) |
+| MiniGrid MultiRoom spike (2 seeds, 2M steps) | PPO no worse; RND never helped |
 
 ## Limitations
 One bandit family and horizon; agents are frozen after tuning once (no per-shift retuning); no multiplicity correction across knob values; the ablations that explain the Kairi wins are post-hoc, cover only those two shifts, and use oracle retuning the protocol does not allow. MiniGrid: one familiar size, a 2M-step budget that missed the 80% calibration target, 10 eval seeds, and Kaiser's entropy
 coefficient was fixed (not tuned) in the main run, which the matched-entropy check addresses post-hoc. See `docs/FINDINGS.md`.
 
 ## Future work
-A harder-exploration world where exploration is the bottleneck (to test whether RND pays off there) and a deep-RL tag-team agent. Crafter and Showdown
+A tuned, larger-budget RND probe on MultiRoom (the cheapest test of whether RND can help at all) and a deep-RL tag-team agent. Crafter and Showdown
 remain out of scope.
