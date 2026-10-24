@@ -46,20 +46,42 @@ PPO (Kairi) vs PPO + RND bonus (Kaiser). Tuned on size 6; evaluated zero-shot at
 
 ### Results
 
-<!-- TODO: fill from the Phase 2 run (plan Task 9 Step 6) -->
+Tuned on size 6 (3 tune seeds): Kairi `ent_coef` = 0.03, Kaiser `rnd_coef` = 0.001; both interior optima
+(not provisional). Budget S = 2M steps (the cap; calibration did not reach the 80% target, mean success ~0.67).
+10 eval seeds per agent, 200 held-out layouts per size.
+
+| size | Kairi | Kaiser | Kairi − Kaiser (95% CI) |
+|---|---|---|---|
+| 5 | 1.000 | 0.904 [0.71, 1.00] | 0.096 [0.00, 0.29] (tie) |
+| 6 (familiar) | 1.000 | 0.900 [0.70, 1.00] | 0.100 [0.00, 0.30] (tie) |
+| 8 | 0.640 [0.57, 0.71] | 0.496 [0.37, 0.58] | 0.143 [0.02, 0.29] (Kairi) |
+| 12 | 0.083 [0.05, 0.12] | 0.038 [0.03, 0.05] | 0.046 [0.01, 0.08] (Kairi) |
+
+- **The curves do not cross.** Kairi is at or above Kaiser at every size; the difference excludes 0 at sizes 8 and 12.
+- **Few-shot (200k steps):** size 8, Kairi 1.00 vs Kaiser 0.90 [0.70, 1.00]; size 12, Kairi 0.72 [0.44, 0.97] vs
+  Kaiser 0.50 [0.22, 0.78]. CIs overlap; no winner is claimed.
+- **Sample efficiency (steps to 80% at size 6):** Kairi 279k [230k, 328k], Kaiser 543k [271k, 929k]. Suggestive only;
+  intervals overlap and runs that never reach 80% are censored.
+- Kaiser's 0.90 at sizes 5/6 is consistent with one of ten seeds failing outright (success is near all-or-nothing per seed).
+
+Figure: `figs/degradation.png`.
 
 ## Limitations
 
 - Phase 1: the `tt_*` agents go beyond the original two-agent design; Kaiser and `tt_triggered` tie at low λ.
 - Phase 1 numbers were produced on Colab (Python 3.13); cross-numpy-version agreement is untested.
-- Phase 2: one familiar size; one seed pool; PPO hyperparameters are not tuned beyond one coefficient
+- Phase 2: the calibrated budget is the 2M cap and the 80% calibration target was not reached; one familiar size; one seed pool; PPO hyperparameters are not tuned beyond one coefficient
   per agent; PPO on DoorKey-6 is very seed-dependent, so CIs are wide.
 - Phase 2: test layouts at sizes 5 and 6 are held-out seeds, not unseen layouts; size 12 is at the
   floor for zero-shot.
 
 ## Where each agent loses
 
-<!-- TODO: write after both phases' results are final -->
+- **Bandit (Phase 1):** Kairi (epsilon-greedy) is never the best single agent; Kaiser's discounted UCB wins at every jump rate.
+  The only regime where something beats Kaiser is `tt_fixed` at high lambda (>= 0.01).
+- **MiniGrid (Phase 2):** Kaiser (PPO + RND) never beats plain PPO. It ties at sizes 5 and 6 and loses at 8 and 12, with
+  RND adding per-step cost (Kaiser seed jobs took ~2.5x as long). The RND bonus gave no benefit on DoorKey (a plausible but untested reason: extrinsic reward is reachable with plain exploration); the agents break down together as size grows (size 12 near the floor).
+- So the exploration bonus helps in the nonstationary bandit and not in this sparse-but-learnable MiniGrid family.
 
 ## Future work
 
