@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 839045d -->
+<!-- STATUS_COMMIT: 60814ba -->
 
 ## Current state
 
@@ -34,8 +34,9 @@ progress," read it first.
 - Phase 1 extra shifts DONE (reversed tuning, sigma, k, drift; `configs/bandit-*.yaml`, `figs/shifts/`, `docs/FINDINGS.md`): Kaiser robust to reversed tuning and noise; Kairi wins at k=50 and drift 0.1. 136 tests pass.
 - Polish DONE: CI green (Python 3.9, 3.12), README Summary and figures, `docs/WRITEUP.md`, `figs/minigrid_robustness.png`.
 - Ablations DONE: retuning at the shifted point reverses both bandit Kairi wins (frozen-tuning brittleness, not exploration cost); `docs/FINDINGS.md`, `figs/ablations/`.
-- **Next:** step B (exploration-heavy world) is open, in design with the user; see RESUME.md. Local commits after 0a12a29 are unpushed.
+- Step B CLOSED as a documented MultiRoom spike (28 runs, 2 seeds): RND never helped; `docs/FINDINGS.md`, `docs/spikes/multiroom_spike.csv`, `scripts/spikes/`.
+- **Next:** nothing required. Optional: tuned larger-budget RND probe at 4 rooms size <= 4. Local commits after 0a12a29 are unpushed; see RESUME.md.
 
 ## Last updated
 
-2026-10-24 (commit 839045d)
+2026-10-24 (commit 60814ba)
