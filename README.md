@@ -102,8 +102,9 @@ Tuned on size 6 (3 tune seeds): Kairi `ent_coef` = 0.03, Kaiser `rnd_coef` = 0.0
 | 12 | 0.083 [0.05, 0.12] | 0.038 [0.03, 0.05] | 0.046 [0.01, 0.08] (Kairi) |
 
 - **The curves do not cross.** Kairi is at or above Kaiser at every size; with the tuned settings the difference excludes 0 at sizes 8 and 12 (but see the tie-sensitivity check below).
-- **Few-shot (200k steps):** size 8, Kairi 1.00 vs Kaiser 0.90 [0.70, 1.00]; size 12, Kairi 0.72 [0.44, 0.97] vs
-  Kaiser 0.50 [0.22, 0.78]. CIs overlap; no winner is claimed.
+- **Few-shot (200k steps):** size 8, Kairi 1.00 vs Kaiser 0.90 [0.70, 1.00] (paired diff 0.100 [−0.002, 0.300], tie); size 12, Kairi 0.72 [0.44, 0.97] vs
+  Kaiser 0.50 [0.23, 0.78] (paired diff 0.215 [0.017, 0.463], Kairi). The size 12 win is not robust: across Kaiser's tuning-tied `rnd_coef` values its few-shot success at size 12 ranges 0.25 to 0.72, and with matched entropy
+  it ties (0.73; paired diff −0.016 [−0.085, 0.060]). See "Few-shot across variants" in `docs/FINDINGS.md` (`scripts/fewshot_compare.py`).
 - **Sample efficiency (steps to 80% at size 6):** mean Kairi 279k [230k, 328k], Kaiser 543k [271k, 929k], but the Kaiser
   mean is inflated by one censored seed (seed 101 never reached 80% and enters at the 2M cap). Medians are about equal
   (Kairi 261k, Kaiser 246k); seven of ten Kaiser seeds reach 80% by 460k steps. No efficiency difference is claimed.

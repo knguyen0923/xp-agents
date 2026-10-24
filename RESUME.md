@@ -9,7 +9,7 @@ Step B CLOSED as a documented spike (user chose option 1 after the 28-run MultiR
 **In flight (started 2026-10-24 17:19, ~4.5 h estimate):** the RND probe, `python scripts/spikes/multiroom_probe.py results/spike-multiroom/probe` (log `results/spike-multiroom/probe.log`).
 4 rooms, max room size 4, 5M steps, plain PPO vs PPO+RND at coef 0.01/0.03/0.1, seeds 0-4 (20 runs). Resumable: rerun the same command if it died (finished jobs are cached as JSON).
 When done: summarise into `docs/spikes/` (CSV like multiroom_spike.csv), add a short FINDINGS/README note (does a bigger budget or higher coef give RND any benefit?), commit. Do not push without the user's yes.
-Not started (needs a design discussion first): deep-RL retuning check (does frozen-tuning brittleness show up in PPO?).
+Deep-RL check: user chose the cheap option; few-shot re-analysis DONE (docs/FINDINGS.md "Few-shot across variants", scripts/fewshot_compare.py, docs/spikes/fewshot_pairs.csv). Full size-8 retune (config-only, ~8-10 h) was judged low value and not run.
 CI is green on v7 actions (pushed 6e34492); origin/main is up to date through 6e34492.
 Nothing from this session is pushed (needs the user's yes).
 

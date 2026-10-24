@@ -89,6 +89,17 @@ Evidence chain, in the order we learned it:
   seed-dependent; test layouts at sizes 5/6 are held-out seeds, not necessarily unseen layouts; size 12 is at the floor zero-shot; the entropy check is post-hoc,
   outside the protocol (the tuned result stays the headline).
 
+## Few-shot across variants (post-hoc re-analysis of existing runs, no new training; `scripts/fewshot_compare.py`, `docs/spikes/fewshot_pairs.csv`)
+This is the deep-RL analog of the bandit "frozen hyperparameters" setting: hyperparameters tuned at size 6 are frozen and the agent adapts online for 200k steps at size 8 or 12 (10 seeds).
+Few-shot success at size 12 (95% CI): Kairi 0.72 [0.44, 0.97] (`ent_coef` 0.03) and 0.62 [0.40, 0.82] (0.1); Kaiser 0.50 [0.23, 0.78] (tuned `rnd_coef` 0.001, ent 0.01), 0.25 [0.05, 0.49] (0.003), 0.72 [0.43, 0.97] (0.01), 0.73 [0.46, 1.00]
+(matched entropy: `rnd_coef` 0.01, ent 0.03). At size 8 everything except the tuned and 0.003 Kaiser variants is at about 1.00.
+Paired Kairi − Kaiser at size 12 against Kairi's tuned run: 0.215 [0.016, 0.465] (tuned Kaiser; excludes 0), 0.468 [0.160, 0.764] (`rnd_coef` 0.003; excludes 0), 0.000 [−0.423, 0.416] (0.01), −0.016 [−0.085, 0.060] (matched entropy).
+- **Corrected a README sentence:** it said the few-shot CIs overlap and no winner is claimed, but the project's rule is the paired CI, which at size 12 excludes 0 for the tuned Kaiser (the protocol's `crossovers__success_fewshot.csv` already said "kairi").
+  The README now reports the paired result.
+- **A hint of the bandit pattern in deep RL, not established:** Kaiser's few-shot score at size 12 swings from 0.25 to 0.73 across three `rnd_coef` values (and the AUC tie-break picked a middling one), while Kairi's moved 0.62 to 0.72 across its two tied `ent_coef` values.
+  So Kaiser's few-shot result depends more on which tied setting is chosen, consistent with "Kaiser's tuned settings are more brittle". With matched entropy and `rnd_coef` 0.01 the difference vanishes.
+- **Caveats:** 10 seeds, wide CIs (size 12 CIs are 0.3 to 0.5 wide), Kairi has only two variants, the variants differ in two coefficients at once in the matched run, and the `rnd_coef` swings may be seed noise (a single failing seed moves the size-12 mean by 0.1). A full retune at size 8 (config-only, about 8 to 10 hours) would be the direct test; we judged it low value.
+
 ## Step B spike: exploration-heavy MiniGrid (MultiRoom), CLOSED 2026-10-24
 Question: does the RND bonus pay off where exploration is the bottleneck? We ran a throwaway feasibility spike instead of a full protocol sweep: plain PPO vs PPO+RND, 2 seeds per cell, 2M steps, `Learner` unchanged
 with the environment factory swapped to MultiRoom (`scripts/spikes/`, table in `docs/spikes/multiroom_spike.csv`; outside the protocol, no tuning). Test success after training (steps to 95% training success):
