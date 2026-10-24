@@ -99,7 +99,8 @@ Figure: `figs/degradation.png`.
 ## Limitations
 
 - Phase 1: the `tt_*` agents go beyond the original two-agent design; Kaiser and `tt_triggered` tie at low λ.
-- Phase 1 numbers were produced on Colab (Python 3.13); cross-numpy-version agreement is untested.
+- Phase 1 was run on Colab (Python 3.13) and rerun locally (Python 3.9.6, numpy 2.0.2): the `gaps.csv` and `crossovers.csv` tables agree to
+  within the 4-decimal rounding of the Colab output (max difference 5e-05), so the results do not depend on the numpy/Python version.
 - Phase 2: the calibrated budget is the 2M cap and the 80% calibration target was not reached; one familiar size; one seed pool; PPO hyperparameters are not tuned beyond one coefficient
   per agent; PPO on DoorKey-6 is very seed-dependent, so CIs are wide.
 - Phase 2: the tuned-setting advantage of Kairi at sizes 8 and 12 is sensitive to which tied `rnd_coef` the AUC tie-break picks (see above); 10 eval seeds only.
