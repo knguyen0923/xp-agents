@@ -30,3 +30,12 @@ def test_nan_success_counts_as_zero():
 def test_mismatched_log_steps_are_rejected():
     with pytest.raises(ValueError):
         suggest_budget([_curve([0.0, 1.0]), _curve([0.0, 1.0, 1.0])], target=0.8, cap=5000)
+
+
+def test_json_output_has_no_nan_tokens():
+    import json
+
+    from xp.minigrid.calibrate import _json_safe
+
+    text = json.dumps(_json_safe({"curves": [[{"success_100": math.nan}, {"success_100": 0.5}]]}), allow_nan=False)
+    assert "NaN" not in text and json.loads(text)["curves"][0][0]["success_100"] is None

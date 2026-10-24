@@ -41,6 +41,9 @@ def eval_layout_seeds(n: int, base: int = TEST_LAYOUT_BASE) -> list:
     return [base + i for i in range(n)]
 
 
+STATS_WINDOW = 100  # finished episodes behind `success_100` / `recent_stats`
+
+
 class VecEnv:
     """Synchronous vector env. Every episode (including after auto-reset) gets an explicit training layout seed."""
 
@@ -74,7 +77,10 @@ class VecEnv:
             self.obs[i] = o
         return self.obs.copy(), rews, dones
 
-    def recent_stats(self, k: int = 100):
+    def recent_window_full(self, k: int = STATS_WINDOW) -> bool:
+        return len(self.recent) >= k
+
+    def recent_stats(self, k: int = STATS_WINDOW):
         window = self.recent[-k:]
         if not window:
             return float("nan"), float("nan")

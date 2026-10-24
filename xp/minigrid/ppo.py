@@ -169,6 +169,6 @@ class Learner:
                 succ, ret = env.recent_stats()
                 done_steps = (u + 1) * batch
                 curve.append({"steps": done_steps, "success_100": succ, "return_100": ret})
-                if steps_to_target is None and succ == succ and succ >= target:
+                if steps_to_target is None and env.recent_window_full() and succ >= target:  # a partial window can be lucky
                     steps_to_target = done_steps
         return {"curve": curve, "steps_to_target": steps_to_target, "steps": updates * batch}

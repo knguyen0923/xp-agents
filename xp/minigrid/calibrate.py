@@ -27,6 +27,17 @@ def suggest_budget(curves: List[List[dict]], target: float, cap: int) -> dict:
             "log_steps": steps}
 
 
+def _json_safe(obj):
+    """Recursively replace NaN floats with None so the file is strict JSON."""
+    if isinstance(obj, float) and obj != obj:
+        return None
+    if isinstance(obj, dict):
+        return {k: _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_json_safe(v) for v in obj]
+    return obj
+
+
 def calibration_run(cfg: dict, seed: int) -> list:
     """Default-entropy Kairi on one tune seed for the whole cap; returns its training-success curve."""
     torch.set_num_threads(1)
@@ -48,7 +59,7 @@ def main(argv=None) -> None:
     curves = _run_jobs(calibration_run, [(cfg, s) for s in phase.tune_seeds], args.workers)
     suggestion = suggest_budget(curves, cfg["budget"]["target_success"], cfg["budget"]["cap"])
     with open(args.out, "w") as f:
-        json.dump({"suggestion": suggestion, "curves": curves}, f, indent=2)
+        json.dump(_json_safe({"suggestion": suggestion, "curves": curves}), f, indent=2, allow_nan=False)
     state = "reached" if suggestion["reached"] else "NOT reached; using the cap"
     print(f"suggested budget S = {suggestion['steps']} steps ({cfg['budget']['target_success']:.0%} target {state}); set budget.steps in the config")
 

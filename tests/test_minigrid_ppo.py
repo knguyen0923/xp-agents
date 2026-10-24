@@ -76,3 +76,9 @@ def test_intrinsic_returns_stay_small():
     naive = (raw / raw.std()).astype(np.float32)
     assert _max_discounted_return(scaled) < 20.0
     assert _max_discounted_return(naive) > 1000.0
+
+
+def test_steps_to_target_needs_a_full_episode_window():
+    learner = Learner(PPO, 0.01, None, seed=3)
+    out = learner.train(5, 1024, target=0.0)  # some episodes finish (<100); target 0 trips on any non-empty window
+    assert out["steps_to_target"] is None

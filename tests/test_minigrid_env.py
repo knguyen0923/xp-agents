@@ -51,3 +51,11 @@ def test_vecenv_raises_when_its_layout_stream_runs_out():
     with pytest.raises(ProtocolError):
         for _ in range(600):
             env.step(np.zeros(2, dtype=int))
+
+
+def test_recent_window_full_needs_k_finished_episodes():
+    env = VecEnv(5, 2, seed=0)
+    env.recent = [(1.0, 1.0)] * 99
+    assert not env.recent_window_full()
+    env.recent.append((1.0, 1.0))
+    assert env.recent_window_full()
