@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 94e1b68 -->
+<!-- STATUS_COMMIT: 1d56820 -->
 
 ## Current state
 
@@ -37,8 +37,9 @@ progress," read it first.
 - Step B CLOSED as a documented MultiRoom spike (28 runs, 2 seeds): RND never helped; `docs/FINDINGS.md`, `docs/spikes/multiroom_spike.csv`, `scripts/spikes/`.
 - Pushed through 6e34492; CI green on `actions/checkout@v7` / `setup-python@v7` (Node 20 warning gone). The RND probe commit and this refresh are local.
 - **In flight:** RND probe (4 rooms, size <= 4, 5M steps, PPO vs PPO+RND coef 0.01/0.03/0.1, 5 seeds), started 17:19 on 2026-10-24; see RESUME.md for the resume command and what to do when it finishes.
-- **Next:** summarise the probe into FINDINGS/README; deep-RL retuning check is unstarted and needs a design discussion.
+- Deep-RL check done the cheap way: few-shot paired re-analysis across all variants (`docs/FINDINGS.md`, `scripts/fewshot_compare.py`, `docs/spikes/fewshot_pairs.csv`); README few-shot sentence corrected (paired CI at size 12 favours Kairi for the tuned Kaiser, not robust; ties at matched entropy). Full size-8 retune not run.
+- **Next:** summarise the RND probe when it finishes (see RESUME.md).
 
 ## Last updated
 
-2026-10-24 (commit 94e1b68)
+2026-10-24 (commit 1d56820)
