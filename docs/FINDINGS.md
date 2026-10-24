@@ -8,7 +8,7 @@ When does an explicit uncertainty-driven exploration term (Kaiser) beat the same
 conditions both were tuned on? Protocol: tune on the familiar knob value (tune seeds only), freeze, evaluate across the knob on disjoint eval seeds, report
 paired 95% bootstrap CIs.
 
-## Phase 1 — changing bandit (DONE; extra shifts pending)
+## Phase 1 — changing bandit (DONE)
 **Conclusion: Kaiser (discounted UCB) beats Kairi (epsilon-greedy) at every jump rate; the curves do not cross.**
 - Kairi − Kaiser regret/step is 0.033 to 0.072 across λ ∈ [0, 0.02]; all seven 95% CIs exclude 0. Evidence: README Phase 1 table, `gaps.csv`.
 - Both agents degrade similarly away from the familiar λ = 0.001 (at λ = 0.02, Kairi +0.552, Kaiser +0.546 regret), so the Kaiser lead is a
@@ -17,8 +17,33 @@ paired 95% bootstrap CIs.
   21 comparisons, likely noise).
 - Robustness: Colab (Python 3.13) and a local rerun (3.9.6) agree within 5e-5.
 - Caveats: one bandit family (k = 10, σ = 1, horizon 2000), one tuning point; tag-team agents go beyond the original two-agent design.
-- Pending extra shifts (cheap): reversed tuning direction (familiar λ = 0.02; running, `configs/bandit-reversed.yaml`, `results/bandit-reversed/`),
-  reward noise σ, arm count k, slow drift. Results go in a section below when done.
+- Extra shifts: see the next section.
+
+## Phase 1 extra shifts (DONE 2026-10-24; figures and tables in `figs/shifts/<name>/`)
+Same bandit, agents, protocol and seed pools; only the swept knob (or the tuning point) changes. Configs: `configs/bandit-{reversed,sigma,k,drift}.yaml`.
+Mean regret per step, Kairi vs Kaiser (Kairi − Kaiser > 0 means Kaiser better; winner declared when the paired 95% CI excludes 0):
+
+| shift (familiar in bold) | result |
+|---|---|
+| **Reversed tuning** (tuned at λ = 0.02, swept λ 0 to 0.02) | Kaiser wins at all 7 λ; the gap grows with λ (0.0035 [0.0008, 0.0064] at λ = 0 to 0.101 [0.095, 0.107] at 0.02). No crossover. |
+| **σ** 0.25, 0.5, **1.0**, 2.0, 4.0 | Kaiser wins at all 5; gap 0.158, 0.105, 0.053, 0.158, 0.325 (all CIs exclude 0). No crossover. |
+| **k** 2, 5, **10**, 20, 50 arms | Kaiser wins at k ≤ 20 (0.009, 0.037, 0.053, 0.043). **Kairi wins at k = 50 (−0.054 [−0.071, −0.037]); crossover in (20, 50).** |
+| **Drift** per-step std 0, 0.005, **0.01**, 0.02, 0.05, 0.1 (no jumps) | Kaiser wins up to 0.02 (gap 0.063 to 0.070); tie at 0.05 (−0.027 [−0.059, 0.002]); **Kairi wins at 0.1 (−0.209 [−0.283, −0.132]); crossover in (0.02, 0.1).** |
+
+Conclusions:
+- **Kaiser's bandit advantage holds under reversed tuning and under reward-noise shifts.** It is not an artifact of tuning at a low jump rate or at σ = 1.
+- **We found where Kairi wins, in two regimes: many more arms than tuned for (k = 50 vs 10) and fast random-walk drift (0.1 vs 0.01).** These are the first
+  defensible "Kairi wins" results in the project. Both are shifts away from the tuned point, so they fit the project's question (where does each agent break).
+- Plausible explanations (untested): with k = 50 and horizon 2000, UCB's optimism spends many pulls on arms it has not yet tried, so exploration cost grows with k;
+  under fast drift Kaiser tuned at drift 0.01 chose gamma = 1.0 (no discounting), so its estimates lag, while Kairi's constant step size (alpha 0.4) keeps tracking.
+  Testing these would need extra ablations (e.g. retuning at each shift, or a discounted Kaiser at drift 0.01).
+- Tag-team: `tt_fixed` and `tt_meta` beat the best single agent in the two regimes where Kairi wins (k = 50: vs Kairi by 0.07 to 0.08; drift 0.05 and 0.1) and at k = 2;
+  `tt_triggered` mostly ties.
+- Protocol notes: the first reversed run (Kaiser gamma at the grid's low edge) and the first drift run (Kairi epsilon, Kaiser c and `tt_meta` c at grid edges) were provisional;
+  grids were widened (equal sizes kept) and rerun, final results are not provisional. The provisional runs are kept locally in `results/*-v1-provisional/`, not in plots.
+  The sigma and k tuning point is the main run's (σ = 1, k = 10, λ = 0.001), so their familiar values match Phase 1.
+- Caveats: frozen agents (tuned once at the familiar point, no retuning per shift); no multiplicity correction across knob values; one horizon (2000); the drift world is
+  a Gaussian random walk without clipping, so arm means can wander far from N(0, 1); unequal knob grids differ per shift.
 
 ## Phase 2 — MiniGrid DoorKey (CLOSED 2026-10-24 by user decision)
 **Conclusion: RND gave no measurable benefit on DoorKey. Kairi ≥ Kaiser everywhere, but the apparent Kairi win at sizes 8 and 12 is not robust.**
@@ -40,10 +65,11 @@ Evidence chain, in the order we learned it:
   outside the protocol (the tuned result stays the headline).
 
 ## Cross-phase picture ("where each agent loses")
-- Kaiser's exploration term pays off in the nonstationary bandit (reward distribution changes, so uncertainty re-grows) and showed no measurable benefit in
-  the stationary-but-sparse MiniGrid DoorKey family.
-- Kairi never wins outright in either phase; in MiniGrid it ties. "Kairi winning some regimes" has not yet happened at a level we can defend.
-  Open question for step B and the Phase 1 shifts: is there any regime where the plain learner clearly wins (e.g. very high noise, many arms)?
+- Kaiser's exploration term pays off in the nonstationary bandit near and moderately beyond the tuned conditions (jumps, noise, drift up to ~2x), and showed no measurable
+  benefit in the stationary-but-sparse MiniGrid DoorKey family.
+- **Kairi wins when the world moves far from the tuned point in a way that makes optimism expensive or stale: 5x more arms than tuned, or 10x faster drift** (bandit extra shifts).
+  In MiniGrid Kairi only ties. So "a map of when each agent wins and where it breaks" now has both sides: Kaiser breaks under many arms and fast drift.
+- Open for step B: does RND pay off in a world where exploration is the bottleneck, and is the "Kaiser breaks far from tuning" pattern also visible in deep RL?
 
 ## Methodological lessons (worth carrying forward)
 - Give both agents equal treatment on every non-tuned hyperparameter, or tune it for both (entropy was fixed for one and tuned for the other).
@@ -52,4 +78,4 @@ Evidence chain, in the order we learned it:
 - Seed-level failures (one outright failure in 10) move means a lot; always report them with the CI.
 
 ## Next
-Phase 1 extra shifts (reversed direction running) -> step B spike (exploration-heavy world) -> polish (CI on push, README figures, short write-up).
+Step B spike (exploration-heavy world, optionally an ablation of the k = 50 and drift = 0.1 explanations) -> polish (CI on push, README figures, short write-up).
