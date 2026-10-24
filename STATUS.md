@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 98fffa6 -->
+<!-- STATUS_COMMIT: 06d0fd3 -->
 
 ## Current state
 
@@ -29,8 +29,8 @@ progress," read it first.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), default branch `main`.
   `origin/main` includes the requirements fix (`0734460`); `c1b33f4` is on `origin/main`; the `feat/phase2-minigrid` branch is local only (push needs the user's yes).
 
-- **Next:** see RESUME.md. Agreed plan: entropy check (Kaiser at Kairi's entropy) -> make Phase 2 conclusive -> cheap Phase 1 shifts -> exploration-world spike -> polish. The entropy check was approved and is running in the background (`scripts/entropy_fair.py`, `configs/minigrid-entfair.yaml`, committed e074ecc, local only; output `results/ent-fair/`); see RESUME.md.
+- **Next:** see RESUME.md. Agreed plan: entropy check (Kaiser at Kairi's entropy) -> make Phase 2 conclusive -> cheap Phase 1 shifts -> exploration-world spike -> polish. The entropy check is DONE: matched-entropy Kaiser ties Kairi at every size (README post-hoc paragraph). Step A (30 seeds, matched entropy by construction) is drafted in `docs/superpowers/plans/2026-10-24-phase2-step-a.md`, awaiting the user's decisions; see RESUME.md.
 
 ## Last updated
 
-2026-10-24 (commit 98fffa6)
+2026-10-24 (commit 06d0fd3)
