@@ -60,9 +60,14 @@ Tuned on size 6 (3 tune seeds): Kairi `ent_coef` = 0.03, Kaiser `rnd_coef` = 0.0
 - **The curves do not cross.** Kairi is at or above Kaiser at every size; the difference excludes 0 at sizes 8 and 12.
 - **Few-shot (200k steps):** size 8, Kairi 1.00 vs Kaiser 0.90 [0.70, 1.00]; size 12, Kairi 0.72 [0.44, 0.97] vs
   Kaiser 0.50 [0.22, 0.78]. CIs overlap; no winner is claimed.
-- **Sample efficiency (steps to 80% at size 6):** Kairi 279k [230k, 328k], Kaiser 543k [271k, 929k]. Suggestive only;
-  intervals overlap and runs that never reach 80% are censored.
-- Kaiser's 0.90 at sizes 5/6 is consistent with one of ten seeds failing outright (success is near all-or-nothing per seed).
+- **Sample efficiency (steps to 80% at size 6):** mean Kairi 279k [230k, 328k], Kaiser 543k [271k, 929k], but the Kaiser
+  mean is inflated by one censored seed (seed 101 never reached 80% and enters at the 2M cap). Medians are about equal
+  (Kairi 261k, Kaiser 246k); seven of ten Kaiser seeds reach 80% by 460k steps. No efficiency difference is claimed.
+- **One Kaiser seed fails outright.** Kaiser seed 101 got 0.04 at size 5, 0.00 at size 6 and 0.00 at sizes 8 and 12 (and 0.00
+  few-shot at size 8); every other Kaiser seed reached 1.0 at sizes 5 and 6, as did all ten Kairi seeds. That one seed
+  explains Kaiser's 0.90 at sizes 5/6 and 0.90 few-shot at size 8. Excluding it, Kaiser is 0.552 at size 8 and 0.042 at size 12
+  (still below Kairi's 0.640 and 0.083), so the size 8 and 12 ordering does not depend on that seed. (Post-hoc check,
+  not part of the protocol.)
 
 Figure: `figs/degradation.png`.
 
