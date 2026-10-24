@@ -111,7 +111,8 @@ Figure: `figs/degradation.png`.
   within the 4-decimal rounding of the Colab output (max difference 5e-05), so the results do not depend on the numpy/Python version.
 - Phase 2: the calibrated budget is the 2M cap and the 80% calibration target was not reached; one familiar size; one seed pool; PPO hyperparameters are not tuned beyond one coefficient
   per agent; PPO on DoorKey-6 is very seed-dependent, so CIs are wide.
-- Phase 2: the tuned-setting advantage of Kairi at sizes 8 and 12 is sensitive to which tied `rnd_coef` the AUC tie-break picks (see above); 10 eval seeds only.
+- Phase 2: the tuned-setting advantage of Kairi at sizes 8 and 12 is sensitive to which tied `rnd_coef` the AUC tie-break picks and disappears with matched entropy (see above); 10 eval seeds only, so a small Kaiser effect in either direction cannot be ruled out.
+- Phase 2: in the main run Kaiser's `ent_coef` (0.01) was fixed while Kairi's was tuned (0.03), an unequal treatment that the matched-entropy check addresses post-hoc only.
 - Phase 2: test layouts at sizes 5 and 6 are held-out seeds, not unseen layouts; size 12 is at the
   floor for zero-shot.
 
@@ -119,8 +120,11 @@ Figure: `figs/degradation.png`.
 
 - **Bandit (Phase 1):** Kairi (epsilon-greedy) is never the best single agent; Kaiser's discounted UCB wins at every jump rate.
   The only regime where something beats Kaiser is `tt_fixed` at high lambda (>= 0.01).
-- **MiniGrid (Phase 2):** Kaiser (PPO + RND) never beats plain PPO. It ties at sizes 5 and 6 and, at its tuned setting, loses at 8 and 12 (indistinguishable from Kairi at other tied settings), with
-  RND adding per-step cost (Kaiser seed jobs took ~2.5x as long). The RND bonus gave no benefit on DoorKey (a plausible but untested reason: extrinsic reward is reachable with plain exploration); the agents break down together as size grows (size 12 near the floor).
+- **MiniGrid (Phase 2):** Kaiser (PPO + RND) never beats plain PPO. It ties at sizes 5 and 6 and, at its tuned setting, loses at 8 and 12, but that loss does not survive
+  either robustness check: Kaiser at a different tied `rnd_coef`, or at Kairi's entropy coefficient, is statistically indistinguishable from Kairi at every size (10 seeds).
+  The supported conclusion is "no measurable RND benefit on DoorKey", not "RND hurts". RND adds per-step cost (Kaiser seed jobs took ~2.5x as long). A plausible but
+  untested reason for no benefit: extrinsic reward is reachable with plain exploration. The agents break down together as size grows (size 12 near the floor).
+  MiniGrid is closed here; a 30-seed rerun with matched entropy was planned and shelved (`docs/superpowers/plans/2026-10-24-phase2-step-a.md`).
 - So the exploration bonus helps in the nonstationary bandit and not in this sparse-but-learnable MiniGrid family.
 
 ## Future work

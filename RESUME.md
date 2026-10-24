@@ -1,8 +1,8 @@
 # XP — Resume
 
-Nothing is running. Entropy check DONE (2026-10-24): matched-entropy Kaiser (ent 0.03, rnd 0.01) ties Kairi at every size (n=10); in README as post-hoc.
-Step A is **drafted, not approved**: `docs/superpowers/plans/2026-10-24-phase2-step-a.md` + `configs/minigrid-a.yaml` (eval seeds 100-129 only so far).
-Next: get the user's decisions on the plan's `?` items (tune seeds 3->5, second familiar size), then amend the spec and TDD the Kaiser-entropy-from-Kairi change.
+Nothing is running. **MiniGrid is closed** (user decision 2026-10-24): entropy check done (matched-entropy Kaiser ties Kairi at every size, n=10, README post-hoc);
+step A (30 seeds, matched entropy) is shelved, see `docs/superpowers/plans/2026-10-24-phase2-step-a.md`. Do not reopen without the user asking.
+Next: cheap Phase 1 shifts (reward noise sigma, arm count k, slow drift, reversed tuning direction), then B spike, then C polish.
 Nothing from this session is pushed (needs the user's yes).
 
 ## Agreed direction (brainstorm, 2026-10-24)
@@ -20,7 +20,7 @@ for the main result. Cost ~2 h (about 50 min tuning, 30-60 min eval); use `caffe
 Outcome: tie, so A reruns with matched entropy for both agents.
 
 ## Then
-- A: more eval seeds (30 instead of 10; new config and full rerun, ~5-6 h, mostly Kaiser), a pre-declared tie-break rule, maybe a second familiar size.
+- A: SHELVED (MiniGrid closed).
 - Cheap Phase 1 shifts (minutes locally): reward noise sigma, arm count k, the slow-drift check, reversed tuning direction.
 - B spike: harder-exploration MiniGrid (KeyCorridor/MultiRoom) or CoinRun; DoorKey sizes can sit at 0% for all agents (spec risk table).
 - C last: CI on every push (spec requires it; check whether it exists), figures in the README, short write-up.

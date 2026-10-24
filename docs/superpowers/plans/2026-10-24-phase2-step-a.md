@@ -1,4 +1,7 @@
-# Phase 2 step A — make the MiniGrid result conclusive (DRAFT, not approved, nothing run)
+# Phase 2 step A — make the MiniGrid result conclusive (SHELVED 2026-10-24, nothing run)
+
+**Shelved:** the user chose to close MiniGrid on the existing evidence (tuned run, tie-sensitivity check, matched-entropy check) and move on. Decisions made before
+shelving: 5 tune seeds, defer the second familiar size. Kept for reference if MiniGrid is reopened; `configs/minigrid-a.yaml` is an unfinished draft (eval seeds only).
 
 ## Why
 The matched-entropy check (README, "Matched-entropy check") showed Kaiser at Kairi's entropy ties Kairi at every size (n = 10). The main-run
