@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: ecfe4e1 -->
+<!-- STATUS_COMMIT: 1d0909e -->
 
 ## Current state
 
@@ -25,10 +25,10 @@ progress," read it first.
   still to write; need `gaps.csv` and `crossovers.csv` CIs.
   Untested: whether results match across numpy versions; rerun the Colab setup cell to confirm.
 - Phase 2 (MiniGrid DoorKey, PPO vs PPO+RND): plan `docs/superpowers/plans/2026-10-23-phase2-minigrid.md` executed through Task 8 and merged into `main` (pushed): `xp/minigrid/` implemented and tested (123 tests), Colab launcher `notebooks/run_minigrid.ipynb`, CLAUDE.md updated. Remaining work = Task 9 (calibrate the budget, full run, report, README results), which the user chose to run locally on the laptop later (go-ahead needed before starting; see RESUME.md). The spike scripts were removed; their numbers are in the plan and the spec amendment.
-- Phase 2 run COMPLETE (2026-10-23): calibration hit the 2M cap (80% target not reached), tuned Kairi ent_coef=0.03 / Kaiser rnd_coef=0.001, 20 seed jobs done, report generated in `figs/`. Result: curves do not cross; Kairi >= Kaiser everywhere (wins at sizes 8, 12; ties at 5, 6). Phase 2 README results written. Phase 1 README CIs filled in from the Colab CSVs. (`figs/degradation.png` committed and `main` pushed at `bf28aef`; `calibration.json` committed in 6c2e4c2).
+- Phase 2 run COMPLETE (2026-10-23): calibration hit the 2M cap (80% target not reached), tuned Kairi ent_coef=0.03 / Kaiser rnd_coef=0.001, 20 seed jobs done, report generated in `figs/`. Result: curves do not cross; Kairi >= Kaiser everywhere (wins at sizes 8, 12; ties at 5, 6). Phase 2 README results written. Phase 1 README CIs filled in from the Colab CSVs. Post-hoc tie-robustness check (Kaiser rnd_coef 0.003/0.01, Kairi ent_coef 0.1) done: Kairi's 8/12 advantage holds only for the AUC-selected Kaiser setting; README updated. (`figs/degradation.png` committed and `main` pushed at `bf28aef`; `calibration.json` committed in 6c2e4c2).
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), default branch `main`.
   `origin/main` includes the requirements fix (`0734460`); `c1b33f4` is on `origin/main`; the `feat/phase2-minigrid` branch is local only (push needs the user's yes).
 
 ## Last updated
 
-2026-10-23 (commit ecfe4e1)
+2026-10-24 (commit 1d0909e)
