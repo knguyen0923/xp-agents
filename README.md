@@ -175,7 +175,7 @@ Few seeds, untuned RND coefficient, 2M-step cap: evidence for "no benefit at thi
 
 ## Future work
 
-Crafter, Showdown, a tuned larger-budget RND probe on MultiRoom, and a deep-RL tag-team agent.
+Crafter, Showdown, a tuned larger-budget RND probe on MultiRoom, and a deep-RL tag-team agent. A design sketch for Crafter and Showdown (knobs, costs, risks, go/no-go criteria; not approved for building) is in `docs/FUTURE_WORK.md`.
 
 ## Reproducing
 
