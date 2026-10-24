@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 06d0fd3 -->
+<!-- STATUS_COMMIT: 0461d46 -->
 
 ## Current state
 
@@ -29,8 +29,9 @@ progress," read it first.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), default branch `main`.
   `origin/main` includes the requirements fix (`0734460`); `c1b33f4` is on `origin/main`; the `feat/phase2-minigrid` branch is local only (push needs the user's yes).
 
-- **Next:** see RESUME.md. Agreed plan: entropy check (Kaiser at Kairi's entropy) -> make Phase 2 conclusive -> cheap Phase 1 shifts -> exploration-world spike -> polish. The entropy check is DONE: matched-entropy Kaiser ties Kairi at every size (README post-hoc paragraph). Step A (30 seeds, matched entropy by construction) is drafted in `docs/superpowers/plans/2026-10-24-phase2-step-a.md`, awaiting the user's decisions; see RESUME.md.
+- **MiniGrid is closed** (user decision, 2026-10-24): Kaiser shows no measurable RND benefit on DoorKey; matched-entropy Kaiser ties Kairi at every size (n=10). Step A (30-seed rerun) is shelved.
+- **Next:** see RESUME.md. Cheap Phase 1 shifts (reward noise, arm count, slow drift, reversed tuning) -> exploration-world spike -> polish.
 
 ## Last updated
 
-2026-10-24 (commit 06d0fd3)
+2026-10-24 (commit 0461d46)
