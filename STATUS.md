@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 60814ba -->
+<!-- STATUS_COMMIT: 94e1b68 -->
 
 ## Current state
 
@@ -35,8 +35,10 @@ progress," read it first.
 - Polish DONE: CI green (Python 3.9, 3.12), README Summary and figures, `docs/WRITEUP.md`, `figs/minigrid_robustness.png`.
 - Ablations DONE: retuning at the shifted point reverses both bandit Kairi wins (frozen-tuning brittleness, not exploration cost); `docs/FINDINGS.md`, `figs/ablations/`.
 - Step B CLOSED as a documented MultiRoom spike (28 runs, 2 seeds): RND never helped; `docs/FINDINGS.md`, `docs/spikes/multiroom_spike.csv`, `scripts/spikes/`.
-- **Next:** nothing required. Optional: tuned larger-budget RND probe at 4 rooms size <= 4. Local commits after 0a12a29 are unpushed; see RESUME.md.
+- Pushed through 6e34492; CI green on `actions/checkout@v7` / `setup-python@v7` (Node 20 warning gone). The RND probe commit and this refresh are local.
+- **In flight:** RND probe (4 rooms, size <= 4, 5M steps, PPO vs PPO+RND coef 0.01/0.03/0.1, 5 seeds), started 17:19 on 2026-10-24; see RESUME.md for the resume command and what to do when it finishes.
+- **Next:** summarise the probe into FINDINGS/README; deep-RL retuning check is unstarted and needs a design discussion.
 
 ## Last updated
 
-2026-10-24 (commit 60814ba)
+2026-10-24 (commit 94e1b68)
