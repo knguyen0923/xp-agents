@@ -3,7 +3,8 @@
 Nothing is running. **MiniGrid is closed** (user decision 2026-10-24): entropy check done (matched-entropy Kaiser ties Kairi at every size, n=10, README post-hoc);
 step A (30 seeds, matched entropy) is shelved, see `docs/superpowers/plans/2026-10-24-phase2-step-a.md`. Do not reopen without the user asking.
 Phase 1 extra shifts DONE (reversed, sigma, k, drift; docs/FINDINGS.md, figs/shifts/): Kaiser robust to reversed tuning and noise; Kairi wins at k=50 and drift 0.1 (crossovers in (20,50) and (0.02,0.1)).
-Next: B spike (exploration-heavy world; optionally ablate the untested k=50/drift explanations), then C polish (CI on push, README figures, short write-up).
+Polish DONE (user chose to go straight to it, 2026-10-24): CI exists and is green on Python 3.9 and 3.12; README has a Summary and figures; short write-up `docs/WRITEUP.md`; MiniGrid robustness figure `figs/minigrid_robustness.png`.
+Nothing is in flight. Optional, only if the user asks: step B (exploration-heavy world), ablations of the untested k=50/drift explanations. Known nit: CI actions warn about Node 20 deprecation (bump `actions/checkout`/`setup-python` majors).
 Nothing from this session is pushed (needs the user's yes).
 
 ## Agreed direction (brainstorm, 2026-10-24)
