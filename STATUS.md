@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: e4c6b9e -->
+<!-- STATUS_COMMIT: 839045d -->
 
 ## Current state
 
@@ -32,9 +32,10 @@ progress," read it first.
 - Conclusions and analysis are written up in `docs/FINDINGS.md` (update it as new results land).
 - **MiniGrid is closed** (user decision, 2026-10-24): Kaiser shows no measurable RND benefit on DoorKey; matched-entropy Kaiser ties Kairi at every size (n=10). Step A (30-seed rerun) is shelved.
 - Phase 1 extra shifts DONE (reversed tuning, sigma, k, drift; `configs/bandit-*.yaml`, `figs/shifts/`, `docs/FINDINGS.md`): Kaiser robust to reversed tuning and noise; Kairi wins at k=50 and drift 0.1. 136 tests pass.
-- Polish DONE: CI green (Python 3.9, 3.12), README Summary and figures, `docs/WRITEUP.md` short write-up, `figs/minigrid_robustness.png`.
-- **Next:** nothing required. Optional: step B (exploration-heavy world) or ablations of the k=50 / drift explanations; see RESUME.md.
+- Polish DONE: CI green (Python 3.9, 3.12), README Summary and figures, `docs/WRITEUP.md`, `figs/minigrid_robustness.png`.
+- Ablations DONE: retuning at the shifted point reverses both bandit Kairi wins (frozen-tuning brittleness, not exploration cost); `docs/FINDINGS.md`, `figs/ablations/`.
+- **Next:** step B (exploration-heavy world) is open, in design with the user; see RESUME.md. Local commits after 0a12a29 are unpushed.
 
 ## Last updated
 
-2026-10-24 (commit e4c6b9e)
+2026-10-24 (commit 839045d)
