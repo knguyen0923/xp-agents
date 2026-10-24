@@ -10,6 +10,15 @@ progressively away from the conditions they were tuned on.
 The output is a map of *when each agent wins and where it breaks*, built on a reusable protocol.
 Kairi winning some regimes is a valid result. Design: `docs/superpowers/specs/2026-10-22-xp-design.md`.
 
+## Summary
+
+- **Bandit:** Kaiser (discounted UCB) beats Kairi (epsilon-greedy) at every jump rate, under reversed tuning, and under reward-noise shifts. Kairi wins only far from the tuned point:
+  many more arms than tuned (k = 50 vs 10) and fast arm drift (0.1 vs 0.01), with crossovers in (20, 50) arms and (0.02, 0.1) drift.
+- **MiniGrid DoorKey:** the RND bonus gave no measurable benefit. Kairi (PPO) looked better at sizes 8 and 12 with the tuned settings, but that gap disappears at other tuning-tied settings and with
+  matched entropy (10 seeds), so the supported claim is a tie, not "RND hurts".
+- **Map:** the exploration bonus helps in a changing bandit near the tuned conditions, breaks far from them (many arms, fast drift), and does not help in this sparse-but-learnable gridworld.
+- Short write-up: `docs/WRITEUP.md`; full analysis with evidence and caveats: `docs/FINDINGS.md`; design: `docs/superpowers/specs/2026-10-22-xp-design.md`.
+
 ## Protocol
 
 1. Tune each agent on the familiar knob value, using tune seeds only.
@@ -29,6 +38,8 @@ seeds. Metric: regret per step (lower is better). Three tag-team agents (`tt_fix
 `tt_meta`) that switch between Kairi and Kaiser are also evaluated.
 
 ### Results
+
+![Regret vs jump rate, tuned at lambda = 0.001](figs/phase1/degradation.png)
 
 - **Kaiser beats Kairi at every jump rate and the curves do not cross.** Kairi − Kaiser regret per step (95% CI):
 
@@ -56,6 +67,12 @@ Kairi − Kaiser regret per step, paired 95% CI; positive = Kaiser better.
 | reward noise σ ∈ {0.25, 0.5, 1, 2, 4} | all 5 (0.053 to 0.325) | none | none | none |
 | arms k ∈ {2, 5, 10, 20, 50} | k ≤ 20 (0.009 to 0.053) | none | k = 50 (−0.054 [−0.071, −0.037]) | (20, 50) |
 | drift std ∈ {0, 0.005, 0.01, 0.02, 0.05, 0.1}, no jumps | up to 0.02 (0.063 to 0.070) | 0.05 (−0.027 [−0.059, 0.002]) | 0.1 (−0.209 [−0.283, −0.132]) | (0.02, 0.1) |
+
+| tuned at λ = 0.02 | reward noise σ |
+|---|---|
+| ![reversed](figs/shifts/reversed/degradation.png) | ![sigma](figs/shifts/sigma/degradation.png) |
+| **arms k** | **arm drift** |
+| ![k](figs/shifts/k/degradation.png) | ![drift](figs/shifts/drift/degradation.png) |
 
 Kaiser's advantage is robust to reversing the tuning direction and to reward noise. Kairi wins when the world is far from the tuned point in a way that raises the
 cost of optimism: many more arms than tuned (k = 50) or fast arm drift. Explanations are plausible but untested; see `docs/FINDINGS.md`. First runs for the reversed and
@@ -117,7 +134,9 @@ seeds. Kairi is not rerun. Paired Kairi − Kaiser success (95% CI): size 5 and 
 statistically indistinguishable from Kairi at every size, so the tuned-setting deficit above is better read as an entropy/tuning effect than as evidence that RND
 hurts. It is not evidence that RND helps either; n = 10 and the size 8/12 intervals are wide.
 
-Figure: `figs/degradation.png`.
+![DoorKey success vs grid size: tuned Kairi, tuned Kaiser, Kaiser at matched entropy](figs/minigrid_robustness.png)
+
+The tuned-only figure from the protocol report is `figs/degradation.png`; the figure above adds the matched-entropy Kaiser (`scripts/plot_minigrid_robustness.py`).
 
 ## Limitations
 

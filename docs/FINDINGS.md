@@ -37,8 +37,10 @@ Conclusions:
 - Plausible explanations (untested): with k = 50 and horizon 2000, UCB's optimism spends many pulls on arms it has not yet tried, so exploration cost grows with k;
   under fast drift Kaiser tuned at drift 0.01 chose gamma = 1.0 (no discounting), so its estimates lag, while Kairi's constant step size (alpha 0.4) keeps tracking.
   Testing these would need extra ablations (e.g. retuning at each shift, or a discounted Kaiser at drift 0.01).
-- Tag-team: `tt_fixed` and `tt_meta` beat the best single agent in the two regimes where Kairi wins (k = 50: vs Kairi by 0.07 to 0.08; drift 0.05 and 0.1) and at k = 2;
-  `tt_triggered` mostly ties.
+- Tag-team vs the best single agent (`pair_vs_best_single.csv`; difference = team − best single, negative = team better): at k = 50 only `tt_meta` beats the best single
+  agent, Kairi (−0.069 [−0.085, −0.054]); `tt_fixed` (+0.080) and `tt_triggered` (+0.058) are worse than Kairi. At drift 0.05 and 0.1 `tt_fixed` (−0.067, −0.058) and `tt_meta`
+  (−0.077, −0.074) beat Kairi, while `tt_triggered` ties at 0.05 and is worse at 0.1 (+0.115). At k = 2 all three teams beat Kaiser by a small margin (about −0.004 to −0.005).
+  In the reversed and σ shifts the teams mostly lose to Kaiser. So switching rules help most where the single agents fail, and `tt_meta` is the most reliable of the three.
 - Protocol notes: the first reversed run (Kaiser gamma at the grid's low edge) and the first drift run (Kairi epsilon, Kaiser c and `tt_meta` c at grid edges) were provisional;
   grids were widened (equal sizes kept) and rerun, final results are not provisional. The provisional runs are kept locally in `results/*-v1-provisional/`, not in plots.
   The sigma and k tuning point is the main run's (σ = 1, k = 10, λ = 0.001), so their familiar values match Phase 1.
