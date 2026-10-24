@@ -1,13 +1,17 @@
 # XP — Resume
 
-Nothing is running. Both phases are done and pushed; this file holds the agreed plan for the rest of the project.
+**In flight (started 2026-10-24):** the entropy check is running in the background:
+`python scripts/entropy_fair.py --config configs/minigrid-entfair.yaml --out results/ent-fair --workers 3` (log `results/ent-fair/run.log`, ~2 h,
+resumable: rerun the same command if it died). Script and config are committed (e074ecc, not pushed). When done: compare `results/ent-fair/minigrid/kaiser__seed-*.csv`
+with the main Kairi CSVs, paired by seed (see `scripts/compare_robustness.py`), add a post-hoc README paragraph, then decide per the rule below.
+Both phases are done and pushed; the rest of this file is the agreed plan.
 
 ## Agreed direction (brainstorm, 2026-10-24)
 User wants a mix of: (1) polish, (2) a stronger research claim, (3) fixing weaknesses. Compute budget: **overnight is fine**.
 Order: entropy check -> A (make Phase 2 conclusive) -> cheap Phase 1 extra shifts -> B spike (world where exploration matters) -> C (polish).
 Skip other exploration methods (count-based, ICM): they change Kaiser's definition. Do not build Crafter/Showdown.
 
-## Next step: entropy check (design presented; the user has NOT yet said "yes" to it, so confirm, then start)
+## Entropy check (user said yes; running, see top)
 Why: Kairi tuned `ent_coef` (picked 0.03); Kaiser's `ent_coef` is fixed at 0.01 and only `rnd_coef` is tuned (config: `agents.kaiser.fixed.ent_coef`).
 Kairi at 0.01 and Kaiser at `rnd_coef` 0 are the same agent and tied in tuning, so Kaiser's deficit at sizes 8/12 may be an entropy effect, not RND.
 Design: copy the config with Kaiser `fixed.ent_coef` = 0.03, re-tune `rnd_coef` on the 6-value grid with tune seeds only (protocol-legal), then evaluate
