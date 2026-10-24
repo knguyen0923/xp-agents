@@ -2,7 +2,8 @@
 
 Nothing is running. **MiniGrid is closed** (user decision 2026-10-24): entropy check done (matched-entropy Kaiser ties Kairi at every size, n=10, README post-hoc);
 step A (30 seeds, matched entropy) is shelved, see `docs/superpowers/plans/2026-10-24-phase2-step-a.md`. Do not reopen without the user asking.
-Next: cheap Phase 1 shifts (reward noise sigma, arm count k, slow drift, reversed tuning direction), then B spike, then C polish.
+Phase 1 extra shifts DONE (reversed, sigma, k, drift; docs/FINDINGS.md, figs/shifts/): Kaiser robust to reversed tuning and noise; Kairi wins at k=50 and drift 0.1 (crossovers in (20,50) and (0.02,0.1)).
+Next: B spike (exploration-heavy world; optionally ablate the untested k=50/drift explanations), then C polish (CI on push, README figures, short write-up).
 Nothing from this session is pushed (needs the user's yes).
 
 ## Agreed direction (brainstorm, 2026-10-24)
@@ -21,7 +22,7 @@ Outcome: tie, so A reruns with matched entropy for both agents.
 
 ## Then
 - A: SHELVED (MiniGrid closed).
-- Cheap Phase 1 shifts (minutes locally): reward noise sigma, arm count k, the slow-drift check, reversed tuning direction.
+- Cheap Phase 1 shifts: DONE.
 - B spike: harder-exploration MiniGrid (KeyCorridor/MultiRoom) or CoinRun; DoorKey sizes can sit at 0% for all agents (spec risk table).
 - C last: CI on every push (spec requires it; check whether it exists), figures in the README, short write-up.
 
