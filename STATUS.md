@@ -44,6 +44,7 @@ progress," read it first.
 - Plan written: `docs/superpowers/plans/2026-10-25-multiroom-confirmation.md` (8 tasks; no code started).
 - Plan Tasks 1-6 DONE on local branch `feat/multiroom-confirmation` (subagent-driven; 152 tests green; smoke run OK). Final whole-branch review: no Critical; fix wave 57643c8 (training curves kept, matched-entropy guards) and 0930c43 (plan hardening notes) committed, scoped re-review in flight. Tasks 7 (calibrate + 11-13 h run) and 8 (write-up) pending.
 - Task 7 RUNNING since 2026-10-25: S=2,938,880 frozen (32e41e2); full run in worktree ../xp-agents-run (see RESUME.md). Re-review of fix wave came back clean.
+- Interim evaluation doc written: `docs/MULTIROOM_EVALUATION.md` + `scripts/multiroom_eval_figs.py` (figures in figs/multiroom/eval_*.png, force-added). Branch merged to main and pushed (c0fd8fe); doc commit 32bc10b is local, not pushed. Kairi tuned: ent_coef 0.01 (interior); Kaiser tuning running.
 - **Next:** wait for run, report (Task 7 step 6), Task 8 write-up, then finish branch (merge/push need user's yes)
 
 ## Last updated
