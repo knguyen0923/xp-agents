@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 3892a09 -->
+<!-- STATUS_COMMIT: c986a1e -->
 
 ## Current state
 
@@ -36,11 +36,11 @@ progress," read it first.
 - Ablations DONE: retuning at the shifted point reverses both bandit Kairi wins (frozen-tuning brittleness, not exploration cost); `docs/FINDINGS.md`, `figs/ablations/`.
 - Step B CLOSED as a documented MultiRoom spike (28 runs, 2 seeds): RND never helped; `docs/FINDINGS.md`, `docs/spikes/multiroom_spike.csv`, `scripts/spikes/`.
 - Pushed through 6e34492; CI green on `actions/checkout@v7` / `setup-python@v7` (Node 20 warning gone). The RND probe commit and this refresh are local.
-- **In flight:** RND probe (4 rooms, size <= 4, 5M steps, PPO vs PPO+RND coef 0.01/0.03/0.1, 5 seeds), started 17:19 on 2026-10-24; see RESUME.md for the resume command and what to do when it finishes.
 - Deep-RL check done the cheap way: few-shot paired re-analysis across all variants (`docs/FINDINGS.md`, `scripts/fewshot_compare.py`, `docs/spikes/fewshot_pairs.csv`); README few-shot sentence corrected (paired CI at size 12 favours Kairi for the tuned Kaiser, not robust; ties at matched entropy). Full size-8 retune not run.
 - Crafter/Showdown future-work sketch written (`docs/FUTURE_WORK.md`, not approved for building; CLAUDE.md scope rule unchanged).
-- **Next:** summarise the RND probe when it finishes (see RESUME.md).
+- 5M-step RND probe DONE: at 4 MultiRoom rooms (size <= 4), RND coef 0.1 reached 95% success in about half the steps of plain PPO (5/5 seeds faster); coef 0.01/0.03 no benefit. Post-hoc, not a protocol result; `docs/FINDINGS.md`, `docs/spikes/multiroom_probe.csv`.
+- **Next:** nothing required. Optional: a protocol-legal confirmation of the probe (needs a design discussion); see RESUME.md.
 
 ## Last updated
 
-2026-10-24 (commit 3892a09)
+2026-10-24 (commit c986a1e)
