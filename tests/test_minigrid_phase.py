@@ -7,7 +7,7 @@ pytest.importorskip("torch")
 pytest.importorskip("minigrid")
 
 from xp.errors import ConfigMismatchError, ProtocolError  # noqa: E402
-from xp.minigrid.phase import break_ties, build_learner, run_phase, tune_job  # noqa: E402
+from xp.minigrid.phase import break_ties, build_learner, run_phase, training_auc, tune_job  # noqa: E402
 from xp.protocol.phase import Phase  # noqa: E402
 from xp.protocol.results import TuneResult, load_results, read_tune, read_tune_job, read_tune_job_extra  # noqa: E402
 
@@ -108,3 +108,26 @@ def test_two_workers_match_one_worker(tiny_mg_cfg, tmp_path):
     a = load_results(tmp_path / "one", "minigrid")[cols].sort_values(cols[:4]).reset_index(drop=True)
     b = load_results(tmp_path / "two", "minigrid")[cols].sort_values(cols[:4]).reset_index(drop=True)
     pd.testing.assert_frame_equal(a, b)
+
+
+def test_training_auc_counts_nan_as_zero_and_averages_the_whole_curve():
+    nan = float("nan")
+    assert training_auc([{"success_100": nan}, {"success_100": 1.0}]) == 0.5
+    assert training_auc([]) == 0.0
+
+
+def test_auc_objective_scores_one_minus_auc_and_rejects_unknown_objectives(tiny_mr_cfg, tmp_path):
+    phase = Phase.from_config(tiny_mr_cfg)
+    score = tune_job(tiny_mr_cfg, tmp_path, "kairi", {"ent_coef": 0.01}, seed=0)
+    extra = read_tune_job_extra(tmp_path, phase, "kairi", {"ent_coef": 0.01}, 0)
+    assert score == pytest.approx(1.0 - extra["auc"])
+    tiny_mr_cfg["tuning"]["objective"] = "bogus"
+    with pytest.raises(ProtocolError):
+        tune_job(tiny_mr_cfg, tmp_path / "other", "kairi", {"ent_coef": 0.01}, seed=0)
+
+
+def test_break_ties_by_steps_prefers_fewest_steps_then_grid_order():
+    grid = {"rnd_coef": [0.01, 0.03, 0.1]}
+    result = _tied_result([0.2, 0.2, 0.2], grid)
+    picked = break_ties(result, grid, None, [0.9, 0.1, 0.5], steps_by_point=[3.0, 1.0, 1.0])
+    assert picked.best_params == {"rnd_coef": 0.03}  # steps 1.0 ties between points 1 and 2; grid order wins

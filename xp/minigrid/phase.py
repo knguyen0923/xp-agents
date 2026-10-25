@@ -26,17 +26,29 @@ def build_learner(cfg: dict, agent: str, params: dict, seed: int) -> Learner:
     """Kairi = PPO (tunes its entropy coefficient); Kaiser = the same PPO plus RND (tunes the RND coefficient)."""
     learner_seed = cfg["seeds"]["agent_seed"] + int(seed)
     if agent == "kairi":
-        return Learner(cfg["ppo"], params["ent_coef"], None, learner_seed)
+        return Learner(cfg["ppo"], params["ent_coef"], None, learner_seed, env_spec=cfg.get("env"))
     if agent == "kaiser":
         fixed_ent = cfg["agents"]["kaiser"]["fixed"]["ent_coef"]
         if params["rnd_coef"] == 0:  # no bonus: exactly plain PPO at the default entropy (no RND, no intrinsic head)
-            return Learner(cfg["ppo"], fixed_ent, None, learner_seed)
-        return Learner(cfg["ppo"], fixed_ent, params["rnd_coef"], learner_seed)
+            return Learner(cfg["ppo"], fixed_ent, None, learner_seed, env_spec=cfg.get("env"))
+        return Learner(cfg["ppo"], fixed_ent, params["rnd_coef"], learner_seed, env_spec=cfg.get("env"))
     raise ValueError(f"unknown agent {agent!r}")
 
 
+def training_auc(curve: list) -> float:
+    """Mean logged training success over the whole curve (NaN, before the first full window, counts as 0)."""
+    succ = [0.0 if row["success_100"] != row["success_100"] else row["success_100"] for row in curve]
+    return float(np.mean(succ)) if succ else 0.0
+
+
 def tune_job(cfg: dict, out_dir, agent: str, params: dict, seed: int) -> float:
-    """Train at the familiar size with one tune seed; score = 1 - success on validation layouts (lower is better)."""
+    """Train at the familiar size with one tune seed (lower score is better).
+
+    Objective `validation_error` (default): 1 - success on validation layouts. Objective `auc`: 1 - training AUC.
+    """
+    objective = cfg.get("tuning", {}).get("objective", "validation_error")
+    if objective not in ("validation_error", "auc"):
+        raise ProtocolError(f"unknown tuning objective {objective!r}")
     torch.set_num_threads(1)
     phase = Phase.from_config(cfg)
     phase.assert_tune_seeds([seed])
@@ -45,25 +57,32 @@ def tune_job(cfg: dict, out_dir, agent: str, params: dict, seed: int) -> float:
         return cached
     learner = build_learner(cfg, agent, params, seed)
     run = learner.train(int(phase.familiar), cfg["budget"]["steps"], target=cfg["budget"]["target_success"])
-    score = 1.0 - learner.evaluate(int(phase.familiar), cfg["eval"]["layouts"], VALIDATION_LAYOUT_BASE)["success"]
-    succ = [0.0 if row["success_100"] != row["success_100"] else row["success_100"] for row in run["curve"]]
-    extra = {"auc": float(np.mean(succ)) if succ else 0.0, "steps_to_target": run["steps_to_target"]}
+    auc = training_auc(run["curve"])
+    if objective == "auc":
+        score = 1.0 - auc
+    else:
+        score = 1.0 - learner.evaluate(int(phase.familiar), cfg["eval"]["layouts"], VALIDATION_LAYOUT_BASE)["success"]
+    extra = {"auc": auc, "steps_to_target": run["steps_to_target"]}
     write_tune_job(out_dir, phase, agent, params, seed, score, extra=extra)
     print(f"[{phase.name}] tune {agent} {params} seed {seed} score {score:.3f}", flush=True)
     return score
 
 
-def break_ties(result: TuneResult, grid: dict, natural_limits, auc_by_point) -> TuneResult:
+def break_ties(result: TuneResult, grid: dict, natural_limits, auc_by_point, steps_by_point=None) -> TuneResult:
     """Among grid points tied (within 1e-12) for the best tuning score, pick the highest mean training AUC, then grid order.
 
-    `auc_by_point` holds one mean AUC per row of `result.table` (grid order).
+    `auc_by_point` holds one mean AUC per row of `result.table` (grid order). When `steps_by_point` is given
+    (mean steps to target, censored at the budget), the fewest steps wins instead, then grid order.
     """
     table = result.table
     best = float(table["score"].min())
     tied = [i for i, sc in enumerate(table["score"]) if abs(float(sc) - best) <= 1e-12]
     if len(tied) <= 1:
         return result
-    pick = max(tied, key=lambda i: (float(auc_by_point[i]), -i))
+    if steps_by_point is not None:
+        pick = min(tied, key=lambda i: (float(steps_by_point[i]), i))
+    else:
+        pick = max(tied, key=lambda i: (float(auc_by_point[i]), -i))
     params = {k: table.loc[pick, k] for k in grid}
     params = {k: (v.item() if hasattr(v, "item") else v) for k, v in params.items()}
     return TuneResult(params, result.best_score, boundary_dims(params, grid, natural_limits), table)
@@ -144,7 +163,21 @@ def _tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int) -> T
         vals = [(read_tune_job_extra(out_dir, phase, agent, params, s) or {}).get("auc", -1.0) for s in phase.tune_seeds]
         return float(np.mean(vals))
 
-    broken = break_ties(result, spec["grid"], spec.get("natural_limits"), [mean_auc(p) for p in grid_points(spec["grid"])])
+    steps_by_point = None
+    if cfg.get("tuning", {}).get("objective") == "auc":
+
+        def mean_steps(params: dict) -> float:
+            budget = cfg["budget"]["steps"]
+            vals = []
+            for s in phase.tune_seeds:
+                st = (read_tune_job_extra(out_dir, phase, agent, params, s) or {}).get("steps_to_target")
+                vals.append(budget if st is None else st)
+            return float(np.mean(vals))
+
+        steps_by_point = [mean_steps(p) for p in grid_points(spec["grid"])]
+
+    broken = break_ties(result, spec["grid"], spec.get("natural_limits"), [mean_auc(p) for p in grid_points(spec["grid"])],
+                        steps_by_point=steps_by_point)
     if broken is not result:
         n_tied = int((abs(result.table["score"] - result.best_score) <= 1e-12).sum())
         print(f"[{phase.name}] {agent}: tie of {n_tied} points broken by AUC -> {broken.best_params}", flush=True)

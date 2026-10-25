@@ -62,3 +62,25 @@ _TINY_MG = {
 @pytest.fixture
 def tiny_mg_cfg():
     return copy.deepcopy(_TINY_MG)
+
+
+def _tiny_mr():
+    cfg = copy.deepcopy(_TINY_MG)
+    cfg["knob"] = {"name": "rooms", "familiar": 2, "sweep": [2]}
+    cfg["env"] = {"level": "multiroom", "max_room_size": 4}
+    cfg["tuning"] = {"objective": "auc"}
+    cfg["budget"] = {"steps": 256, "target_success": 0.95, "cap": 512}
+    cfg["fewshot"] = {"sizes": [], "steps": 0}
+    cfg["agents"] = {
+        "kairi": {"grid": {"ent_coef": [0.01]}, "natural_limits": {"ent_coef": [0.0, None]}},
+        "kaiser": {"fixed": {"ent_coef": 0.01, "ent_coef_from": "kairi"}, "grid": {"rnd_coef": [0.01]},
+                   "natural_limits": {"rnd_coef": [0.0, None]}},
+    }
+    cfg["report"] = {"metric": "auc", "lower_is_better": False, "agents": ["kairi", "kaiser"],
+                     "extra_metrics": {"success": False, "steps_to_95": True}}
+    return cfg
+
+
+@pytest.fixture
+def tiny_mr_cfg():
+    return _tiny_mr()
