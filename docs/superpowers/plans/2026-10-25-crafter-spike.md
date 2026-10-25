@@ -22,10 +22,10 @@
 
 ---
 
-### Task 1: Tests for the script's helpers and a commit of the script
+### Task 1: Tests for the script's helpers
 
 **Files:**
-- Already written, uncommitted: `scripts/spikes/crafter_spike.py`
+- Already written and committed (before Task 1): `scripts/spikes/crafter_spike.py`, and the G1 edit in the spec
 - Create: `tests/test_crafter_spike.py`
 
 **Interfaces:**
@@ -111,8 +111,8 @@ Expected: exit 0.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add scripts/spikes/crafter_spike.py tests/test_crafter_spike.py docs/superpowers/specs/2026-10-22-xp-design.md
-git commit -m "feat(spike): Crafter spike script (plain PPO) and helper tests
+git add tests/test_crafter_spike.py
+git commit -m "test(spike): Crafter spike helper tests
 
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
