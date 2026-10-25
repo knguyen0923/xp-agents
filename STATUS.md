@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: c986a1e -->
+<!-- STATUS_COMMIT: bbef278 -->
 
 ## Current state
 
@@ -39,8 +39,9 @@ progress," read it first.
 - Deep-RL check done the cheap way: few-shot paired re-analysis across all variants (`docs/FINDINGS.md`, `scripts/fewshot_compare.py`, `docs/spikes/fewshot_pairs.csv`); README few-shot sentence corrected (paired CI at size 12 favours Kairi for the tuned Kaiser, not robust; ties at matched entropy). Full size-8 retune not run.
 - Crafter/Showdown future-work sketch written (`docs/FUTURE_WORK.md`, not approved for building; CLAUDE.md scope rule unchanged).
 - 5M-step RND probe DONE: at 4 MultiRoom rooms (size <= 4), RND coef 0.1 reached 95% success in about half the steps of plain PPO (5/5 seeds faster); coef 0.01/0.03 no benefit. Post-hoc, not a protocol result; `docs/FINDINGS.md`, `docs/spikes/multiroom_probe.csv`.
-- **Next:** nothing required. Optional: a protocol-legal confirmation of the probe (needs a design discussion); see RESUME.md.
+- Protocol-legal confirmation of the MultiRoom RND result: discussed and written down in `docs/FUTURE_WORK.md` (options, costs, open decisions); scope undecided, nothing built.
+- **Next:** nothing required; optional confirmation per RESUME.md. Last push was b139f20; the confirmation write-up commit is local.
 
 ## Last updated
 
-2026-10-24 (commit c986a1e)
+2026-10-24 (commit bbef278)
