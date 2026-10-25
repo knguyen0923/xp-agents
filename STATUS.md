@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 5790bd6 -->
+<!-- STATUS_COMMIT: 5aa72c7 -->
 
 ## Current state
 
@@ -42,9 +42,9 @@ progress," read it first.
 - Protocol-legal confirmation of the MultiRoom RND result: discussed and written down in `docs/FUTURE_WORK.md` (options, costs, open decisions); scope undecided, nothing built.
 - MultiRoom confirmation: user chose Option 1 (single level, fully protocol-legal) on 2026-10-25; spec amendment 5.4 written and committed (0959b04). Cross-checked against FINDINGS.md, the probe CSV and the code and corrected (AUC padding, config-switch objective, code-change list, cost 10-13 h); no plan, no code, nothing running.
 - Plan written: `docs/superpowers/plans/2026-10-25-multiroom-confirmation.md` (8 tasks; no code started).
-- Executing the plan on local branch `feat/multiroom-confirmation` (subagent-driven): Task 1 (level-aware env, f91df44) complete; Task 2 (AUC objective, 2eb2057) implemented, review in flight; Tasks 3-8 pending.
-- **Next:** finish Task 2 review, then Task 3; the long run (Task 7) needs the user's go-ahead (details in RESUME.md). Last push was b139f20; later commits are local.
+- Executing the plan on local branch `feat/multiroom-confirmation` (subagent-driven): Tasks 1 (level-aware env, f91df44) and 2 (AUC objective, 2eb2057) complete; Task 3 (matched entropy, 3322be5) implemented, review in flight; Tasks 4-8 pending.
+- **Next:** finish Task 3 review, then Task 4; the long run (Task 7) needs the user's go-ahead (details in RESUME.md). Last push was b139f20; later commits are local.
 
 ## Last updated
 
-2026-10-25 (commit 5790bd6)
+2026-10-25 (commit 5aa72c7)
