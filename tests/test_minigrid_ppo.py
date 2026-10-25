@@ -82,3 +82,11 @@ def test_steps_to_target_needs_a_full_episode_window():
     learner = Learner(PPO, 0.01, None, seed=3)
     out = learner.train(5, 1024, target=0.0)  # some episodes finish (<100); target 0 trips on any non-empty window
     assert out["steps_to_target"] is None
+
+
+def test_learner_trains_and_evaluates_on_multiroom():
+    spec = {"level": "multiroom", "max_room_size": 4}
+    learner = Learner(PPO, 0.01, None, 0, env_spec=spec)
+    learner.train(2, 64)
+    res = learner.evaluate(2, 3)
+    assert 0.0 <= res["success"] <= 1.0

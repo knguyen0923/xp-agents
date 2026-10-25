@@ -8,7 +8,7 @@ pytest.importorskip("minigrid")
 
 from xp.errors import ProtocolError  # noqa: E402
 from xp.minigrid.env import (  # noqa: E402
-    FEWSHOT_EPISODE_OFFSET, TEST_LAYOUT_BASE, TRAIN_STRIDE, VecEnv, eval_layout_seeds, train_layout_seed,
+    FEWSHOT_EPISODE_OFFSET, TEST_LAYOUT_BASE, TRAIN_STRIDE, VecEnv, eval_layout_seeds, make_env, train_layout_seed,
 )
 
 
@@ -59,3 +59,23 @@ def test_recent_window_full_needs_k_finished_episodes():
     assert not env.recent_window_full()
     env.recent.append((1.0, 1.0))
     assert env.recent_window_full()
+
+
+MR = {"level": "multiroom", "max_room_size": 4}
+
+
+def test_make_env_multiroom_uses_room_count_and_room_size():
+    env = make_env(3, MR).unwrapped
+    assert (env.minNumRooms, env.maxNumRooms, env.maxRoomSize) == (3, 3, 4)
+
+
+def test_make_env_defaults_to_doorkey_and_rejects_unknown_levels():
+    assert type(make_env(5).unwrapped).__name__ == "DoorKeyEnv"
+    assert type(make_env(5, {"level": "doorkey"}).unwrapped).__name__ == "DoorKeyEnv"
+    with pytest.raises(ProtocolError):
+        make_env(5, {"level": "nope"})
+
+
+def test_vecenv_multiroom_layouts_are_deterministic_per_seed():
+    a, b = VecEnv(2, 2, seed=4, spec=MR), VecEnv(2, 2, seed=4, spec=MR)
+    assert (a.obs == b.obs).all()

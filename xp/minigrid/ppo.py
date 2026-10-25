@@ -54,8 +54,10 @@ class Learner:
     training a deep copy on a new size. `evaluate` never updates anything.
     """
 
-    def __init__(self, ppo: dict, ent_coef: float, rnd_coef: Optional[float], seed: int, device: str = "cpu"):
+    def __init__(self, ppo: dict, ent_coef: float, rnd_coef: Optional[float], seed: int, device: str = "cpu",
+                 env_spec: Optional[dict] = None):
         self.ppo, self.ent_coef, self.rnd_coef, self.seed = ppo, ent_coef, rnd_coef, int(seed)
+        self.env_spec = env_spec
         self.device = torch.device(device)
         torch.manual_seed(self.seed)
         np.random.seed(self.seed)
@@ -80,7 +82,7 @@ class Learner:
         return h.hexdigest()
 
     def evaluate(self, size: int, n_layouts: int, base: int = TEST_LAYOUT_BASE) -> dict:
-        return evaluate_policy(self.net, size, n_layouts, self.device, base)
+        return evaluate_policy(self.net, size, n_layouts, self.device, base, self.env_spec)
 
     def train(self, size: int, steps: int, first_episode: int = 0, limit: int = FEWSHOT_EPISODE_OFFSET,
               log_every: int = 10, target: float = 0.8) -> dict:
@@ -92,7 +94,7 @@ class Learner:
         n, t_len = c["n_envs"], c["n_steps"]
         batch = n * t_len
         updates = max(1, steps // batch)
-        env = VecEnv(size, n, self.seed, first_episode, limit)
+        env = VecEnv(size, n, self.seed, first_episode, limit, self.env_spec)
         net, opt = self.net, self.opt
         obs_buf = np.zeros((t_len, n, 7, 7, 3), dtype=np.uint8)
         act_buf = torch.zeros((t_len, n), dtype=torch.long, device=device)

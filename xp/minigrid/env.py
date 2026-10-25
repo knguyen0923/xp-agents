@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from typing import Optional
+
 import numpy as np
 import torch
-from minigrid.envs import DoorKeyEnv
+from minigrid.envs import DoorKeyEnv, MultiRoomEnv
 from minigrid.wrappers import ImgObsWrapper
 from torch.distributions import Categorical
 
@@ -15,8 +17,20 @@ TEST_LAYOUT_BASE = 1_000_000_000        # final-evaluation layouts: seeds >= thi
 VALIDATION_LAYOUT_BASE = 2_000_000_000  # tuning-time layouts, disjoint from training and from the test pool
 
 
-def make_env(size: int):
-    return ImgObsWrapper(DoorKeyEnv(size=int(size)))
+def make_env(size: int, spec: Optional[dict] = None):
+    """DoorKey (default; `size` is the grid size) or MultiRoom (`size` is the room count)."""
+    level = (spec or {}).get("level", "doorkey")
+    if level == "doorkey":
+        return ImgObsWrapper(DoorKeyEnv(size=int(size)))
+    if level == "multiroom":
+        n = int(size)
+        return ImgObsWrapper(MultiRoomEnv(minNumRooms=n, maxNumRooms=n, maxRoomSize=int(spec["max_room_size"])))
+    raise ProtocolError(f"unknown env level {level!r}")
+
+
+def _build_env(size: int, spec: Optional[dict]):
+    # `make_env(size)` stays one-argument-callable when spec is None: the scripts in scripts/spikes/ monkeypatch it with a lambda.
+    return make_env(size) if spec is None else make_env(size, spec)
 
 
 def prep(obs_np: np.ndarray, device) -> torch.Tensor:
@@ -47,10 +61,11 @@ STATS_WINDOW = 100  # finished episodes behind `success_100` / `recent_stats`
 class VecEnv:
     """Synchronous vector env. Every episode (including after auto-reset) gets an explicit training layout seed."""
 
-    def __init__(self, size: int, n: int, seed: int, first_episode: int = 0, limit: int = FEWSHOT_EPISODE_OFFSET):
+    def __init__(self, size: int, n: int, seed: int, first_episode: int = 0, limit: int = FEWSHOT_EPISODE_OFFSET,
+                 spec: Optional[dict] = None):
         self.n, self.seed, self.limit = n, int(seed), limit
         self.next_episode = first_episode
-        self.envs = [make_env(size) for _ in range(n)]
+        self.envs = [_build_env(size, spec) for _ in range(n)]
         self.obs = np.stack([self._reset(e) for e in self.envs])
         self.ep_ret = np.zeros(n)
         self.recent = []  # (success, return) of finished episodes
@@ -89,9 +104,10 @@ class VecEnv:
 
 
 @torch.no_grad()
-def evaluate_policy(net, size: int, n_layouts: int, device, base: int = TEST_LAYOUT_BASE) -> dict:
+def evaluate_policy(net, size: int, n_layouts: int, device, base: int = TEST_LAYOUT_BASE,
+                    spec: Optional[dict] = None) -> dict:
     """Success rate and mean return of a frozen policy on a fixed layout pool. Never updates anything."""
-    env = make_env(size)
+    env = _build_env(size, spec)
     wins, rets = 0.0, []
     for layout in eval_layout_seeds(n_layouts, base):
         gen = torch.Generator().manual_seed(layout)  # sampling is deterministic per layout and leaves global RNG alone
