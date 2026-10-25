@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 270c356 -->
+<!-- STATUS_COMMIT: 6283223 -->
 
 ## Current state
 
@@ -46,8 +46,9 @@ progress," read it first.
 - Task 7 RUNNING since 2026-10-25: S=2,938,880 frozen (32e41e2); full run in worktree ../xp-agents-run (see RESUME.md). Re-review of fix wave came back clean.
 - Interim evaluation doc written: `docs/MULTIROOM_EVALUATION.md` + `scripts/multiroom_eval_figs.py` (figures in figs/multiroom/eval_*.png, force-added). Branch merged to main and pushed (c0fd8fe); doc commit 32bc10b is local, not pushed. Kairi tuned: ent_coef 0.01 (interior); Kaiser tuning running.
 - MultiRoom run was paused 16:36 and RESUMED 18:21 (processes continued, nothing lost).
-- **Next:** resume and wait for run, report (Task 7 step 6), Task 8 write-up, then finish branch (merge/push need user's yes)
+- MultiRoom confirmation COMPLETE (2026-10-25): Kairi ent_coef 0.01, Kaiser rnd_coef 0.6 (both interior); on 10 eval seeds Kaiser reached 95% in 0.70M vs 2.23M steps (paired CI of difference [-2.12M, -0.93M]), faster on 10/10, AUC 0.78 vs 0.26, solved 10/10 vs 5/10. Written up in `docs/MULTIROOM_EVALUATION.md`, FINDINGS, README, WRITEUP (commit 5d442de, local, not pushed).
+- **Next:** user decides on pushing; optional cleanup (remove ../xp-agents-run worktree and the git-ignored .superpowers/sdd workspace); no open research items, report (Task 7 step 6), Task 8 write-up, then finish branch (merge/push need user's yes)
 
 ## Last updated
 
-2026-10-25 (commit 270c356)
+2026-10-25 (commit 6283223)
