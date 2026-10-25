@@ -1,0 +1,372 @@
+<style>
+.xp { max-width: 62rem; margin-inline: auto; font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.xp h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 2.1rem; line-height: 1.15; margin: 0 0 var(--cds-gap-sm); text-wrap: balance; }
+.xp h2 { font-size: var(--cds-font-size-title); font-family: var(--font-anthropic-serif); font-weight: 400; margin: 2.6rem 0 var(--cds-gap-xs); text-wrap: balance; }
+.xp h3 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0 0 2px; }
+.xp p { line-height: 1.55; margin: 0 0 var(--cds-gap-sm); max-width: 44rem; font-size: var(--cds-font-size-body); }
+.xp .lede { font-size: 1.05rem; color: var(--color-fg); max-width: 46rem; }
+.xp .muted { color: var(--color-fg-muted); }
+.xp .note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0 0 var(--cds-gap-sm); max-width: none; }
+.xp .grid { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); margin: var(--cds-gap-md) 0; }
+.xp .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; position: relative; }
+.xp .chart { min-height: 14rem; position: relative; }
+.xp .chart.tall { min-height: 19rem; }
+.xp svg text { fill: var(--color-fg-muted); font-size: 11px; font-family: var(--font-anthropic-sans); }
+.xp svg .lbl { fill: var(--color-fg); }
+.xp .legend { display: flex; gap: var(--cds-gap-md); flex-wrap: wrap; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-xs); }
+.xp .sw { display: inline-block; width: .7rem; height: .7rem; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.xp .hero { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); margin: var(--cds-gap-md) 0 var(--cds-gap-sm); }
+.xp .big { font-family: var(--font-anthropic-serif); font-size: 2.3rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.xp .tbl { overflow-x: auto; }
+.xp table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.xp th, .xp td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.xp th:first-child, .xp td:first-child { text-align: left; }
+.xp th { color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); }
+.xp ul { margin: 0 0 var(--cds-gap-sm); padding-left: 1.2rem; max-width: 44rem; line-height: 1.5; font-size: var(--cds-font-size-body); }
+.xp li { margin-bottom: 4px; }
+.xp .tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 5; display: none; }
+.xp .cap { font-size: var(--cds-font-size-caption); letter-spacing: .04em; text-transform: uppercase; color: var(--color-fg-muted); margin: 0 0 4px; max-width: none; }
+.xp .verdict { border-left: 3px solid var(--color-border-line); padding-left: var(--cds-pad-md); margin: var(--cds-gap-md) 0; }
+</style>
+
+<div class="xp" id="xp">
+  <p class="cap">XP project · explore versus exploit</p>
+  <h1>An exploration bonus helps when exploring is the hard part, and where it seemed to lose, the settings had gone stale</h1>
+  <p class="lede">Two agents, same learner. <b class="k1">Kairi</b> has no exploration term. <b class="k2">Kaiser</b> adds one (an uncertainty bonus). We tuned each on a familiar world, froze it, and tested on worlds that drift away. Everything below comes from the project's result tables.</p>
+
+  <div class="hero">
+    <div class="card"><p class="cap">MultiRoom, steps to 95% success</p><div class="big"><span data-source="mr_paired" data-where="metric=steps_to_95" data-field="kairi" data-fmt="M">—</span> → <span data-source="mr_paired" data-where="metric=steps_to_95" data-field="kaiser" data-fmt="M">—</span></div><p class="note">Kairi → Kaiser, mean of 10 fresh seeds</p></div>
+    <div class="card"><p class="cap">Seeds solved within budget</p><div class="big"><span data-source="mr_paired" data-where="metric=reached_95" data-field="kairi" data-fmt="pct">—</span> → <span data-source="mr_paired" data-where="metric=reached_95" data-field="kaiser" data-fmt="pct">—</span></div><p class="note">Kairi → Kaiser</p></div>
+    <div class="card"><p class="cap">Seeds where Kaiser was faster</p><div class="big"><span data-source="mr_paired" data-where="metric=steps_to_95" data-field="better_seeds">—</span></div><p class="note">paired by seed, steps to 95%</p></div>
+  </div>
+
+  <h2>How the test works</h2>
+  <p>Each agent is tuned on the familiar world using tuning seeds only, then frozen. It is then run on separate evaluation seeds at every world setting. The seed pools never overlap, and the code refuses to run if they do. We report paired 95% bootstrap intervals, resampling seeds. A tuned value sitting on the edge of its grid marks the run provisional, and a provisional run never reaches a final chart. Kairi winning somewhere is a valid result.</p>
+
+  <h2>Chapter 1: in a changing bandit, Kaiser wins, and the two fail at the same distance</h2>
+  <p>The bandit is a pull-an-arm world where the best arm moves. Kairi uses epsilon-greedy; Kaiser uses discounted UCB. Each panel shows regret per step (lower is better) as one setting of the world is pushed away from the tuned value. Shaded bands are 95% intervals.</p>
+  <div class="legend"><span><i class="sw" style="background:var(--k1)"></i>Kairi</span><span><i class="sw" style="background:var(--k2)"></i>Kaiser</span></div>
+  <div class="grid" data-source="bandit" id="bandit-grid"></div>
+  <div class="verdict"><p><b>Kaiser has lower regret nearly everywhere.</b> The two exceptions are the largest number of arms and the fastest drift, the two panels where Kairi's line dips below Kaiser's. Both are frozen-settings effects, shown next.</p></div>
+
+  <h2>Chapter 2: both Kairi wins disappear when the agents are retuned</h2>
+  <p>We reran the protocol with the tuning point moved to the shifted world. Each dot is Kairi minus Kaiser regret: above zero means Kaiser is better. Bars are 95% intervals. This is an after-the-fact check and uses information the real protocol does not allow, so it explains the wins rather than replacing them.</p>
+  <div class="grid" data-source="retune" id="retune-grid"></div>
+  <div class="verdict"><p><b>Retuned, Kaiser wins at the points where Kairi had won.</b> The loss came from Kaiser's frozen settings fitting the old world, not from exploring being harmful there. Practical reading: retune Kaiser when the world moves a long way.</p></div>
+
+  <h2>Chapter 3: on DoorKey, the exploration bonus gave no measurable benefit</h2>
+  <p>DoorKey is a MiniGrid key-then-door task, tuned at size 6 and tested at 5, 6, 8 and 12 (10 seeds each, success rate shown). With Kaiser's tuned settings Kairi looks ahead at sizes 8 and 12. That gap does not survive two checks: using a different tuning-tied bonus strength, or giving Kaiser the same entropy coefficient as Kairi, makes the two statistically indistinguishable. A plausible but untested reason: plain exploration already reaches the reward, so the bonus has little to add.</p>
+  <div class="card"><div class="legend"><span><i class="sw" style="background:var(--k1)"></i>Kairi</span><span><i class="sw" style="background:var(--k2)"></i>Kaiser (tuned setting)</span></div><div class="chart" id="doorkey-chart" data-source="doorkey"></div><p class="note">Zero-shot success rate by grid size, 95% intervals. Size 12 is near the floor for both.</p></div>
+
+  <h2>Chapter 4: where exploration is the bottleneck, RND finally helps</h2>
+  <p>That pointed to a level where reaching the goal is hard. MultiRoom with 4 small rooms fits: the agent must find a chain of doors. First, a quick unplanned probe (5 seeds, three bonus strengths) hinted that a strong bonus reaches the goal faster. That probe picked its best value after seeing results, so it is a hint and not evidence.</p>
+  <div class="card"><h3>The hint: steps to 95% success, by setting</h3><p class="note">One dot per seed. Blue bar is the median. A red dot is a seed that never got there in 5M steps.</p><div class="chart" id="probe-chart" data-source="mr_probe"></div></div>
+
+  <h2>Chapter 5: the confirmation, run under the full protocol</h2>
+  <p>We then ran the same level the legal way. Kairi's entropy was tuned first on 3 tuning seeds; Kaiser took that entropy and tuned only its bonus strength over six values from 0.01 to 1.0. The training budget was calibrated so default Kairi just reaches 95% on the tuning seeds. Both tuned values landed inside their grids.</p>
+  <div class="card"><h3>Tuning: training AUC of success per setting</h3><p class="note">Higher is better. Bars are the mean of 3 tuning seeds, dots are single seeds, the chosen setting is filled. Chosen: Kairi entropy <b data-source="mr_tuned" data-where="agent=kairi&amp;best=1" data-field="coef">—</b>, Kaiser bonus <b data-source="mr_tuned" data-where="agent=kaiser&amp;best=1" data-field="coef">—</b>.</p><div class="grid" style="margin:0" id="tuning-grid" data-source="mr_tuning"></div></div>
+  <p class="muted" style="margin-top:var(--cds-gap-md)">Kairi's pick is noisy: with 3 seeds and all-or-nothing outcomes, its winner rests on a couple of take-off times. Kaiser's larger bonus values all learn fast, so its pick is steadier.</p>
+
+  <h3 style="margin-top:2rem">Result on 10 fresh seeds, success while training</h3>
+  <div class="card"><div class="legend"><span><i class="sw" style="background:var(--k1)"></i>Kairi</span><span><i class="sw" style="background:var(--k2)"></i>Kaiser</span></div><div class="chart tall" id="curves-chart" data-source="mr_curves"></div><p class="note">Thin lines are single seeds, thick lines the mean. Dashed line: 95% success. Kaiser takes off early and nearly together; Kairi's seeds take off anywhere from the middle of the run to past its end.</p></div>
+
+  <div class="card" style="margin-top:var(--cds-gap-md)"><h3>Seed by seed</h3><p class="note">Steps to 95% for each evaluation seed. A seed that never reached 95% counts as the full budget (right edge).</p><div class="chart" id="pairs-chart" data-source="mr_pairs"></div></div>
+
+  <div class="card tbl" style="margin-top:var(--cds-gap-md)"><h3>Paired comparison, Kaiser minus Kairi</h3><p class="note">Mean over 10 seeds; interval is a 95% paired bootstrap that resamples seeds. Steps are censored at the budget, so the step gap is a lower bound.</p>
+  <table id="paired-table" data-source="mr_paired" data-row-key="metric"><thead><tr><th data-field="label">Metric</th><th data-field="kairi">Kairi</th><th data-field="kaiser">Kaiser</th><th data-field="diff">Difference</th><th data-field="lo">Low</th><th data-field="hi">High</th><th data-field="better_seeds">Kaiser better on</th></tr></thead><tbody></tbody></table></div>
+
+  <div class="verdict"><p><b>Kaiser is faster on all 10 evaluation seeds.</b> The interval for the step gap runs from <span data-source="mr_paired" data-where="metric=steps_to_95" data-field="lo" data-fmt="M">—</span> to <span data-source="mr_paired" data-where="metric=steps_to_95" data-field="hi" data-fmt="M">—</span> steps, nowhere near zero. This is the project's first confirmed exploration-bonus advantage in MiniGrid.</p></div>
+
+  <h2>What this does and does not show</h2>
+  <ul>
+    <li><b>One level.</b> It says nothing about other room counts, and DoorKey still shows no benefit.</li>
+    <li><b>The design came after the probe.</b> The level, target and bonus range were chosen after seeing it, and two tuning seeds overlap the probe seeds. Only the evaluation seeds are fresh.</li>
+    <li><b>Kairi's failures are budget failures.</b> The budget was fitted to Kairi's tuning seeds, and in the probe plain PPO solved every seed given 5M steps. Trust the speed gaps (steps, AUC) more than the solved-or-not counts.</li>
+    <li><b>Steps, not time.</b> The bonus adds compute per step; wall-clock was not compared.</li>
+    <li><b>Frozen settings are brittle.</b> In the bandit, Kaiser's tuned values transfer worse than Kairi's. The advice is to retune it after a large shift.</li>
+  </ul>
+  <p class="note">Sources: results tables in the project repository (<code>docs/FINDINGS.md</code>, <code>docs/MULTIROOM_EVALUATION.md</code>, <code>docs/spikes/</code>, <code>figs/</code>). The bandit, retune, DoorKey, probe and MultiRoom tables are copies of those files; the MultiRoom curves are sampled every 4th logged point.</p>
+</div>
+
+<script>
+(function () {
+  var root = document.getElementById('xp');
+  var C1 = dash.colors[0], C2 = dash.colors[1];
+  root.style.setProperty('--k1', C1); root.style.setProperty('--k2', C2);
+  root.querySelectorAll('.k1').forEach(function (e) { e.style.color = C1; });
+  root.querySelectorAll('.k2').forEach(function (e) { e.style.color = C2; });
+
+  dash.calc('mr_pairs', {
+    inputs: ['mr_seeds'], title: 'Steps to 95% by seed',
+    description: 'One row per evaluation seed: steps to 95% for Kairi and Kaiser.',
+    fn: function (mr_seeds) {
+      var m = {};
+      mr_seeds.forEach(function (r) { var s = r.seed; m[s] = m[s] || { seed: s }; m[s][r.agent] = Number(r.steps_to_95); });
+      return Object.keys(m).sort().map(function (s) { return { seed: s, kairi: m[s].kairi, kaiser: m[s].kaiser }; });
+    }
+  });
+  dash.calc('mr_tuned', {
+    inputs: ['mr_tuning'], title: 'Mean tuning AUC by setting',
+    description: 'Mean AUC over the 3 tuning seeds for each setting, with the best per agent flagged.',
+    fn: function (mr_tuning) {
+      var g = {};
+      mr_tuning.forEach(function (r) { var k = r.agent + '|' + r.coef; (g[k] = g[k] || { agent: r.agent, coef: r.coef, s: 0, n: 0 }); g[k].s += Number(r.auc); g[k].n += 1; });
+      var out = Object.keys(g).map(function (k) { return { agent: g[k].agent, coef: g[k].coef, mean_auc: g[k].s / g[k].n, best: 0 }; });
+      ['kairi', 'kaiser'].forEach(function (a) {
+        var rs = out.filter(function (r) { return r.agent === a; });
+        var b = rs.reduce(function (x, y) { return y.mean_auc > x.mean_auc ? y : x; }, rs[0]);
+        if (b) b.best = 1;
+      });
+      return out;
+    }
+  });
+
+  var fmtM = function (v) { return (v / 1e6).toFixed(2) + 'M'; };
+  var fmtPct = function (v) { return Math.round(v * 100) + '%'; };
+  function rowsOf(id) { var d = dash.data(id); return d.status === 'ok' ? d.data : null; }
+  function okAll(ids) { return ids.every(function (i) { return dash.data(i).status === 'ok'; }); }
+  function num(v) { return v === '' || v == null ? NaN : Number(v); }
+
+  var tip = document.createElement('div'); tip.className = 'tip'; root.appendChild(tip);
+  function showTip(ev, html) {
+    tip.innerHTML = ''; html.forEach(function (l) { var d = document.createElement('div'); d.textContent = l; tip.appendChild(d); });
+    tip.style.display = 'block';
+    var x = ev.clientX + 12, y = ev.clientY + 12;
+    var w = tip.offsetWidth;
+    if (x + w > window.innerWidth - 8) x = ev.clientX - w - 12;
+    tip.style.position = 'fixed'; tip.style.left = Math.max(4, x) + 'px'; tip.style.top = y + 'px';
+  }
+  function hideTip() { tip.style.display = 'none'; }
+  function dot(g, x, y, r, fill, lines, extra) {
+    var c = g.append('circle').attr('cx', x).attr('cy', y).attr('r', r).attr('fill', fill);
+    if (extra) Object.keys(extra).forEach(function (k) { c.attr(k, extra[k]); });
+    c.on('mousemove', function (ev) { showTip(ev, lines); }).on('mouseleave', hideTip);
+    return c;
+  }
+
+  function mk(el, h, m) {
+    el.innerHTML = '';
+    var W = Math.max(240, el.clientWidth || 300);
+    var svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', '0 0 ' + W + ' ' + h);
+    var g = svg.append('g').attr('transform', 'translate(' + m.l + ',' + m.t + ')');
+    return { svg: svg, g: g, w: W - m.l - m.r, h: h - m.t - m.b };
+  }
+  function axes(c, x, y, o) {
+    o = o || {};
+    var ax = c.g.append('g').attr('transform', 'translate(0,' + c.h + ')').call(d3.axisBottom(x).ticks(o.xt || 5).tickFormat(o.xf || null).tickSizeOuter(0));
+    var ay = c.g.append('g').call(d3.axisLeft(y).ticks(o.yt || 5).tickFormat(o.yf || null).tickSizeOuter(0));
+    [ax, ay].forEach(function (a) { a.attr('font-size', null).attr('font-family', null); a.selectAll('line,path').attr('stroke', 'var(--cds-chart-axis)'); });
+    if (o.grid) c.g.append('g').call(d3.axisLeft(y).ticks(o.yt || 5).tickSize(-c.w).tickFormat('')).call(function (s) { s.select('.domain').remove(); s.selectAll('line').attr('stroke', 'var(--cds-chart-grid)'); });
+    if (o.xlabel) c.g.append('text').attr('x', c.w).attr('y', c.h + 32).attr('text-anchor', 'end').text(o.xlabel);
+    if (o.ylabel) c.g.append('text').attr('x', 0).attr('y', -8).attr('text-anchor', 'start').text(o.ylabel);
+  }
+  var fmtNum = function (v) { return d3.format('.3~g')(v); };
+
+  // ---- Bandit small multiples
+  function drawBandit() {
+    var host = document.getElementById('bandit-grid');
+    var rows = rowsOf('bandit');
+    if (!rows) { host.innerHTML = ''; return; }
+    var worlds = ['jump rate', 'noise sigma', 'arms k', 'drift', 'reversed tuning'];
+    var titles = { 'jump rate': 'How often the best arm jumps', 'noise sigma': 'Reward noise', 'arms k': 'Number of arms', 'drift': 'Drift of arm values', 'reversed tuning': 'Tuned at the fast-jump end, swept the other way' };
+    host.innerHTML = '';
+    worlds.forEach(function (wd) {
+      var rs = rows.filter(function (r) { return r.world === wd; }).map(function (r) { return { agent: r.agent, x: r.knob, v: num(r.regret), lo: num(r.lo), hi: num(r.hi) }; });
+      var card = document.createElement('div'); card.className = 'card';
+      var h = document.createElement('h3'); h.textContent = titles[wd]; card.appendChild(h);
+      var p = document.createElement('p'); p.className = 'note'; p.textContent = 'x: setting of the world · y: regret per step'; card.appendChild(p);
+      var el = document.createElement('div'); el.className = 'chart'; card.appendChild(el); host.appendChild(card);
+      var c = mk(el, 220, { l: 38, r: 10, t: 14, b: 36 });
+      var xs = Array.from(new Set(rs.map(function (r) { return r.x; }))).sort(function (a, b) { return Number(a) - Number(b); });
+      var x = d3.scalePoint().domain(xs).range([0, c.w]).padding(0.3);
+      var y = d3.scaleLinear().domain([Math.min(0, d3.min(rs, function (r) { return r.lo; })), d3.max(rs, function (r) { return r.hi; })]).nice().range([c.h, 0]);
+      axes(c, x, y, { grid: true, yt: 4, yf: d3.format('.2f') });
+      [['kairi', C1], ['kaiser', C2]].forEach(function (a) {
+        var pts = xs.map(function (k) { return rs.filter(function (r) { return r.agent === a[0] && r.x === k; })[0]; }).filter(Boolean);
+        c.g.append('path').attr('d', d3.area().x(function (d) { return x(d.x); }).y0(function (d) { return y(d.lo); }).y1(function (d) { return y(d.hi); })(pts)).attr('fill', a[1]).attr('opacity', 0.16);
+        c.g.append('path').attr('d', d3.line().x(function (d) { return x(d.x); }).y(function (d) { return y(d.v); })(pts)).attr('fill', 'none').attr('stroke', a[1]).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+        pts.forEach(function (d) { dot(c.g, x(d.x), y(d.v), 3, a[1], [wd + ' ' + d.x, a[0] + ': ' + fmtNum(d.v), '95% CI ' + fmtNum(d.lo) + ' to ' + fmtNum(d.hi)]); });
+      });
+    });
+  }
+
+  // ---- Retune forest
+  function drawRetune() {
+    var host = document.getElementById('retune-grid');
+    var rows = rowsOf('retune');
+    if (!rows) { host.innerHTML = ''; return; }
+    host.innerHTML = '';
+    var shifts = Array.from(new Set(rows.map(function (r) { return r.shift; })));
+    var names = { 'retuned at k=50': 'Both agents retuned for many arms', 'retuned at drift 0.1': 'Both agents retuned for fast drift' };
+    shifts.forEach(function (sh) {
+      var rs = rows.filter(function (r) { return r.shift === sh; }).map(function (r) { return { x: r.knob, v: num(r.kairi_minus_kaiser), lo: num(r.lo), hi: num(r.hi) }; });
+      var card = document.createElement('div'); card.className = 'card';
+      var h = document.createElement('h3'); h.textContent = names[sh] || sh; card.appendChild(h);
+      var p = document.createElement('p'); p.className = 'note'; p.textContent = 'Above zero: Kaiser better. Below: Kairi better. x: setting of the world.'; card.appendChild(p);
+      var el = document.createElement('div'); el.className = 'chart'; card.appendChild(el); host.appendChild(card);
+      var c = mk(el, 230, { l: 42, r: 10, t: 14, b: 36 });
+      var x = d3.scalePoint().domain(rs.map(function (r) { return r.x; })).range([0, c.w]).padding(0.4);
+      var y = d3.scaleLinear().domain([d3.min(rs, function (r) { return Math.min(r.lo, 0); }), d3.max(rs, function (r) { return Math.max(r.hi, 0); })]).nice().range([c.h, 0]);
+      axes(c, x, y, { grid: true, yt: 4, yf: d3.format('.2f') });
+      c.g.append('line').attr('x1', 0).attr('x2', c.w).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
+      rs.forEach(function (d) {
+        var col = d.lo > 0 ? C2 : d.hi < 0 ? C1 : 'var(--cds-chart-muted)';
+        c.g.append('line').attr('x1', x(d.x)).attr('x2', x(d.x)).attr('y1', y(d.lo)).attr('y2', y(d.hi)).attr('stroke', col).attr('stroke-width', 2).attr('stroke-linecap', 'round');
+        dot(c.g, x(d.x), y(d.v), 4.5, col, ['setting ' + d.x, 'Kairi − Kaiser: ' + fmtNum(d.v), '95% CI ' + fmtNum(d.lo) + ' to ' + fmtNum(d.hi), d.lo > 0 ? 'Kaiser better' : d.hi < 0 ? 'Kairi better' : 'tie']);
+      });
+    });
+  }
+
+  // ---- DoorKey grouped bars
+  function drawDoorkey() {
+    var el = document.getElementById('doorkey-chart');
+    var rows = rowsOf('doorkey');
+    if (!rows) { el.innerHTML = ''; return; }
+    var rs = rows.map(function (r) { return { agent: r.agent, x: r.size, v: num(r.success), lo: num(r.lo), hi: num(r.hi) }; });
+    var c = mk(el, 240, { l: 40, r: 10, t: 14, b: 38 });
+    var sizes = Array.from(new Set(rs.map(function (r) { return r.x; }))).sort(function (a, b) { return a - b; });
+    var x0 = d3.scaleBand().domain(sizes).range([0, c.w]).padding(0.25);
+    var x1 = d3.scaleBand().domain(['kairi', 'kaiser']).range([0, x0.bandwidth()]).padding(0.1);
+    var y = d3.scaleLinear().domain([0, 1]).range([c.h, 0]);
+    axes(c, x0, y, { grid: true, yf: d3.format('.0%'), xf: function (s) { return 'size ' + Number(s); } });
+    rs.forEach(function (d) {
+      var col = d.agent === 'kairi' ? C1 : C2, bx = x0(d.x) + x1(d.agent), bw = x1.bandwidth();
+      var r = c.g.append('rect').attr('x', bx).attr('y', y(d.v)).attr('width', bw).attr('height', Math.max(0, c.h - y(d.v))).attr('rx', 4).attr('fill', col);
+      r.on('mousemove', function (ev) { showTip(ev, ['size ' + Number(d.x) + ', ' + d.agent, 'success ' + d3.format('.1%')(d.v), '95% CI ' + d3.format('.1%')(d.lo) + ' to ' + d3.format('.1%')(d.hi)]); }).on('mouseleave', hideTip);
+      c.g.append('line').attr('x1', bx + bw / 2).attr('x2', bx + bw / 2).attr('y1', y(d.lo)).attr('y2', y(d.hi)).attr('stroke', 'var(--color-fg)').attr('stroke-width', 1.5);
+    });
+  }
+
+  // ---- Probe dots
+  function drawProbe() {
+    var el = document.getElementById('probe-chart');
+    var rows = rowsOf('mr_probe');
+    if (!rows) { el.innerHTML = ''; return; }
+    var lab = function (r) { return r.agent === 'ppo' ? 'Plain PPO' : 'RND ' + r.rnd_coef; };
+    var cats = ['Plain PPO', 'RND 0.01', 'RND 0.03', 'RND 0.1'];
+    var rs = rows.map(function (r) { return { cat: lab(r), s: num(r.steps_to_95) / 1e6, ok: r.reached_95 === 'True', seed: r.seed }; });
+    var c = mk(el, 280, { l: 40, r: 10, t: 14, b: 36 });
+    var x = d3.scalePoint().domain(cats).range([0, c.w]).padding(0.5);
+    var y = d3.scaleLinear().domain([0, 5.2]).range([c.h, 0]);
+    axes(c, x, y, { grid: true, yf: function (v) { return v + 'M'; } });
+    cats.forEach(function (cat, i) {
+      var v = rs.filter(function (r) { return r.cat === cat; });
+      var med = d3.median(v, function (r) { return r.s; });
+      c.g.append('line').attr('x1', x(cat) - 28).attr('x2', x(cat) + 28).attr('y1', y(med)).attr('y2', y(med)).attr('stroke', C1).attr('stroke-width', 3).attr('stroke-linecap', 'round');
+      v.forEach(function (r, j) {
+        var jx = (j - (v.length - 1) / 2) * 9;
+        dot(c.g, x(cat) + jx, y(r.s), 4.5, r.ok ? 'var(--color-fg)' : 'var(--cds-chart-status-critical)', [cat + ', seed ' + r.seed, r.ok ? d3.format('.2f')(r.s) + 'M steps to 95%' : 'never reached 95% in 5M steps']);
+      });
+    });
+  }
+
+  // ---- Tuning panels
+  function drawTuning() {
+    var host = document.getElementById('tuning-grid');
+    var rows = rowsOf('mr_tuning'), tuned = rowsOf('mr_tuned');
+    if (!rows || !tuned) { host.innerHTML = ''; return; }
+    host.innerHTML = '';
+    [['kairi', 'Kairi: entropy coefficient', C1], ['kaiser', 'Kaiser: RND bonus strength', C2]].forEach(function (a) {
+      var cell = document.createElement('div'); cell.style.minWidth = '0';
+      var h = document.createElement('p'); h.className = 'cap'; h.textContent = a[1]; cell.appendChild(h);
+      var el = document.createElement('div'); el.className = 'chart'; cell.appendChild(el); host.appendChild(cell);
+      var rs = rows.filter(function (r) { return r.agent === a[0]; }).map(function (r) { return { x: r.coef, auc: num(r.auc), seed: r.seed }; });
+      var best = tuned.filter(function (r) { return r.agent === a[0] && Number(r.best) === 1; })[0];
+      var cats = Array.from(new Set(rs.map(function (r) { return r.x; }))).sort(function (p, q) { return Number(p) - Number(q); });
+      var c = mk(el, 230, { l: 38, r: 8, t: 14, b: 34 });
+      var x = d3.scaleBand().domain(cats).range([0, c.w]).padding(0.25);
+      var y = d3.scaleLinear().domain([0, 1]).range([c.h, 0]);
+      axes(c, x, y, { grid: true, yf: d3.format('.1f') });
+      cats.forEach(function (k) {
+        var v = rs.filter(function (r) { return r.x === k; }), m = d3.mean(v, function (r) { return r.auc; });
+        var isBest = best && String(best.coef) === String(k);
+        c.g.append('rect').attr('x', x(k)).attr('y', y(m)).attr('width', x.bandwidth()).attr('height', Math.max(0, c.h - y(m))).attr('rx', 4).attr('fill', isBest ? a[2] : 'var(--cds-chart-muted)').attr('opacity', isBest ? 1 : 0.55);
+        v.forEach(function (r) { dot(c.g, x(k) + x.bandwidth() / 2, y(r.auc), 3, 'var(--color-fg)', [a[0] + ' ' + k + ', seed ' + r.seed, 'AUC ' + d3.format('.3f')(r.auc), 'mean ' + d3.format('.3f')(m)]); });
+      });
+    });
+  }
+
+  // ---- Eval curves
+  function drawCurves() {
+    var el = document.getElementById('curves-chart');
+    var rows = rowsOf('mr_curves');
+    if (!rows) { el.innerHTML = ''; return; }
+    var rs = rows.map(function (r) { var v = num(r.success); return { a: r.agent, s: r.seed, x: Number(r.steps), v: isNaN(v) ? 0 : v }; });
+    var c = mk(el, 320, { l: 40, r: 10, t: 14, b: 38 });
+    var xmax = d3.max(rs, function (r) { return r.x; });
+    var x = d3.scaleLinear().domain([0, xmax]).range([0, c.w]);
+    var y = d3.scaleLinear().domain([0, 1]).range([c.h, 0]);
+    axes(c, x, y, { grid: true, yf: d3.format('.0%'), xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'training steps' });
+    c.g.append('line').attr('x1', 0).attr('x2', c.w).attr('y1', y(0.95)).attr('y2', y(0.95)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
+    var line = d3.line().x(function (d) { return x(d.x); }).y(function (d) { return y(d.v); });
+    [['kairi', C1], ['kaiser', C2]].forEach(function (a) {
+      var mine = rs.filter(function (r) { return r.a === a[0]; });
+      var bySeed = d3.group(mine, function (r) { return r.s; });
+      bySeed.forEach(function (pts) { c.g.append('path').attr('d', line(pts)).attr('fill', 'none').attr('stroke', a[1]).attr('opacity', 0.22).attr('stroke-width', 1); });
+      var byX = d3.rollups(mine, function (v) { return d3.mean(v, function (r) { return r.v; }); }, function (r) { return r.x; }).sort(function (p, q) { return p[0] - q[0]; }).map(function (p) { return { x: p[0], v: p[1] }; });
+      c.g.append('path').attr('d', line(byX)).attr('fill', 'none').attr('stroke', a[1]).attr('stroke-width', 2.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+      c.g.append('text').attr('x', c.w - 4).attr('y', y(byX[byX.length - 1].v) + (a[0] === 'kairi' ? 14 : -6)).attr('text-anchor', 'end').attr('class', 'lbl').style('fill', a[1]).text((a[0] === 'kairi' ? 'Kairi ' : 'Kaiser ') + d3.format('.0%')(byX[byX.length - 1].v));
+    });
+    var ov = c.g.append('rect').attr('width', c.w).attr('height', c.h).attr('fill', 'transparent');
+    ov.on('mousemove', function (ev) {
+      var px = d3.pointer(ev)[0], xv = x.invert(px);
+      var lines = [d3.format('.2f')(xv / 1e6) + 'M steps'];
+      [['kairi', 'Kairi'], ['kaiser', 'Kaiser']].forEach(function (a) {
+        var mine = rs.filter(function (r) { return r.a === a[0]; });
+        var near = d3.min(mine, function (r) { return Math.abs(r.x - xv); });
+        var sel = mine.filter(function (r) { return Math.abs(r.x - xv) === near; });
+        lines.push(a[1] + ' mean ' + d3.format('.0%')(d3.mean(sel, function (r) { return r.v; })));
+      });
+      showTip(ev, lines);
+    }).on('mouseleave', hideTip);
+  }
+
+  // ---- Seed dumbbells
+  function drawPairs() {
+    var el = document.getElementById('pairs-chart');
+    var rows = rowsOf('mr_pairs');
+    if (!rows) { el.innerHTML = ''; return; }
+    var rs = rows.map(function (r) { return { seed: r.seed, a: num(r.kairi), b: num(r.kaiser) }; });
+    var budget = d3.max(rs, function (r) { return Math.max(r.a, r.b); });
+    var c = mk(el, 28 * rs.length + 60, { l: 44, r: 16, t: 10, b: 38 });
+    var x = d3.scaleLinear().domain([0, budget]).range([0, c.w]);
+    var y = d3.scaleBand().domain(rs.map(function (r) { return r.seed; })).range([0, c.h]).padding(0.4);
+    axes(c, x, y, { xt: 6, xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'steps to 95%' });
+    rs.forEach(function (r) {
+      var yy = y(r.seed) + y.bandwidth() / 2;
+      c.g.append('line').attr('x1', x(r.b)).attr('x2', x(r.a)).attr('y1', yy).attr('y2', yy).attr('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 2).attr('stroke-linecap', 'round');
+      var cens = r.a >= budget;
+      dot(c.g, x(r.a), yy, 5, C1, ['seed ' + r.seed, 'Kairi: ' + (cens ? 'did not reach 95% (counted as full budget)' : d3.format('.2f')(r.a / 1e6) + 'M steps')]);
+      dot(c.g, x(r.b), yy, 5, C2, ['seed ' + r.seed, 'Kaiser: ' + d3.format('.2f')(r.b / 1e6) + 'M steps']);
+    });
+  }
+
+  // ---- Paired table (words only) and mark filling
+  function drawTable() {
+    var t = document.getElementById('paired-table'), rows = rowsOf('mr_paired');
+    var tb = t.querySelector('tbody'); tb.innerHTML = '';
+    if (!rows) return;
+    rows.forEach(function (r) {
+      var f = r.metric === 'steps_to_95' ? function (v) { return (Number(v) / 1e6).toFixed(2) + 'M'; } : r.metric === 'auc' ? function (v) { return Number(v).toFixed(3); } : function (v) { return Math.round(Number(v) * 100) + '%'; };
+      var tr = document.createElement('tr'); tr.setAttribute('data-key', r.metric);
+      [r.label, f(r.kairi), f(r.kaiser), (Number(r.diff) > 0 ? '+' : '') + f(r.diff), f(r.lo), f(r.hi), r.better_seeds].forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+  }
+  function fillMarks() {
+    root.querySelectorAll('[data-source][data-field][data-where]').forEach(function (el) {
+      var rows = rowsOf(el.getAttribute('data-source'));
+      if (!rows) return;
+      var kv = el.getAttribute('data-where').split('&').map(function (p) { return p.split('='); });
+      var hit = rows.filter(function (r) { return kv.every(function (q) { return String(r[q[0]]) === q[1]; }); })[0];
+      if (!hit) return;
+      var v = hit[el.getAttribute('data-field')], fm = el.getAttribute('data-fmt');
+      el.textContent = fm === 'M' ? fmtM(Number(v)) : fm === 'pct' ? fmtPct(Number(v)) : v;
+    });
+  }
+
+  dash.onData(function () {
+    drawBandit(); drawRetune(); drawDoorkey(); drawProbe(); drawTuning(); drawCurves(); drawPairs(); drawTable(); fillMarks();
+  });
+})();
+</script>
