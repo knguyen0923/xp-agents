@@ -1,0 +1,62 @@
+# Phase 2b: MultiRoom confirmation (spec 5.4). Phase name stays "minigrid" so `xp.run --phase minigrid` accepts it;
+# run it with a separate --out (results/multiroom). budget.steps is a PLACEHOLDER (the cap) until calibration sets S (plan Task 7).
+phase: minigrid
+knob:
+  name: rooms
+  familiar: 4
+  sweep: [4]
+env:
+  level: multiroom
+  max_room_size: 4
+tuning:
+  objective: auc
+seeds:
+  tune: [0, 3]
+  eval: [100, 110]
+  chunk: 1
+  agent_seed: 0
+budget:
+  steps: 5000000
+  target_success: 0.95
+  cap: 5000000
+eval:
+  layouts: 200
+fewshot:
+  sizes: []
+  steps: 0
+ppo:
+  n_envs: 8
+  n_steps: 128
+  epochs: 4
+  minibatches: 4
+  lr: 0.00025
+  gamma: 0.99
+  lam: 0.95
+  clip: 0.2
+  vf_coef: 0.5
+  rnd_lr: 0.0001
+agents:
+  kairi:
+    grid:
+      ent_coef: [0.003, 0.006, 0.01, 0.02, 0.05, 0.1]
+    natural_limits:
+      ent_coef: [0.0, null]
+  kaiser:
+    fixed:
+      ent_coef: 0.01          # default entropy: used only by calibration; tuning uses Kairi's tuned value
+      ent_coef_from: kairi
+    grid:
+      rnd_coef: [0.01, 0.03, 0.1, 0.3, 0.6, 1.0]
+    natural_limits:
+      rnd_coef: [0.0, null]
+report:
+  metric: auc
+  lower_is_better: false
+  agents: [kairi, kaiser]
+  extra_metrics:
+    success: false
+    steps_to_95: true
+    reached_95: false
+  xlabel: MultiRoom, 4 rooms (single familiar level)
+  ylabel: training AUC of success (95% CI)
+  title: MultiRoom, tuned Kairi vs Kaiser
