@@ -1,5 +1,15 @@
 # XP — Resume
 
+## >>> TO CONTINUE: say "resume" (or "read RESUME.md and continue"). Then do exactly this: <<<
+**Execute the Crafter spike plan with subagent-driven development** (the user chose subagent-driven, 2026-10-25).
+1. Read this file, `STATUS.md`, the spec section 5.5 (`docs/superpowers/specs/2026-10-22-xp-design.md`) and the plan `docs/superpowers/plans/2026-10-25-crafter-spike.md`. Do not redo the reading of the spec or the earlier MultiRoom work; it is done and pushed.
+2. Invoke `superpowers:subagent-driven-development` on that plan. The ledger lives in the git-ignored `.superpowers/sdd/2026-10-25-crafter-spike/progress.md`; if it exists, trust it and `git log` over memory.
+3. Tasks 1 and 2 (tests, throughput) can run without asking. **Task 3 is a hard stop: ask the user for the go-ahead before the two 1M-step runs (Task 4).** Never push without the user's yes. Plain PPO only; read no RND result.
+4. State of the tree at handoff: script `scripts/spikes/crafter_spike.py` and the spec G1 edit (raised 3 to 5) are COMMITTED; `tests/test_crafter_spike.py` does not exist yet (Task 1 creates it); `crafter` 1.8.3 is installed in `.venv` (not in requirements). Smoke test already done: 41k steps, area 32, CPU 572 / MPS 701 steps/s, near-random `ach_100` about 3.
+5. Keep STATUS.md current (commit other files first, then a STATUS-only marker commit). Showdown (spec 5.6) is specified but NOT approved for building.
+
+---
+
 IN PROGRESS (2026-10-25): the user lifted the Crafter scope rule and asked for both Crafter and Showdown to be specified as generality tests (single familiar world, no shift knob; Showdown agents = PPO vs PPO+RND on structured features). Spec amendments 5.5 (Crafter) and 5.6 (Showdown) are WRITTEN and committed in `docs/superpowers/specs/2026-10-22-xp-design.md`; CLAUDE.md scope updated (Crafter in scope, spike first; Showdown specified but NOT approved for building). The user approved the spec; the Crafter SPIKE PLAN is written: docs/superpowers/plans/2026-10-25-crafter-spike.md (5 tasks; Task 3 asks the user's go-ahead before the two 1M-step runs). Awaiting the user's choice of execution mode. The Crafter spike is NOT done: only `pip install crafter` (1.8.3, in .venv, not in requirements) and env timing (random policy: ~1000 / 395 / 141 steps/s at area 32 / 64 / 96) were done; no spike script exists. Next: execute the spike plan (script scripts/spikes/crafter_spike.py is written, smoke-tested at 41k steps on CPU 572 / MPS 701 steps/s, and UNCOMMITTED until plan Task 1). G1 was raised from 3 to 5 in spec 5.5 because a near-random policy already averages ~3 achievements. Do not build Showdown. Pushes need the user's yes. Everything else below is history; MultiRoom is complete and pushed.
 
 Nothing is running. **MiniGrid is closed** (user decision 2026-10-24): entropy check done (matched-entropy Kaiser ties Kairi at every size, n=10, README post-hoc);
