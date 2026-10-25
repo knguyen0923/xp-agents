@@ -1,6 +1,8 @@
 # MultiRoom confirmation: evaluation document
 
-**Status: INTERIM (written 2026-10-25, run in progress).** Calibration and Kairi tuning are done. Kaiser tuning and the 20 evaluation jobs are still running (about 10 more hours). Sections marked **PENDING** are filled in after the run. Everything else is final.
+**Status: COMPLETE (2026-10-25).** All 20 evaluation jobs finished; the run is not provisional (no tuned value on a grid edge).
+
+**Headline:** under the full protocol, Kaiser (PPO + RND, `rnd_coef` 0.6) learned MultiRoom (4 rooms) much faster than Kairi (plain PPO, `ent_coef` 0.01): faster on all 10 of 10 fresh eval seeds, about 1.5M fewer steps to 95% success (paired 95% CI 0.9M to 2.1M), and 10/10 seeds solved against 5/10 for Kairi within the budget. Read section 7 for what this does and does not show.
 
 Binding design: `docs/superpowers/specs/2026-10-22-xp-design.md`, section 5.4. Plan: `docs/superpowers/plans/2026-10-25-multiroom-confirmation.md`.
 Figures are made by `scripts/multiroom_eval_figs.py` (rerun it any time; it draws whatever exists).
@@ -58,8 +60,6 @@ How to read it: thin lines are the three tune seeds, black is their mean, dashed
 
 ![tuning](../figs/multiroom/eval_tuning.png)
 
-*(The Kaiser row appears in this figure once Kaiser tuning has run; regenerate to see it.)*
-
 How to read it:
 - **Left:** mean training success vs steps, one line per `ent_coef` (thick = winner).
 - **Middle:** the tuning score. Bars are the mean AUC over 3 seeds, dots are the individual seeds, blue is the winner.
@@ -87,42 +87,66 @@ No. AUC here is measured up to S, and S was set to where default Kairi barely fi
 1. **Noisy.** With 3 seeds and all-or-nothing outcomes, the ranking turns on a few take-off times. 0.006 has the single best seed (0.497), and 0.01 wins mainly because two seeds took off. A different seed set might choose 0.006 or 0.02. The protocol fixes the seeds in advance, so this is not a validity error, but treat "0.01" as a reasonable choice, not a precise optimum. Kaiser inherits this entropy.
 2. **0.01 is slightly favoured by construction.** S was calibrated on 0.01's own curve (the same seeds and settings), so the budget is cut exactly where 0.01 finishes. Other entropy values are truncated at a point that suits them less. This effect is likely small, because 0.006 and 0.02 stall at 0.33 rather than just finishing late, but it is real and should be reported.
 
-## 5. Kaiser tuning — PENDING
+## 5. Kaiser tuning (done)
 
-Expected content: AUC per `rnd_coef` in 0.01 to 1.0, with entropy matched to 0.01, the winner, and whether it sits on an edge.
-Risk to check: a winner at 1.0 makes the run provisional (the probe never tried above 0.1), so it would need a widened grid and a rerun.
+Entropy matched to Kairi's tuned 0.01. The top row of the tuning figure in section 4 is Kairi, the bottom row is Kaiser.
 
-## 6. Evaluation on fresh seeds — PENDING
+| rnd_coef | seed 0 | seed 1 | seed 2 | mean AUC |
+|---|---|---|---|---|
+| 0.01 | 0.277 | 0.508 | 0.884 | 0.556 |
+| 0.03 | 0.111 | 0.020 | 0.228 | 0.120 |
+| 0.1 | 0.506 | 0.449 | 0.618 | 0.524 |
+| 0.3 | 0.892 | 0.466 | 0.896 | 0.751 |
+| **0.6** | 0.865 | 0.899 | 0.903 | **0.889** |
+| 1.0 | 0.915 | 0.823 | 0.919 | 0.886 |
 
-Expected content, all paired by seed across Kairi and Kaiser (10 eval seeds, 100 to 109):
+**Result: `rnd_coef` = 0.6, an interior grid point (not provisional).** 1.0 is within noise of it (0.886 vs 0.889), so 0.6 is a reasonable choice rather than a sharp optimum. Larger coefficients all learn fast (all three tune seeds reach 95% by about 0.3 to 0.6M steps); small ones (0.01, 0.03) are erratic. The tuning score is on the same seeds used to choose, so on its own it is not a result.
 
-| Metric | What it tells us |
-|---|---|
-| Training AUC | Overall learning speed (the metric we tuned on) |
-| Steps to 95% (censored at S) | Speed to solve; the probe's headline metric |
-| Seeds reaching 95% | Reliability; failures matter, not just medians |
-| Held-out success (200 test layouts) | Does the learned policy generalise to unseen layouts |
+## 6. Evaluation on fresh seeds (done)
 
-Figure `figs/multiroom/eval_curves.png` (success vs steps, thin lines = seeds, thick = mean) and the standard report table (`python -m xp.report --phase minigrid --config configs/minigrid-multiroom.yaml --out results/multiroom --figs figs/multiroom`, no `--allow-provisional`).
+10 eval seeds (100 to 109), never used in tuning. Paired by seed. Steps to 95% is censored at S (a seed that never reaches 95% counts as S).
 
-## 7. How to read the final answer — PENDING
+![eval curves](../figs/multiroom/eval_curves.png)
 
-Decision rule written down before the result:
-- **Kaiser better:** the paired CI for (Kairi − Kaiser) steps to 95% excludes zero in Kaiser's favour. Then we say RND helped here under the full protocol, with the limitations in section 2.
-- **Tie:** the CI includes zero. Report as "no detectable benefit", and say how wide the CI is.
-- **Kairi better:** report it plainly.
+Thin lines are individual seeds, thick lines the mean. Kaiser (red) mostly takes off between 0.25M and 0.5M steps; Kairi (blue) takes off anywhere from 0.7M to past the budget, and 5 of 10 seeds never reach 95% by S. The staircase shape of the means is just seeds jumping one at a time.
 
-A result is **never** upgraded because it matches the probe, and the tuned values are never revisited after seeing eval results.
+| Metric | Kairi mean | Kaiser mean | Kaiser − Kairi, 95% paired CI | Kaiser better on |
+|---|---|---|---|---|
+| Training AUC (primary) | 0.258 | 0.778 | **+0.520 [+0.312, +0.728]** | 10/10 seeds |
+| Steps to 95% (censored at S) | 2.23M | 0.70M | **−1.52M [−2.12M, −0.93M]** | 10/10 seeds |
+| Seeds reaching 95% by S | 5/10 | 10/10 | +0.50 [+0.20, +0.80] | 5 seeds (rest tied) |
+| Held-out success, 200 test layouts | 0.50 | 1.00 | +0.50 [+0.20, +0.80] | 6 seeds (rest tied) |
+
+Per-seed values: `docs/spikes/multiroom_confirmation.csv` (from `scripts/multiroom_paired.py`). Standard report figure: `figs/multiroom/degradation.png`.
+
+Detail worth knowing:
+- **Kaiser is not uniformly fast.** Seed 102 needed 2.22M steps and seed 101 1.43M; the other eight needed 0.28M to 0.87M.
+- **Kairi's failures are budget failures, not impossibility.** The earlier probe saw plain PPO reach 95% on all 5 seeds by 3.15M steps. S (2.94M) was calibrated on the three tune seeds, and 5 of 10 eval seeds simply took longer. So the "5/10 vs 10/10" and the success rows depend on S; the steps and AUC rows are the more robust comparisons, and the steps gap is a *lower bound* (censoring caps Kairi's failures at S).
+- **Held-out success is almost the same as "reached 95%"** because each agent either solves the level or does not; neither generalises partially.
+
+## 7. What this does and does not show
+
+**Supported (under the protocol):** with entropy matched and each agent tuned on separate seeds, an RND bonus makes PPO learn MultiRoom with 4 small rooms substantially faster and more reliably than plain PPO. The effect is large relative to seed noise: all 10 eval seeds agree in direction, and the paired CIs for AUC and steps exclude zero. This is the first confirmed Kaiser advantage in MiniGrid and agrees in direction (but is larger than) the earlier post-hoc probe.
+
+**Not shown:**
+1. **Only one level.** It says nothing about other room counts or about DoorKey (where there was no benefit).
+2. **The design was chosen after seeing the probe** (level, target, coefficient range). Only the eval seeds are fresh, so this is a confirmation with a known forking path, not an independent discovery.
+3. **Budget-dependent absolute numbers.** S was fit to Kairi's tune seeds, so Kairi's "reached 95%" and success rates would rise with a longer budget. The speed advantage (steps to 95%, AUC) is the robust finding, and the speed gap would only shrink if Kairi kept improving on its failed seeds.
+4. **Cost not compared.** RND adds per-step compute; steps are not wall-clock. Earlier work saw Kaiser jobs take about 1.2 to 2.5x as long.
+5. **Entropy is Kairi's tuned 0.01, itself a noisy pick from 3 seeds** (section 4). Both agents share it, so it cannot explain the difference, but a different shared entropy could change the size of the gap.
+
+**Decision rule check:** the paired CI for (Kairi − Kaiser) steps to 95% excludes zero in Kaiser's favour, so by the rule fixed in advance this is "Kaiser better" on this level.
 
 ## 8. How to rerun / regenerate
 
 ```bash
 # run (resumable; use the same --out and worktree on resume)
 caffeinate -i python -m xp.run --phase minigrid --config configs/minigrid-multiroom.yaml --out results/multiroom --workers 3
-# figures for this document
-python scripts/multiroom_eval_figs.py --run results/multiroom --out figs/multiroom
 # standard report
 python -m xp.report --phase minigrid --config configs/minigrid-multiroom.yaml --out results/multiroom --figs figs/multiroom
+# figures and paired statistics for this document
+python scripts/multiroom_eval_figs.py --run results/multiroom --out figs/multiroom
+python scripts/multiroom_paired.py --run results/multiroom --csv docs/spikes/multiroom_confirmation.csv
 ```
 
-Files: `configs/minigrid-multiroom.yaml` (frozen S), `calibration-multiroom.json`, `results/multiroom/minigrid/` (tuning jobs, per-seed curve sidecars), `docs/spikes/multiroom_probe.csv`.
+Files: `configs/minigrid-multiroom.yaml` (frozen S), `calibration-multiroom.json`, `results/multiroom/minigrid/` (git-ignored: tuning jobs, per-seed curves), `docs/spikes/multiroom_probe.csv`, `docs/spikes/multiroom_confirmation.csv`.

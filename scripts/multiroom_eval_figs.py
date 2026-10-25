@@ -118,8 +118,8 @@ def evaluation(run, out):
         C[os.path.basename(f).split("__")[0]].append(d)
     fig, ax = plt.subplots(figsize=(7.5, 4.5))
     for a, L in C.items():
-        cs = np.array([_curve(d["curve"]) for d in L])
-        x = [p[0] for p in L[0]["curve"]]
+        cs = np.array([_curve(d) for d in L])
+        x = [p[0] for p in L[0]]
         for c in cs:
             ax.plot(x, c, color=COL[a], alpha=0.2, lw=0.8)
         ax.plot(x, np.nanmean(cs, 0), color=COL[a], lw=2.2, label=f"{a} (n={len(L)})")

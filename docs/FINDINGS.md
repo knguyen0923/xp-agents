@@ -142,7 +142,22 @@ Follow-up on the borderline level (4 rooms, max room size 4): 5M steps instead o
   - 5 seeds, one level, one PPO configuration; the seeds are from the tune pool and there is no disjoint eval pool here.
   - The metric is steps to 95% on the training curve (a recent-episodes window); wall-clock was not compared fairly (runs shared the CPU with other jobs).
   - The 0.01 failure on seed 4 shows seed-level failures matter.
+- **Update 2026-10-25: this confirmation was run (see "Protocol-legal MultiRoom confirmation" below); the line that follows is the original plan.**
 - **What a confirmation would need:** a full protocol phase on this level (familiar 4 small rooms or the nearest solvable level, a widened RND grid including values above 0.1, tune seeds disjoint from eval seeds, 10+ eval seeds, matched entropy by construction). Not run; user decision pending.
+
+
+### Protocol-legal MultiRoom confirmation (2026-10-25; full write-up `docs/MULTIROOM_EVALUATION.md`, data `docs/spikes/multiroom_confirmation.csv`)
+Spec amendment 5.4: MultiRoom, 4 rooms, max room size 4, single familiar level; Kairi `ent_coef` and Kaiser `rnd_coef` tuned on 3 tune seeds by training AUC (Kaiser's entropy matched to Kairi's tuned 0.01); S = 2,938,880 steps from calibration; 10 disjoint eval seeds (100 to 109); not provisional (Kairi 0.01 and Kaiser 0.6 are interior).
+
+| metric (10 eval seeds) | Kairi | Kaiser | Kaiser − Kairi, paired 95% CI | Kaiser better on |
+|---|---|---|---|---|
+| training AUC | 0.258 | 0.778 | +0.520 [+0.312, +0.728] | 10/10 |
+| steps to 95% (censored at S) | 2.23M | 0.70M | −1.52M [−2.12M, −0.93M] | 10/10 |
+| seeds reaching 95% by S | 5/10 | 10/10 | +0.50 [+0.20, +0.80] | |
+| held-out success (200 layouts) | 0.50 | 1.00 | +0.50 [+0.20, +0.80] | |
+
+- **Result: Kaiser is faster and more reliable on this level under the full protocol.** First confirmed RND benefit in the project; the direction agrees with the post-hoc probe, and the size is larger (1.5M fewer steps against 1.17M).
+- **Caveats:** one level; the level, target and grid range were chosen after the probe and tune seeds 0 to 2 overlap the probe seeds, so only eval seeds are fresh; S was fit to Kairi's tune seeds, so Kairi's 5/10 "reached 95%" and its success rate depend on the budget (the probe saw PPO reach 95% on all 5 seeds by 3.15M steps), and the steps gap is a lower bound because failures are censored at S; Kairi's tuned entropy is a noisy pick from 3 seeds; steps, not wall-clock, were compared.
 
 
 ## Cross-phase picture ("where each agent loses")
@@ -151,7 +166,7 @@ Follow-up on the borderline level (4 rooms, max room size 4): 5M steps instead o
   the steps of plain PPO at `rnd_coef` 0.1 (faster on 5/5 seeds), but not at 0.01 or 0.03: its benefit depends on budget and coefficient.
 - **Kairi wins only when frozen agents face a world far from the tuned point (5x more arms, 10x faster drift), and the ablations show this is tuning brittleness, not a cost of exploration:** retuned for the
   shifted world, Kaiser wins at both points. So the defensible map is "Kaiser's tuned settings break under large shifts; its approach does not", plus MiniGrid where RND helps only where exploration is the bottleneck, at a large enough bonus and budget (and only post-hoc evidence so far).
-- Open: the 5M-step RND benefit is post-hoc (best of three coefficients, top of the tried range, 5 seeds, tune-pool seeds); a protocol-legal confirmation on the exploration-heavy level has not been run. The frozen-tuning brittleness has not been tested in deep RL beyond the few-shot re-analysis.
+- The 5M-step RND benefit was confirmed under the full protocol on that one level (see the confirmation section above): Kaiser at `rnd_coef` 0.6 beat Kairi on 10/10 fresh eval seeds. Still open: other levels, wall-clock cost. The frozen-tuning brittleness has not been tested in deep RL beyond the few-shot re-analysis.
 
 ## Methodological lessons (worth carrying forward)
 - Give both agents equal treatment on every non-tuned hyperparameter, or tune it for both (entropy was fixed for one and tuned for the other).

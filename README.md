@@ -15,7 +15,7 @@ Kairi winning some regimes is a valid result. Design: `docs/superpowers/specs/20
 - **Bandit:** Kaiser (discounted UCB) beats Kairi (epsilon-greedy) at every jump rate, under reversed tuning, and under reward-noise shifts. Kairi wins only when the frozen agents face a world far from
   the tuned point: many more arms than tuned (k = 50 vs 10) and fast arm drift (0.1 vs 0.01). Post-hoc ablations show these wins are tuning brittleness, not a cost of exploration: retuned for the shifted
   world, Kaiser wins at both points.
-- **MiniGrid:** on DoorKey the RND bonus gave no measurable benefit, but a post-hoc 5M-step probe on an exploration-heavy MultiRoom level found RND at a large coefficient reaches 95% success in about half the steps of plain PPO (5 seeds; not a protocol result). On DoorKey, Kairi (PPO) looked better at sizes 8 and 12 with the tuned settings, but that gap disappears at other tuning-tied settings and with
+- **MiniGrid:** on DoorKey the RND bonus gave no measurable benefit, but a post-hoc 5M-step probe on an exploration-heavy MultiRoom level found RND at a large coefficient reaches 95% success in about half the steps of plain PPO (5 seeds; not a protocol result), and a protocol-legal confirmation on that level (tuned, matched entropy, 10 fresh seeds) found Kaiser about 1.5M steps faster, on 10 of 10 seeds (paired CI 0.9M to 2.1M). On DoorKey, Kairi (PPO) looked better at sizes 8 and 12 with the tuned settings, but that gap disappears at other tuning-tied settings and with
   matched entropy (10 seeds), so the supported claim is a tie, not "RND hurts".
 - **Map:** the exploration bonus helps in a changing bandit; Kaiser's *tuned settings* are more brittle than Kairi's under large shifts (retune them when the world changes a lot); and RND helps only where exploration is the bottleneck, at a large enough bonus and budget (post-hoc MultiRoom probe), not in the sparse-but-learnable DoorKey.
 - Short write-up: `docs/WRITEUP.md`; full analysis with evidence and caveats: `docs/FINDINGS.md`; design: `docs/superpowers/specs/2026-10-22-xp-design.md`.
@@ -151,7 +151,11 @@ RND was never faster at 2M steps (8 of 8 seed-matched pairs where both solved th
 
 A follow-up probe at that level with a 5M-step budget, 5 seeds, and RND coefficients 0.01, 0.03 and 0.1 (`docs/spikes/multiroom_probe.csv`, `scripts/spikes/probe_summary.py`) changed the picture: plain PPO solves all 5 seeds (median 2.66M steps to 95% training success);
 RND at 0.1 solves all 5 in a median 1.44M steps, faster on every seed (mean 1.17M fewer steps, 95% CI [0.53M, 1.75M]); RND at 0.03 is slightly slower (CI just includes 0) and RND at 0.01 is mixed with one failed seed.
-So RND helps here, but only at a large enough coefficient and budget. This is post-hoc: three coefficients were tried and the best is reported, 0.1 is the top of the range tried, 5 seeds on tune-pool seeds. It is evidence, not a protocol result; a confirmation would tune the coefficient on tune seeds and use disjoint eval seeds. Details in `docs/FINDINGS.md`.
+So RND helps here, but only at a large enough coefficient and budget. This is post-hoc: three coefficients were tried and the best is reported, 0.1 is the top of the range tried, 5 seeds on tune-pool seeds. It is evidence, not a protocol result.
+
+**Protocol-legal confirmation (2026-10-25).** Same level (4 rooms, size ≤ 4), run through the full protocol: Kairi's `ent_coef` and Kaiser's `rnd_coef` (grid 0.01 to 1.0) tuned on 3 tune seeds by training AUC, Kaiser's entropy matched to Kairi's tuned value, budget S = 2.94M from calibration, 10 disjoint eval seeds. Tuned values: Kairi 0.01, Kaiser 0.6 (both interior, not provisional).
+Kaiser reached 95% training success in a mean 0.70M steps against 2.23M for Kairi (difference −1.52M, paired 95% CI [−2.12M, −0.93M]), faster on 10 of 10 seeds; training AUC 0.78 vs 0.26 (+0.52 [+0.31, +0.73]); Kaiser solved 10/10 seeds within the budget, Kairi 5/10.
+Caveats: one level; the level and grid were chosen after the probe, so only the eval seeds are fresh; Kairi's failures are budget-limited (S was fit to its tune seeds), so the step and AUC gaps are the robust numbers; steps, not wall-clock, were compared. Full write-up: `docs/MULTIROOM_EVALUATION.md`; data: `docs/spikes/multiroom_confirmation.csv`.
 
 ## Limitations
 
@@ -173,12 +177,12 @@ So RND helps here, but only at a large enough coefficient and budget. This is po
   either robustness check: Kaiser at a different tied `rnd_coef`, or at Kairi's entropy coefficient, is statistically indistinguishable from Kairi at every size (10 seeds).
   The supported conclusion is "no measurable RND benefit on DoorKey", not "RND hurts". RND adds per-step cost (Kaiser seed jobs took ~2.5x as long). A plausible but
   untested reason for no benefit: extrinsic reward is reachable with plain exploration. The agents break down together as size grows (size 12 near the floor).
-  MiniGrid is closed here (the MultiRoom spike below found no RND benefit at 2M steps, but a post-hoc 5M-step probe found one at a large coefficient); a 30-seed rerun with matched entropy was planned and shelved (`docs/superpowers/plans/2026-10-24-phase2-step-a.md`).
+  MiniGrid DoorKey is closed here (the MultiRoom spike below found no RND benefit at 2M steps; a post-hoc 5M-step probe and then a protocol-legal confirmation found one at a large coefficient on 4 small rooms); a 30-seed rerun with matched entropy was planned and shelved (`docs/superpowers/plans/2026-10-24-phase2-step-a.md`).
 - So the exploration bonus helps in the nonstationary bandit; Kaiser's frozen tuned settings break down far from the tuned point (many arms, fast drift) but not once retuned there; and it does not help in this sparse-but-learnable MiniGrid family.
 
 ## Future work
 
-Crafter, Showdown, a protocol-legal confirmation of the post-hoc MultiRoom RND result (tuned coefficient with a grid above 0.1, disjoint eval seeds), and a deep-RL tag-team agent. A design sketch for Crafter and Showdown (knobs, costs, risks, go/no-go criteria; not approved for building) is in `docs/FUTURE_WORK.md`.
+Crafter, Showdown, the MultiRoom confirmation at other room counts (the 4-room confirmation is done), and a deep-RL tag-team agent. A design sketch for Crafter and Showdown (knobs, costs, risks, go/no-go criteria; not approved for building) is in `docs/FUTURE_WORK.md`.
 
 ## Reproducing
 
