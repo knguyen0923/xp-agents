@@ -109,24 +109,27 @@ def seed_job(cfg: dict, out_dir, agent: str, params: dict, provisional: bool, se
     learner = build_learner(cfg, agent, params, seed)
     run = learner.train(int(phase.familiar), steps, target=cfg["budget"]["target_success"])
     reached = run["steps_to_target"]
+    pct = int(round(100 * cfg["budget"]["target_success"]))
     entries = [
-        (phase.familiar, "steps_to_80", float(steps if reached is None else reached)),  # censored at the budget
-        (phase.familiar, "reached_80", float(reached is not None)),
+        (phase.familiar, f"steps_to_{pct}", float(steps if reached is None else reached)),  # censored at the budget
+        (phase.familiar, f"reached_{pct}", float(reached is not None)),
     ]
+    if cfg.get("tuning", {}).get("objective") == "auc":
+        entries.append((phase.familiar, "auc", training_auc(run["curve"])))
     frozen = learner.fingerprint()
     for size in phase.sweep:  # zero-shot: weights frozen
         res = learner.evaluate(int(size), n_layouts)
         entries += [(size, "success", res["success"]), (size, "return", res["mean_return"])]
     if learner.fingerprint() != frozen:
         raise ProtocolError("a frozen agent changed during zero-shot evaluation")
-    fs = cfg["fewshot"]
+    fs = cfg.get("fewshot", {"sizes": [], "steps": 0})
     for size in fs["sizes"]:  # few-shot: hyperparameters frozen, adapt online on the unfamiliar size
         clone = copy.deepcopy(learner)
         clone.train(int(size), fs["steps"], first_episode=FEWSHOT_EPISODE_OFFSET, limit=TRAIN_STRIDE)
         res = clone.evaluate(int(size), n_layouts)
         entries += [(float(size), "success_fewshot", res["success"]), (float(size), "return_fewshot", res["mean_return"])]
     write_seed_job(out_dir, phase, agent, seed, _rows(phase, agent, seed, provisional, entries))
-    print(f"[{phase.name}] seed job {agent} seed {seed} done (zero-shot sizes {list(phase.sweep)})", flush=True)
+    print(f"[{phase.name}] seed job {agent} seed {seed} done (sweep {list(phase.sweep)}, few-shot sizes {list(fs['sizes'])})", flush=True)
 
 
 def _run_jobs(fn: Callable, arg_tuples: List[tuple], workers: int) -> list:

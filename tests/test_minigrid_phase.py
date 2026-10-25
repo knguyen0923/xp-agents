@@ -7,7 +7,7 @@ pytest.importorskip("torch")
 pytest.importorskip("minigrid")
 
 from xp.errors import ConfigMismatchError, ProtocolError  # noqa: E402
-from xp.minigrid.phase import break_ties, build_learner, matched_entropy, run_phase, training_auc, tune_job  # noqa: E402
+from xp.minigrid.phase import break_ties, build_learner, matched_entropy, run_phase, seed_job, training_auc, tune_job  # noqa: E402
 from xp.protocol.phase import Phase  # noqa: E402
 from xp.protocol.results import TuneResult, load_results, read_tune, read_tune_job, read_tune_job_extra  # noqa: E402
 
@@ -155,3 +155,18 @@ def test_run_phase_tunes_kairi_first_and_gives_kaiser_its_entropy(tiny_mr_cfg, t
     assert "rnd_coef" in kaiser.best_params
     df = load_results(tmp_path, phase.name)
     assert set(df["agent"]) == {"kairi", "kaiser"}
+
+
+def test_seed_job_names_metrics_after_the_target_and_adds_auc_for_the_auc_objective(tiny_mr_cfg, tmp_path):
+    phase = Phase.from_config(tiny_mr_cfg)
+    seed_job(tiny_mr_cfg, tmp_path, "kairi", {"ent_coef": 0.01}, False, 10)
+    df = load_results(tmp_path, phase.name)
+    assert {"steps_to_95", "reached_95", "auc", "success", "return"} <= set(df["metric"])
+    assert not any(m.endswith("_fewshot") for m in df["metric"])  # fewshot.sizes is empty
+
+
+def test_seed_job_keeps_doorkey_metric_names(tiny_mg_cfg, tmp_path):
+    phase = Phase.from_config(tiny_mg_cfg)
+    seed_job(tiny_mg_cfg, tmp_path, "kairi", {"ent_coef": 0.01}, False, 10)
+    metrics = set(load_results(tmp_path, phase.name)["metric"])
+    assert {"steps_to_80", "reached_80"} <= metrics and "auc" not in metrics
