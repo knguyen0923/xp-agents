@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -28,7 +28,7 @@ def build_learner(cfg: dict, agent: str, params: dict, seed: int) -> Learner:
     if agent == "kairi":
         return Learner(cfg["ppo"], params["ent_coef"], None, learner_seed, env_spec=cfg.get("env"))
     if agent == "kaiser":
-        fixed_ent = cfg["agents"]["kaiser"]["fixed"]["ent_coef"]
+        fixed_ent = params.get("ent_coef", cfg["agents"]["kaiser"]["fixed"]["ent_coef"])
         if params["rnd_coef"] == 0:  # no bonus: exactly plain PPO at the default entropy (no RND, no intrinsic head)
             return Learner(cfg["ppo"], fixed_ent, None, learner_seed, env_spec=cfg.get("env"))
         return Learner(cfg["ppo"], fixed_ent, params["rnd_coef"], learner_seed, env_spec=cfg.get("env"))
@@ -146,21 +146,38 @@ def _grid_size(spec: dict) -> int:
     return int(np.prod([len(v) for v in spec["grid"].values()]))
 
 
-def _tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int) -> TuneResult:
+def matched_entropy(cfg: dict, kairi: TuneResult) -> dict:
+    """Extra params for Kaiser's tuning: Kairi's tuned entropy when the config asks for matched entropy."""
+    if cfg["agents"]["kaiser"].get("fixed", {}).get("ent_coef_from") != "kairi":
+        return {}
+    if kairi.provisional:
+        raise ProtocolError(
+            f"Kairi's tuned entropy sits on a grid edge ({kairi.boundary_dims}); widen its grid and rerun "
+            "before tuning Kaiser, whose entropy is matched to it"
+        )
+    return {"ent_coef": kairi.best_params["ent_coef"]}
+
+
+def _tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int, extra: Optional[dict] = None) -> TuneResult:
     cached = read_tune(out_dir, phase, agent)
     if cached is not None:
         return cached
     spec = cfg["agents"][agent]
-    jobs = [(cfg, out_dir, agent, p, s) for p in grid_points(spec["grid"]) for s in phase.tune_seeds]
+    extra = extra or {}
+
+    def full(p: dict) -> dict:
+        return {**p, **extra}
+
+    jobs = [(cfg, out_dir, agent, full(p), s) for p in grid_points(spec["grid"]) for s in phase.tune_seeds]
     _run_jobs(tune_job, jobs, workers)  # each job caches its score; this call only forces completion
 
     def score(params: dict) -> float:
-        return float(np.mean([read_tune_job(out_dir, phase, agent, params, s) for s in phase.tune_seeds]))
+        return float(np.mean([read_tune_job(out_dir, phase, agent, full(params), s) for s in phase.tune_seeds]))
 
     result = tune(score, spec["grid"], spec.get("natural_limits"))
 
     def mean_auc(params: dict) -> float:
-        vals = [(read_tune_job_extra(out_dir, phase, agent, params, s) or {}).get("auc", -1.0) for s in phase.tune_seeds]
+        vals = [(read_tune_job_extra(out_dir, phase, agent, full(params), s) or {}).get("auc", -1.0) for s in phase.tune_seeds]
         return float(np.mean(vals))
 
     steps_by_point = None
@@ -170,7 +187,7 @@ def _tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int) -> T
             budget = cfg["budget"]["steps"]
             vals = []
             for s in phase.tune_seeds:
-                st = (read_tune_job_extra(out_dir, phase, agent, params, s) or {}).get("steps_to_target")
+                st = (read_tune_job_extra(out_dir, phase, agent, full(params), s) or {}).get("steps_to_target")
                 vals.append(budget if st is None else st)
             return float(np.mean(vals))
 
@@ -180,8 +197,10 @@ def _tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int) -> T
                         steps_by_point=steps_by_point)
     if broken is not result:
         n_tied = int((abs(result.table["score"] - result.best_score) <= 1e-12).sum())
-        print(f"[{phase.name}] {agent}: tie of {n_tied} points broken by AUC -> {broken.best_params}", flush=True)
+        rule = "steps-to-target" if steps_by_point is not None else "AUC"
+        print(f"[{phase.name}] {agent}: tie of {n_tied} points broken by {rule} -> {broken.best_params}", flush=True)
     result = broken
+    result.best_params.update(extra)
     write_tune(out_dir, phase, agent, result)
     print(f"[{phase.name}] tuned {agent}: {result.best_params} score {result.best_score:.3f} "
           f"boundary={result.boundary_dims or 'none'}", flush=True)
@@ -198,7 +217,9 @@ def run_phase(cfg: dict, out_dir, workers: int = 1, allow_code_change: bool = Fa
 
     versions = {"torch": torch.__version__, "gymnasium": gymnasium.__version__, "minigrid": getattr(minigrid, "__version__", "unknown")}
     write_manifest(cfg, phase, out_dir, versions, strict_code=True, allow_code_change=allow_code_change)
-    tuned = {a: _tune_agent(cfg, phase, out_dir, a, workers) for a in AGENTS}
+    tuned = {"kairi": _tune_agent(cfg, phase, out_dir, "kairi", workers)}
+    extra = matched_entropy(cfg, tuned["kairi"])
+    tuned["kaiser"] = _tune_agent(cfg, phase, out_dir, "kaiser", workers, extra)
     jobs = [(cfg, out_dir, a, tuned[a].best_params, tuned[a].provisional, s) for a in AGENTS for s in phase.eval_seeds]
     _run_jobs(seed_job, jobs, workers)
     print(f"[{phase.name}] finished {len(jobs)} seed jobs", flush=True)

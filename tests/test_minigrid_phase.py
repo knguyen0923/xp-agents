@@ -7,7 +7,7 @@ pytest.importorskip("torch")
 pytest.importorskip("minigrid")
 
 from xp.errors import ConfigMismatchError, ProtocolError  # noqa: E402
-from xp.minigrid.phase import break_ties, build_learner, run_phase, training_auc, tune_job  # noqa: E402
+from xp.minigrid.phase import break_ties, build_learner, matched_entropy, run_phase, training_auc, tune_job  # noqa: E402
 from xp.protocol.phase import Phase  # noqa: E402
 from xp.protocol.results import TuneResult, load_results, read_tune, read_tune_job, read_tune_job_extra  # noqa: E402
 
@@ -131,3 +131,27 @@ def test_break_ties_by_steps_prefers_fewest_steps_then_grid_order():
     result = _tied_result([0.2, 0.2, 0.2], grid)
     picked = break_ties(result, grid, None, [0.9, 0.1, 0.5], steps_by_point=[3.0, 1.0, 1.0])
     assert picked.best_params == {"rnd_coef": 0.03}  # steps 1.0 ties between points 1 and 2; grid order wins
+
+
+def test_kaiser_uses_ent_coef_from_params_when_given(tiny_mg_cfg):
+    kaiser = build_learner(tiny_mg_cfg, "kaiser", {"rnd_coef": 0.03, "ent_coef": 0.05}, seed=1)
+    assert kaiser.ent_coef == 0.05 and kaiser.rnd_coef == 0.03
+
+
+def test_matched_entropy_follows_the_config_and_refuses_provisional_kairi(tiny_mr_cfg, tiny_mg_cfg):
+    ok = TuneResult({"ent_coef": 0.02}, 0.1, [], pd.DataFrame())
+    assert matched_entropy(tiny_mr_cfg, ok) == {"ent_coef": 0.02}
+    assert matched_entropy(tiny_mg_cfg, ok) == {}  # DoorKey config: Kaiser keeps its fixed entropy
+    edge = TuneResult({"ent_coef": 0.1}, 0.1, ["ent_coef"], pd.DataFrame())
+    with pytest.raises(ProtocolError):
+        matched_entropy(tiny_mr_cfg, edge)
+
+
+def test_run_phase_tunes_kairi_first_and_gives_kaiser_its_entropy(tiny_mr_cfg, tmp_path):
+    run_phase(tiny_mr_cfg, tmp_path)
+    phase = Phase.from_config(tiny_mr_cfg)
+    kairi, kaiser = read_tune(tmp_path, phase, "kairi"), read_tune(tmp_path, phase, "kaiser")
+    assert kaiser.best_params["ent_coef"] == kairi.best_params["ent_coef"]
+    assert "rnd_coef" in kaiser.best_params
+    df = load_results(tmp_path, phase.name)
+    assert set(df["agent"]) == {"kairi", "kaiser"}
