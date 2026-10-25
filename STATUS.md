@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: bbef278 -->
+<!-- STATUS_COMMIT: 672ebea -->
 
 ## Current state
 
@@ -40,8 +40,9 @@ progress," read it first.
 - Crafter/Showdown future-work sketch written (`docs/FUTURE_WORK.md`, not approved for building; CLAUDE.md scope rule unchanged).
 - 5M-step RND probe DONE: at 4 MultiRoom rooms (size <= 4), RND coef 0.1 reached 95% success in about half the steps of plain PPO (5/5 seeds faster); coef 0.01/0.03 no benefit. Post-hoc, not a protocol result; `docs/FINDINGS.md`, `docs/spikes/multiroom_probe.csv`.
 - Protocol-legal confirmation of the MultiRoom RND result: discussed and written down in `docs/FUTURE_WORK.md` (options, costs, open decisions); scope undecided, nothing built.
-- **Next:** nothing required; optional confirmation per RESUME.md. Last push was b139f20; the confirmation write-up commit is local.
+- MultiRoom confirmation: user chose Option 1 (single level, fully protocol-legal) on 2026-10-25; spec amendment 5.4 written and committed (0959b04). Not yet cross-checked against FINDINGS.md, the probe CSV or the code; no plan, no code, nothing running.
+- **Next:** read the remaining docs and code, verify amendment 5.4 against them, user reviews the spec, then writing-plans (details in RESUME.md). Last push was b139f20; later commits are local.
 
 ## Last updated
 
-2026-10-24 (commit bbef278)
+2026-10-25 (commit 672ebea)
