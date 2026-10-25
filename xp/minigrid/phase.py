@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import copy
+import json
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
 from typing import Callable, List, Optional
 
 import numpy as np
@@ -15,7 +17,8 @@ from xp.minigrid.ppo import Learner
 from xp.protocol.manifest import write_manifest
 from xp.protocol.phase import Phase
 from xp.protocol.results import (
-    COLUMNS, TuneResult, read_tune, read_tune_job, read_tune_job_extra, seed_job_done, write_seed_job, write_tune, write_tune_job,
+    COLUMNS, TuneResult, atomic_write, read_tune, read_tune_job, read_tune_job_extra, seed_job_done, write_seed_job, write_tune,
+    write_tune_job,
 )
 from xp.protocol.tune import boundary_dims, grid_points, tune
 
@@ -41,6 +44,11 @@ def training_auc(curve: list) -> float:
     return float(np.mean(succ)) if succ else 0.0
 
 
+def curve_points(curve: list) -> list:
+    """[[steps, success_100], ...] with NaN (before the first full window) as None, so the JSON stays strict."""
+    return [[row["steps"], None if row["success_100"] != row["success_100"] else row["success_100"]] for row in curve]
+
+
 def tune_job(cfg: dict, out_dir, agent: str, params: dict, seed: int) -> float:
     """Train at the familiar size with one tune seed (lower score is better).
 
@@ -62,7 +70,7 @@ def tune_job(cfg: dict, out_dir, agent: str, params: dict, seed: int) -> float:
         score = 1.0 - auc
     else:
         score = 1.0 - learner.evaluate(int(phase.familiar), cfg["eval"]["layouts"], VALIDATION_LAYOUT_BASE)["success"]
-    extra = {"auc": auc, "steps_to_target": run["steps_to_target"]}
+    extra = {"auc": auc, "steps_to_target": run["steps_to_target"], "curve": curve_points(run["curve"])}
     write_tune_job(out_dir, phase, agent, params, seed, score, extra=extra)
     print(f"[{phase.name}] tune {agent} {params} seed {seed} score {score:.3f}", flush=True)
     return score
@@ -128,6 +136,9 @@ def seed_job(cfg: dict, out_dir, agent: str, params: dict, provisional: bool, se
         clone.train(int(size), fs["steps"], first_episode=FEWSHOT_EPISODE_OFFSET, limit=TRAIN_STRIDE)
         res = clone.evaluate(int(size), n_layouts)
         entries += [(float(size), "success_fewshot", res["success"]), (float(size), "return_fewshot", res["mean_return"])]
+    curve_path = Path(out_dir) / phase.name / "curves" / f"{agent}__seed-{seed}.json"  # not *.csv: load_results ignores it
+    curve_path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write(curve_path, lambda tmp: tmp.write_text(json.dumps(curve_points(run["curve"]))))  # before the done-marker
     write_seed_job(out_dir, phase, agent, seed, _rows(phase, agent, seed, provisional, entries))
     print(f"[{phase.name}] seed job {agent} seed {seed} done (sweep {list(phase.sweep)}, few-shot sizes {list(fs['sizes'])})", flush=True)
 
@@ -151,8 +162,11 @@ def _grid_size(spec: dict) -> int:
 
 def matched_entropy(cfg: dict, kairi: TuneResult) -> dict:
     """Extra params for Kaiser's tuning: Kairi's tuned entropy when the config asks for matched entropy."""
-    if cfg["agents"]["kaiser"].get("fixed", {}).get("ent_coef_from") != "kairi":
+    source = cfg["agents"]["kaiser"].get("fixed", {}).get("ent_coef_from")
+    if source is None:
         return {}
+    if source != "kairi":
+        raise ProtocolError(f"ent_coef_from must be 'kairi' or absent, got {source!r}")
     if kairi.provisional:
         raise ProtocolError(
             f"Kairi's tuned entropy sits on a grid edge ({kairi.boundary_dims}); widen its grid and rerun "
@@ -162,11 +176,17 @@ def matched_entropy(cfg: dict, kairi: TuneResult) -> dict:
 
 
 def _tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int, extra: Optional[dict] = None) -> TuneResult:
+    extra = extra or {}
     cached = read_tune(out_dir, phase, agent)
     if cached is not None:
+        for key, value in extra.items():
+            if cached.best_params.get(key) != value:
+                raise ProtocolError(
+                    f"cached {agent} tuning has {key}={cached.best_params.get(key)!r} but Kairi's tuned value is {value!r}; "
+                    "use a fresh --out"
+                )
         return cached
     spec = cfg["agents"][agent]
-    extra = extra or {}
 
     def full(p: dict) -> dict:
         return {**p, **extra}

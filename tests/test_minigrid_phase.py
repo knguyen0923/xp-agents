@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 import pytest
 
@@ -7,9 +9,11 @@ pytest.importorskip("torch")
 pytest.importorskip("minigrid")
 
 from xp.errors import ConfigMismatchError, ProtocolError  # noqa: E402
-from xp.minigrid.phase import break_ties, build_learner, matched_entropy, run_phase, seed_job, training_auc, tune_job  # noqa: E402
+from xp.minigrid.phase import _tune_agent, break_ties, build_learner, matched_entropy, run_phase, seed_job, training_auc, tune_job  # noqa: E402
 from xp.protocol.phase import Phase  # noqa: E402
-from xp.protocol.results import TuneResult, load_results, read_tune, read_tune_job, read_tune_job_extra  # noqa: E402
+from xp.protocol.results import (  # noqa: E402
+    TuneResult, _tune_job_path, load_results, read_tune, read_tune_job, read_tune_job_extra, write_tune,
+)
 
 
 def test_kairi_and_kaiser_differ_only_by_the_rnd_path(tiny_mg_cfg):
@@ -170,3 +174,48 @@ def test_seed_job_keeps_doorkey_metric_names(tiny_mg_cfg, tmp_path):
     seed_job(tiny_mg_cfg, tmp_path, "kairi", {"ent_coef": 0.01}, False, 10)
     metrics = set(load_results(tmp_path, phase.name)["metric"])
     assert {"steps_to_80", "reached_80"} <= metrics and "auc" not in metrics
+
+
+def _strict_json(path):
+    def refuse(token):
+        raise AssertionError(f"non-strict JSON token {token} in {path}")
+    return json.loads(path.read_text(), parse_constant=refuse)
+
+
+def test_tune_job_caches_the_training_curve_as_strict_json(tiny_mr_cfg, tmp_path):
+    phase = Phase.from_config(tiny_mr_cfg)
+    params = {"ent_coef": 0.01}
+    tune_job(tiny_mr_cfg, tmp_path, "kairi", params, seed=0)
+    curve = read_tune_job_extra(tmp_path, phase, "kairi", params, 0)["curve"]
+    assert len(curve) >= 1 and all(len(pt) == 2 for pt in curve)
+    assert all(pt[1] is None or 0.0 <= pt[1] <= 1.0 for pt in curve)
+    _strict_json(_tune_job_path(tmp_path, phase, "kairi", params, 0))
+
+
+def test_seed_job_writes_a_curve_sidecar_that_results_ignore(tiny_mr_cfg, tmp_path):
+    phase = Phase.from_config(tiny_mr_cfg)
+    seed_job(tiny_mr_cfg, tmp_path, "kairi", {"ent_coef": 0.01}, False, 10)
+    sidecar = tmp_path / phase.name / "curves" / "kairi__seed-10.json"
+    curve = _strict_json(sidecar)
+    assert len(curve) >= 1 and all(len(pt) == 2 for pt in curve)
+    before = load_results(tmp_path, phase.name)
+    assert set(before["agent"]) == {"kairi"}
+    mtime = sidecar.stat().st_mtime_ns
+    seed_job(tiny_mr_cfg, tmp_path, "kairi", {"ent_coef": 0.01}, False, 10)  # done: short-circuits
+    assert sidecar.stat().st_mtime_ns == mtime
+    assert len(load_results(tmp_path, phase.name)) == len(before)
+
+
+def test_tune_agent_refuses_a_cached_kaiser_whose_matched_entropy_differs(tiny_mr_cfg, tmp_path):
+    phase = Phase.from_config(tiny_mr_cfg)
+    write_tune(tmp_path, phase, "kaiser", TuneResult({"rnd_coef": 0.03, "ent_coef": 0.05}, 0.1, [], pd.DataFrame()))
+    with pytest.raises(ProtocolError, match="ent_coef"):
+        _tune_agent(tiny_mr_cfg, phase, tmp_path, "kaiser", 1, extra={"ent_coef": 0.02})
+    assert _tune_agent(tiny_mr_cfg, phase, tmp_path, "kaiser", 1, extra={"ent_coef": 0.05}).best_params["ent_coef"] == 0.05
+
+
+def test_matched_entropy_refuses_an_unknown_ent_coef_from(tiny_mr_cfg):
+    ok = TuneResult({"ent_coef": 0.02}, 0.1, [], pd.DataFrame())
+    tiny_mr_cfg["agents"]["kaiser"]["fixed"]["ent_coef_from"] = "kaiser"
+    with pytest.raises(ProtocolError, match="ent_coef_from"):
+        matched_entropy(tiny_mr_cfg, ok)
