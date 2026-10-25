@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 4be9b98 -->
+<!-- STATUS_COMMIT: c985f54 -->
 
 ## Current state
 
@@ -41,8 +41,9 @@ progress," read it first.
 - 5M-step RND probe DONE: at 4 MultiRoom rooms (size <= 4), RND coef 0.1 reached 95% success in about half the steps of plain PPO (5/5 seeds faster); coef 0.01/0.03 no benefit. Post-hoc, not a protocol result; `docs/FINDINGS.md`, `docs/spikes/multiroom_probe.csv`.
 - Protocol-legal confirmation of the MultiRoom RND result: discussed and written down in `docs/FUTURE_WORK.md` (options, costs, open decisions); scope undecided, nothing built.
 - MultiRoom confirmation: user chose Option 1 (single level, fully protocol-legal) on 2026-10-25; spec amendment 5.4 written and committed (0959b04). Cross-checked against FINDINGS.md, the probe CSV and the code and corrected (AUC padding, config-switch objective, code-change list, cost 10-13 h); no plan, no code, nothing running.
-- **Next:** user reviews spec 5.4, then writing-plans (details in RESUME.md). Last push was b139f20; later commits are local.
+- Plan written: `docs/superpowers/plans/2026-10-25-multiroom-confirmation.md` (8 tasks; no code started).
+- **Next:** user picks execution mode and starts Task 1 (details in RESUME.md). Last push was b139f20; later commits are local.
 
 ## Last updated
 
-2026-10-25 (commit 4be9b98)
+2026-10-25 (commit c985f54)
