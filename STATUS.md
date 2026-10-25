@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: c985f54 -->
+<!-- STATUS_COMMIT: d171fd1 -->
 
 ## Current state
 
@@ -42,8 +42,9 @@ progress," read it first.
 - Protocol-legal confirmation of the MultiRoom RND result: discussed and written down in `docs/FUTURE_WORK.md` (options, costs, open decisions); scope undecided, nothing built.
 - MultiRoom confirmation: user chose Option 1 (single level, fully protocol-legal) on 2026-10-25; spec amendment 5.4 written and committed (0959b04). Cross-checked against FINDINGS.md, the probe CSV and the code and corrected (AUC padding, config-switch objective, code-change list, cost 10-13 h); no plan, no code, nothing running.
 - Plan written: `docs/superpowers/plans/2026-10-25-multiroom-confirmation.md` (8 tasks; no code started).
-- **Next:** user picks execution mode and starts Task 1 (details in RESUME.md). Last push was b139f20; later commits are local.
+- Executing the plan on local branch `feat/multiroom-confirmation` (subagent-driven): Task 1 (level-aware env) committed as f91df44, review in flight; Tasks 2-8 pending.
+- **Next:** finish Task 1 review, then Task 2; the long run (Task 7) needs the user's go-ahead (details in RESUME.md). Last push was b139f20; later commits are local.
 
 ## Last updated
 
-2026-10-25 (commit c985f54)
+2026-10-25 (commit d171fd1)
