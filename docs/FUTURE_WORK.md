@@ -33,6 +33,27 @@ Environment facts below come from general knowledge, not from the project; items
 ## Recommendation if only one is ever built
 Crafter, with the world-area knob, because it tests the open question in the cleanest way (same agents, exploration-heavy) and reuses the protocol and agent definitions, at the cost of GPU time and a network upgrade. Showdown is the more novel test of opponent-driven nonstationarity but needs a new agent design and a heavy integration; do it only if the bandit-style "frozen tuning breaks under shift" finding is the question of interest. Either way: run the spike first, write the spec, and update `CLAUDE.md` and the design spec's non-goals before any code.
 
+## Protocol-legal confirmation of the MultiRoom RND result (discussed 2026-10-24; scope NOT yet decided, nothing built)
+Context: the 5M-step probe (`docs/FINDINGS.md`, `docs/spikes/multiroom_probe.csv`) found RND at `rnd_coef` 0.1 reaching 95% training success in about half the steps of plain PPO at 4 MultiRoom rooms (max room size 4), faster on 5/5 seeds, mean 1.17M fewer steps [0.53M, 1.75M]. It is post-hoc.
+
+**What a protocol-legal version must fix**
+1. Selection asymmetry: RND had three coefficients to choose from and plain PPO none; the best RND value was reported. Both agents must tune on tune seeds only, then freeze.
+2. Grid edge: 0.1 was the top of the range tried, so the RND grid must reach above it (otherwise the run is provisional).
+3. Disjoint eval seeds: the probe used tune-pool seeds 0 to 4; the confirmation needs fresh eval seeds, 10 or more.
+4. Pre-declared budget S and tuning objective: the spec's rule sets S from default-entropy Kairi on the tune seeds (not from RND results). At 5M steps nearly every setting reaches about 100% success, so the usual objective (success at S) saturates and ties; a speed-based objective (for example training AUC or steps to target) would have to be pre-declared before any run.
+5. Entropy matched by construction: in the probe both agents used `ent_coef` 0.01, but the protocol-legal version should tune Kairi's entropy and give Kaiser the same value.
+
+**Code that would change:** `xp/minigrid/env.py` builds DoorKey only (`make_env`, `VecEnv`, `evaluate_policy`); a MultiRoom variant (`MultiRoomEnv` with `minNumRooms=maxNumRooms=N`, `maxRoomSize=4`) means generalising the factory and the knob; `configs/` gets a new config; `xp/minigrid/phase.py` needs Kaiser's fixed entropy taken from Kairi's tuned value (see `docs/superpowers/plans/2026-10-24-phase2-step-a.md`, item 1, for the shelved design of this change); the spec gets an amendment (level, budget rule, tuning objective, tie-break). TDD applies.
+
+**Cost (rough, extrapolated from the probe's 30 to 40 minute runs, not measured):** tuning both agents on a 6-value grid with 3 tune seeds is 36 runs, plus about 20 eval runs: roughly 8 to 10 hours on the laptop; the calibrated budget S is likely below 5M, which lowers it.
+
+**Options discussed (user has not chosen)**
+1. *Single-level confirmation, fully protocol-legal (recommended):* familiar level = 4 rooms, size <= 4, no shift sweep; Kairi tunes `ent_coef`, Kaiser tunes `rnd_coef` with a grid reaching above 0.1 and entropy matched; tune seeds only, then 10+ disjoint eval seeds; metrics steps to a success target plus success at the calibrated budget, paired CIs. About 8 to 10 hours.
+2. *Pre-declared replication, no tuning:* freeze RND at 0.1 and plain PPO at entropy 0.01, 10 fresh seeds each; about 4 to 7 hours; fixes the seed-selection issue but not the unequal tuning or the grid edge.
+3. *Full phase with a shift knob* (for example zero-shot across room counts 2 to 5): answers where RND breaks too, but is the most expensive and zero-shot transfer across room counts is likely near 0% or 100% everywhere.
+
+**Decisions still open if this is picked up:** which option; the tuning objective and tie-break (pre-declare); the RND grid values above 0.1 (for example up to 0.3 or 1.0, with equal-sized grids for both agents); number of tune seeds; the budget rule (spec's calibration vs a fixed S). Next step is the brainstorming process: scope decision, then a spec amendment, then a plan.
+
 ## Also still open (smaller)
-- A protocol-legal confirmation of the 5M-step MultiRoom probe (RND at coefficient 0.1 reached 95% in about half the steps of plain PPO, post-hoc): tune the RND coefficient on tune seeds over a grid reaching above 0.1, evaluate on 10+ disjoint eval seeds, matched entropy by construction. Not run; see `docs/FINDINGS.md`.
+- The protocol-legal confirmation of the 5M-step MultiRoom probe: see the section above (options and costs written down, scope undecided).
 - A deep-RL retune-at-the-shift check (size 8 DoorKey); judged low value, config-only if wanted.
