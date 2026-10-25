@@ -19,7 +19,7 @@ two help mainly where the single agents fail; `tt_meta` is the most reliable.
 
 **MiniGrid DoorKey (tuned on 6x6, tested at 5, 6, 8, 12, 10 seeds).** With tuned settings Kairi is at or above Kaiser everywhere, and the gap excludes 0 at sizes 8 and 12. That gap is not robust:
 Kaiser at a different tuning-tied RND coefficient, or at Kairi's entropy coefficient, is statistically indistinguishable from Kairi at every size. The supported conclusion is no measurable benefit
-from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two of three RND settings, so seed-level failures matter. A post-hoc MultiRoom spike (28 runs, 2 seeds, 2M steps) on an exploration-heavy family found no RND benefit either: it was slower in all 8 seed-matched pairs and never solved a level plain PPO failed.
+from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two of three RND settings, so seed-level failures matter. A post-hoc MultiRoom spike (28 runs, 2 seeds, 2M steps) on an exploration-heavy family found no RND benefit at that budget, but a follow-up probe at 5M steps on the borderline level (4 small rooms, 5 seeds) found that RND at coefficient 0.1 reaches 95% training success in a median 1.44M steps against 2.66M for plain PPO, faster on all 5 seeds (mean 1.17M fewer steps, CI [0.53M, 1.75M]); coefficients 0.01 and 0.03 gave no benefit. This is post-hoc (best of three coefficients, top of the range tried, tune-pool seeds), so it is evidence, not a protocol result.
 
 ## Map: where each agent wins and breaks
 | regime | winner |
@@ -28,12 +28,13 @@ from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two o
 | bandit, 50 arms (5x tuned), drift 0.1 (10x tuned), settings frozen | Kairi |
 | same two points with both agents retuned there (post-hoc) | Kaiser |
 | MiniGrid DoorKey 5 to 12 | tie (RND no measurable benefit) |
-| MiniGrid MultiRoom spike (2 seeds, 2M steps) | PPO no worse; RND never helped |
+| MiniGrid MultiRoom, 2M steps, 2 seeds | PPO no worse; RND never helped |
+| MiniGrid MultiRoom 4 small rooms, 5M steps, 5 seeds (post-hoc) | RND at coef 0.1 (about 2x fewer steps); no benefit at 0.01 or 0.03 |
 
 ## Limitations
 One bandit family and horizon; agents are frozen after tuning once (no per-shift retuning); no multiplicity correction across knob values; the ablations that explain the Kairi wins are post-hoc, cover only those two shifts, and use oracle retuning the protocol does not allow. MiniGrid: one familiar size, a 2M-step budget that missed the 80% calibration target, 10 eval seeds, and Kaiser's entropy
 coefficient was fixed (not tuned) in the main run, which the matched-entropy check addresses post-hoc. See `docs/FINDINGS.md`.
 
 ## Future work
-A tuned, larger-budget RND probe on MultiRoom (the cheapest test of whether RND can help at all) and a deep-RL tag-team agent. Crafter and Showdown
+A protocol-legal confirmation of the post-hoc MultiRoom RND result (RND coefficient tuned on tune seeds over a grid reaching above 0.1, 10+ disjoint eval seeds) and a deep-RL tag-team agent. Crafter and Showdown
 remain out of scope.

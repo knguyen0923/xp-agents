@@ -100,7 +100,7 @@ Paired Kairi − Kaiser at size 12 against Kairi's tuned run: 0.215 [0.016, 0.46
   So Kaiser's few-shot result depends more on which tied setting is chosen, consistent with "Kaiser's tuned settings are more brittle". With matched entropy and `rnd_coef` 0.01 the difference vanishes.
 - **Caveats:** 10 seeds, wide CIs (size 12 CIs are 0.3 to 0.5 wide), Kairi has only two variants, the variants differ in two coefficients at once in the matched run, and the `rnd_coef` swings may be seed noise (a single failing seed moves the size-12 mean by 0.1). A full retune at size 8 (config-only, about 8 to 10 hours) would be the direct test; we judged it low value.
 
-## Step B spike: exploration-heavy MiniGrid (MultiRoom), CLOSED 2026-10-24
+## Step B spike: exploration-heavy MiniGrid (MultiRoom), spike 2026-10-24, probe 2026-10-24
 Question: does the RND bonus pay off where exploration is the bottleneck? We ran a throwaway feasibility spike instead of a full protocol sweep: plain PPO vs PPO+RND, 2 seeds per cell, 2M steps, `Learner` unchanged
 with the environment factory swapped to MultiRoom (`scripts/spikes/`, table in `docs/spikes/multiroom_spike.csv`; outside the protocol, no tuning). Test success after training (steps to 95% training success):
 
@@ -114,20 +114,44 @@ with the environment factory swapped to MultiRoom (`scripts/spikes/`, table in `
 | 2 rooms, size ≤ 8 | 1.00, 1.00 (297k, 696k) | 1.00, 0.99 (328k, 881k), coef 0.03 |
 | 2 rooms, size ≤ 10 | 0.99, 1.00 (369k, 512k) | 0.99, 0.99 (1.12M, 881k), coef 0.03 |
 
-- **RND gave no benefit anywhere**: in all 8 seed-matched pairs where both agents solved the level it needed more steps to reach 95%, it never solved a level plain PPO failed, and runs took about 1.2 to 1.8x as long. At the one borderline
+- **In the 2M-step spike RND gave no benefit anywhere** (revised by the 5M-step probe below): in all 8 seed-matched pairs where both agents solved the level it needed more steps to reach 95%, it never solved a level plain PPO failed, and runs took about 1.2 to 1.8x as long. At the one borderline
   level (4 rooms, size ≤ 4) plain PPO solved 1 of 2 seeds and RND 0 of 2; with 2 seeds this is not evidence that RND is worse.
 - **Difficulty axis:** room count with small rooms is the usable axis (3 rooms solved, 4 rooms borderline, probably the floor at 5); with size-6 rooms the wall is already at 3 rooms; bigger rooms at 2 rooms only slow PPO mildly.
-- **Consistent with Phase 2:** the bonus gave no measurable benefit on DoorKey either. Together this is evidence for "no RND benefit in sparse-reward MiniGrid at a 2M-step PPO budget".
+- **Consistent with Phase 2 at 2M steps:** the bonus gave no measurable benefit on DoorKey either. Together this was evidence for "no RND benefit in sparse-reward MiniGrid at a 2M-step PPO budget"; the 5M-step probe below shows the answer changes with budget and coefficient.
 - **Why we stopped:** a full sweep (environment code, spec, tuned RND coefficient, 10+ seeds, roughly 6 to 10 hours) would most likely add another tie with the top level at the floor. User decision: close as a documented spike.
 - **Caveats:** 2 seeds per cell, one fixed untuned RND coefficient per setting (0.003 or 0.03), a 2M-step cap (published RND wins on MultiRoom use far larger budgets), one PPO configuration. This does not show that RND cannot help; a larger budget or a tuned
-  coefficient at the 4-small-room level is the cheapest probe if someone reopens it (option "targeted probe" in the step B discussion).
+  coefficient at the 4-small-room level was the cheapest probe; it was run, see the next subsection.
+
+### 5M-step probe (post-hoc, 2026-10-24; `scripts/spikes/multiroom_probe.py`, `scripts/spikes/probe_summary.py`, `docs/spikes/multiroom_probe.csv`)
+Follow-up on the borderline level (4 rooms, max room size 4): 5M steps instead of 2M, plain PPO vs PPO+RND at `rnd_coef` 0.01, 0.03 and 0.1, seeds 0 to 4 (20 runs). Steps to 95% training success (censored at 5M if never reached), paired by seed:
+
+| setting | reached 95% | median steps | mean steps | PPO − RND mean steps [95% CI] | RND faster on |
+|---|---|---|---|---|---|
+| plain PPO | 5/5 | 2.66M | 2.54M | | |
+| RND 0.01 | 4/5 (seed 4 never) | 2.24M | 2.43M | +0.11M [−0.92M, +1.12M] | 3/5 seeds |
+| RND 0.03 | 5/5 | 2.94M | 3.02M | −0.48M [−0.93M, +0.01M] | 1/5 seeds |
+| **RND 0.1** | 5/5 | **1.44M** | **1.37M** | **+1.17M [+0.53M, +1.75M]** | **5/5 seeds** |
+
+- **First RND benefit in the project:** at `rnd_coef` 0.1 and a 5M budget, RND reached 95% training success in about half the steps of plain PPO, faster on every seed, with a paired CI that excludes 0. Test success was about 1.00 for every run that reached the threshold
+  (plain PPO seed 2 scored 0.96; RND 0.01 seed 4 scored 0.00), so the difference is speed, not final success.
+- **The effect depends strongly on the coefficient:** neutral to slightly harmful at 0.03 (slower, CI just includes 0), mixed at 0.01 (fast on 3 of 4 solved seeds, one outright failure), clearly helpful at 0.1. The 2M-step spike used only 0.003 and 0.03, which likely explains why it saw no benefit.
+- **This revises the spike conclusion:** "RND never helped" holds for the 2M-step spike, not for the larger budget with a larger coefficient. It fits the project's thesis (optimism helps where exploration is the bottleneck), and it contrasts with DoorKey, where no benefit appeared.
+- **Caveats (important):**
+  - Post-hoc selection: three coefficients were tried and 0.1 is the best, so its advantage is optimistic. A protocol-legal version would tune the coefficient on tune seeds and evaluate on disjoint eval seeds.
+  - 0.1 is the top of the tried range, so the optimum may be higher (a grid-edge result, which the protocol would treat as provisional).
+  - 5 seeds, one level, one PPO configuration; the seeds are from the tune pool and there is no disjoint eval pool here.
+  - The metric is steps to 95% on the training curve (a recent-episodes window); wall-clock was not compared fairly (runs shared the CPU with other jobs).
+  - The 0.01 failure on seed 4 shows seed-level failures matter.
+- **What a confirmation would need:** a full protocol phase on this level (familiar 4 small rooms or the nearest solvable level, a widened RND grid including values above 0.1, tune seeds disjoint from eval seeds, 10+ eval seeds, matched entropy by construction). Not run; user decision pending.
+
 
 ## Cross-phase picture ("where each agent loses")
-- Kaiser's exploration term pays off in the nonstationary bandit near and moderately beyond the tuned conditions (jumps, noise, drift up to ~2x), and showed no measurable
-  benefit in the stationary-but-sparse MiniGrid DoorKey family.
+- Kaiser's exploration term pays off in the nonstationary bandit near and moderately beyond the tuned conditions (jumps, noise, drift up to ~2x), showed no measurable
+  benefit in the stationary-but-sparse MiniGrid DoorKey family or at 2M steps on MultiRoom, and in a post-hoc 5M-step probe on the exploration-heavy MultiRoom level (4 small rooms) reached 95% success in about half
+  the steps of plain PPO at `rnd_coef` 0.1 (faster on 5/5 seeds), but not at 0.01 or 0.03: its benefit depends on budget and coefficient.
 - **Kairi wins only when frozen agents face a world far from the tuned point (5x more arms, 10x faster drift), and the ablations show this is tuning brittleness, not a cost of exploration:** retuned for the
-  shifted world, Kaiser wins at both points. So the defensible map is "Kaiser's tuned settings break under large shifts; its approach does not", plus MiniGrid where RND gives no measurable benefit.
-- Open: the frozen-tuning brittleness has not been tested in deep RL, and RND has not been tested at larger budgets or with a tuned coefficient (the step B spike found no benefit at 2M steps).
+  shifted world, Kaiser wins at both points. So the defensible map is "Kaiser's tuned settings break under large shifts; its approach does not", plus MiniGrid where RND helps only where exploration is the bottleneck, at a large enough bonus and budget (and only post-hoc evidence so far).
+- Open: the 5M-step RND benefit is post-hoc (best of three coefficients, top of the tried range, 5 seeds, tune-pool seeds); a protocol-legal confirmation on the exploration-heavy level has not been run. The frozen-tuning brittleness has not been tested in deep RL beyond the few-shot re-analysis.
 
 ## Methodological lessons (worth carrying forward)
 - Give both agents equal treatment on every non-tuned hyperparameter, or tune it for both (entropy was fixed for one and tuned for the other).

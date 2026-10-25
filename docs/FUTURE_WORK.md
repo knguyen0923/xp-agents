@@ -17,7 +17,7 @@ Environment facts below come from general knowledge, not from the project; items
 - **Candidate shift knob:** world area (smaller familiar world, sweep to larger worlds with sparser resources; the `area` constructor argument, verify). Alternatives: episode length, or a held-out set of world seeds (weak shift). Metric: achievement score (geometric mean of unlock rates) or number of distinct achievements unlocked.
 - **Protocol mapping:** tune seeds and eval world seeds disjoint as now; tune on the familiar area, freeze, evaluate at every area, paired by seed.
 - **Cost (rough estimate, not measured):** each run is millions of image-based steps, plausibly tens of GPU-hours for a full sweep with tuning grids; the laptop is not suitable, Colab is. Start with a one-seed spike at the standard budget.
-- **Risks:** the floor/ceiling problem again (many achievements are rarely unlocked by PPO at 1M steps); RND may show no benefit, as in MiniGrid, which is a valid result; compute budget; engineering of the vectorised env and reward logging.
+- **Risks:** the floor/ceiling problem again (many achievements are rarely unlocked by PPO at 1M steps); RND may show no benefit, as on DoorKey (while on MultiRoom it helped only at a large coefficient and a 5M-step budget), which is a valid result; compute budget; engineering of the vectorised env and reward logging.
 - **Go/no-go for a full phase:** the spike shows plain PPO unlocking some but not all achievements at the familiar area and degrading (not collapsing) at the larger areas.
 
 ## Pokémon Showdown
@@ -34,5 +34,5 @@ Environment facts below come from general knowledge, not from the project; items
 Crafter, with the world-area knob, because it tests the open question in the cleanest way (same agents, exploration-heavy) and reuses the protocol and agent definitions, at the cost of GPU time and a network upgrade. Showdown is the more novel test of opponent-driven nonstationarity but needs a new agent design and a heavy integration; do it only if the bandit-style "frozen tuning breaks under shift" finding is the question of interest. Either way: run the spike first, write the spec, and update `CLAUDE.md` and the design spec's non-goals before any code.
 
 ## Also still open (smaller)
-- A tuned, larger-budget RND probe at 4 MultiRoom rooms with room size 4 (running as of 2026-10-24; see `docs/FINDINGS.md` when done).
+- A protocol-legal confirmation of the 5M-step MultiRoom probe (RND at coefficient 0.1 reached 95% in about half the steps of plain PPO, post-hoc): tune the RND coefficient on tune seeds over a grid reaching above 0.1, evaluate on 10+ disjoint eval seeds, matched entropy by construction. Not run; see `docs/FINDINGS.md`.
 - A deep-RL retune-at-the-shift check (size 8 DoorKey); judged low value, config-only if wanted.
