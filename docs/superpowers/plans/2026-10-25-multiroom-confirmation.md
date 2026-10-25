@@ -624,15 +624,24 @@ git commit -m "chore: freeze MultiRoom budget S from calibration
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
 
-- [ ] **Step 4: Launch the run in the background (resumable)**
+- [ ] **Step 4: Before launching**
+
+Run from a dedicated `git worktree` at the frozen commit (or leave the working tree untouched for the whole run): each stage (Kairi tuning, Kaiser tuning, seed jobs) starts a new spawn pool that re-imports `xp` from the tree, and the commit guard only runs at start. Make no commits touching `xp/` or `configs/` during the run. Checkpoint commits of `STATUS.md`/`RESUME.md` also change HEAD, so on a resume confirm `git diff <launch-commit>..HEAD -- xp configs` is empty before passing `--allow-code-change`.
+
+- [ ] **Step 5: Launch the run in the background (resumable)**
 
 ```bash
 caffeinate -i python -m xp.run --phase minigrid --config configs/minigrid-multiroom.yaml --out results/multiroom --workers 3
 ```
 
-Use a background watcher; do not poll. On a Kairi grid-edge `ProtocolError`: widen the Kairi `ent_coef` grid (keeping 6 values, and widening Kaiser's grid to 6 as well if it changes size), say so in the write-up, and rerun (cached jobs keyed by config hash will recompute under the new hash).
+Use a background watcher; do not poll. On a Kairi grid-edge `ProtocolError`: widen the Kairi `ent_coef` grid (keeping 6 values, and widening Kaiser's grid to 6 as well if it changes size) and say so in the write-up. Widening changes the config hash, so rerunning into the same `--out` raises `ConfigMismatchError`: use a fresh `--out` (e.g. `results/multiroom-v2`) or archive `results/multiroom` first, and say so in the write-up.
 
-- [ ] **Step 5: Report**
+Risks to budget for:
+- A Kairi optimum on a grid edge aborts the run after about a third of it (after Kairi tuning).
+- A Kaiser optimum at the 1.0 edge is plausible (the probe never tried above 0.1) and makes the run provisional.
+- Budget time for a full rerun.
+
+- [ ] **Step 6: Report**
 
 ```bash
 python -m xp.report --phase minigrid --config configs/minigrid-multiroom.yaml --out results/multiroom --figs figs/multiroom
@@ -640,13 +649,15 @@ python -m xp.report --phase minigrid --config configs/minigrid-multiroom.yaml --
 
 No `--allow-provisional` for the final table. If a result is provisional, widen and rerun instead.
 
+The training curves are kept: per-seed sidecars under `results/multiroom/minigrid/curves/` (`<agent>__seed-<seed>.json`) and the `curve` entries inside the tuning job JSONs. They are the source for a Kairi-vs-Kaiser success-vs-steps figure (the figure itself is Task 8).
+
 ---
 
 ### Task 8: Write up (whatever the outcome)
 
 **Files:** Modify `docs/FINDINGS.md`, `README.md`, `docs/WRITEUP.md`, `STATUS.md`, `RESUME.md`.
 
-- [ ] **Step 1:** In `docs/FINDINGS.md` add a "MultiRoom confirmation" section: tuned values for both agents, tuning curves, the paired differences with 95% CIs for `auc`, `steps_to_95` (censored count, `reached_95` per agent), and held-out `success`; the calibrated S (and whether the cap was hit); the stated limitation (level and grid range chosen after the probe).
+- [ ] **Step 1:** In `docs/FINDINGS.md` add a "MultiRoom confirmation" section: tuned values for both agents, tuning curves, the paired differences with 95% CIs for `auc`, `steps_to_95` (censored count, `reached_95` per agent), and held-out `success`; the calibrated S (and whether the cap was hit); the stated limitation (level and grid range chosen after the probe). State that test layouts are held-out layout seeds, not necessarily unseen layouts (as for DoorKey). Note that `success_100` uses a partial-window mean (NaN only for an empty window), which has no effect here since every logged MultiRoom window holds at least 128 episodes.
 - [ ] **Step 2:** Replace the post-hoc caveat in `FINDINGS.md`, the README summary and `docs/WRITEUP.md` with the confirmed or unconfirmed result. Kairi tying or winning is reported as such, with the probe kept as history, not deleted.
 - [ ] **Step 3:** Update `RESUME.md` and `STATUS.md` (commit the content first, then a STATUS-only marker commit so `STATUS_COMMIT` matches; see the Stop hook note in `RESUME.md`). Ask the user before pushing.
 
