@@ -1,5 +1,7 @@
 # XP — Resume
 
+IN PROGRESS (2026-10-25): the user lifted the Crafter scope rule and asked for both Crafter and Showdown to be specified as generality tests (single familiar world, no shift knob; Showdown agents = PPO vs PPO+RND on structured features). Spec amendments 5.5 (Crafter) and 5.6 (Showdown) are WRITTEN and committed in `docs/superpowers/specs/2026-10-22-xp-design.md`; CLAUDE.md scope updated (Crafter in scope, spike first; Showdown specified but NOT approved for building). Awaiting the user's review of the spec before the writing-plans step. The Crafter spike is NOT done: only `pip install crafter` (1.8.3, in .venv, not in requirements) and env timing (random policy: ~1000 / 395 / 141 steps/s at area 32 / 64 / 96) were done; no spike script exists. Next: user reviews 5.5/5.6; then write the Crafter spike plan (plain PPO only, 1 seed at area 32 and 64, 1M steps, gates G1-G3 in 5.5) via superpowers:writing-plans. Do not build Showdown. Pushes need the user's yes. Everything else below is history; MultiRoom is complete and pushed.
+
 Nothing is running. **MiniGrid is closed** (user decision 2026-10-24): entropy check done (matched-entropy Kaiser ties Kairi at every size, n=10, README post-hoc);
 step A (30 seeds, matched entropy) is shelved, see `docs/superpowers/plans/2026-10-24-phase2-step-a.md`. Do not reopen without the user asking.
 Phase 1 extra shifts DONE (reversed, sigma, k, drift; docs/FINDINGS.md, figs/shifts/): Kaiser robust to reversed tuning and noise; Kairi wins at k=50 and drift 0.1 (crossovers in (20,50) and (0.02,0.1)).
