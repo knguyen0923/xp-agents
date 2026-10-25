@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: ce05714 -->
+<!-- STATUS_COMMIT: 51f30e5 -->
 
 ## Current state
 
@@ -48,8 +48,9 @@ progress," read it first.
 - MultiRoom run was paused 16:36 and RESUMED 18:21 (processes continued, nothing lost).
 - MultiRoom confirmation COMPLETE (2026-10-25): Kairi ent_coef 0.01, Kaiser rnd_coef 0.6 (both interior); on 10 eval seeds Kaiser reached 95% in 0.70M vs 2.23M steps (paired CI of difference [-2.12M, -0.93M]), faster on 10/10, AUC 0.78 vs 0.26, solved 10/10 vs 5/10. Written up in `docs/MULTIROOM_EVALUATION.md`, FINDINGS, README, WRITEUP (commit 5d442de, pushed).
 - Standalone findings page: `docs/findings.html` (built by `scripts/build_findings_html.py` from `scripts/findings_template.html`; d3 vendored; commit local, not pushed). A private claude.ai artifact copy also exists.
+- Crafter and Showdown specified as generality tests (spec 5.5, 5.6; Crafter in scope, spike first; Showdown not approved for building). Crafter spike not started beyond env timing. Awaiting user's spec review.
 - Cleanup and push done (2026-10-25). **Next:** nothing in flight; no open research items, report (Task 7 step 6), Task 8 write-up, then finish branch (merge/push need user's yes)
 
 ## Last updated
 
-2026-10-25 (commit ce05714)
+2026-10-25 (commit 51f30e5)
