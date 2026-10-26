@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Callable, Dict
 
 import numpy as np
-import pandas as pd
 
 from xp.bandit.agents import KaiserAgent, KairiAgent
 from xp.bandit.tagteam import ChangeTriggered, FixedSchedule, MetaBandit, TagTeamAgent

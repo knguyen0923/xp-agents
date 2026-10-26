@@ -184,6 +184,14 @@ Caveats: one level; the level and grid were chosen after the probe, so only the 
 
 Open: the MultiRoom confirmation at other room counts (the 4-room confirmation is done) and a deep-RL tag-team agent. Crafter was spiked (2026-10-26): plain PPO reached only 4.5 distinct achievements per episode at 1M steps, below the pre-set gate of 5, so Crafter is closed as a documented spike by the user's decision, with no full phase (`docs/spikes/crafter_spike.md`). Showdown is specified but not approved for building. A design sketch for Crafter and Showdown (knobs, costs, risks, go/no-go criteria; not approved for building) is in `docs/FUTURE_WORK.md`.
 
+## Repository map
+
+- `xp/protocol/` phase-agnostic protocol (tuner, evaluator, results store); `xp/bandit/` and `xp/minigrid/` the two phases; `xp/stats/`, `xp/plots/` read only the tidy results table.
+- `configs/` run configs; `calibration*.json` frozen MiniGrid budgets; `tests/` the fast suite.
+- `docs/` write-up (`WRITEUP.md`), full analysis (`FINDINGS.md`), the MultiRoom evaluation, spike data (`docs/spikes/`), the design spec and plans (`docs/superpowers/`).
+- `scripts/` post-hoc analyses; `scripts/spikes/` the closed spikes (MultiRoom, Crafter). The Crafter spike needs `pip install crafter` (not in `requirements*.txt`, since no Crafter phase was built).
+- `notebooks/` Colab launchers for each phase and the Crafter spike. `figs/` and `results/` are generated; only the figures cited in the docs are tracked.
+
 ## Reproducing
 
 See `CLAUDE.md` for commands. Full runs go to Colab (`notebooks/`), Phase 2 may also run locally.
