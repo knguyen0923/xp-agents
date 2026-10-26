@@ -160,6 +160,9 @@ Spec amendment 5.4: MultiRoom, 4 rooms, max room size 4, single familiar level; 
 - **Caveats:** one level; the level, target and grid range were chosen after the probe and tune seeds 0 to 2 overlap the probe seeds, so only eval seeds are fresh; S was fit to Kairi's tune seeds, so Kairi's 5/10 "reached 95%" and its success rate depend on the budget (the probe saw PPO reach 95% on all 5 seeds by 3.15M steps), and the steps gap is a lower bound because failures are censored at S; Kairi's tuned entropy is a noisy pick from 3 seeds; steps, not wall-clock, were compared.
 
 
+### Wall-clock note (2026-10-26, from the logged `secs` in `docs/spikes/multiroom_probe.csv`; not a controlled timing)
+Mean seconds per 5M-step run on 4 small rooms: plain PPO 2163, RND 0.01 1875, 0.03 1877, 0.1 1845 (5 seeds each; three runs shared the laptop, so load differed between runs). So the bonus did not visibly add time per step in the probe, and at coefficient 0.1, which reached 95% in a mean 1.37M steps against 2.54M, the wall-clock to 95% would be roughly half. The DoorKey seed jobs, by contrast, took about 2.5x as long for Kaiser. A fair comparison needs a dedicated run with equal machine load; the MultiRoom confirmation did not log per-job time.
+
 ## Cross-phase picture ("where each agent loses")
 - Kaiser's exploration term pays off in the nonstationary bandit near and moderately beyond the tuned conditions (jumps, noise, drift up to ~2x), showed no measurable
   benefit in the stationary-but-sparse MiniGrid DoorKey family or at 2M steps on MultiRoom, and in a post-hoc 5M-step probe on the exploration-heavy MultiRoom level (4 small rooms) reached 95% success in about half
