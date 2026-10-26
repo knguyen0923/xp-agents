@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 209975b -->
+<!-- STATUS_COMMIT: 46babe2 -->
 
 ## Current state
 
@@ -55,5 +55,5 @@ progress," read it first.
 
 2026-10-25 (commit fc2cd16)
 
-## Last updated 2026-10-26 (commit 209975b)
-- Crafter spike in progress (plan `docs/superpowers/plans/2026-10-25-crafter-spike.md`, subagent-driven, ledger in git-ignored `.superpowers/sdd/2026-10-25-crafter-spike/`). Task 1 DONE: `tests/test_crafter_spike.py` (5 tests, 161 total pass). Task 2 DONE (throughput + cost table in `docs/spikes/crafter_spike.md`). Next: Task 3 asks the user's go-ahead before the two 1M-step runs; then Task 5 write-up. No push without the user's yes; Showdown not approved.
+## Last updated 2026-10-26 (commit 46babe2)
+- Crafter spike in progress (plan `docs/superpowers/plans/2026-10-25-crafter-spike.md`, subagent-driven, ledger in git-ignored `.superpowers/sdd/2026-10-25-crafter-spike/`). Task 1 DONE: `tests/test_crafter_spike.py` (5 tests, 161 total pass). Task 2 DONE (throughput + cost table in `docs/spikes/crafter_spike.md`). Colab notebook `notebooks/run_crafter_spike.ipynb` written (user chose Colab for Task 4; script upload cell because unpushed). Next: Task 3 asks the user's go-ahead before the two 1M-step runs; then Task 5 write-up. No push without the user's yes; Showdown not approved.
