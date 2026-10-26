@@ -1,6 +1,6 @@
 # Showdown Spike Plan
 
-> **STATUS: PLAN ONLY. NOT STARTED. Do not run any task until the user says go.** Pushes also need the user's yes.
+> **STATUS: IN PROGRESS, paused 2026-10-26 waiting on the user's teams.** Task 1 steps 1-4 done, step 6 blocked, Tasks 2-5 not started (see Progress log). Pushes need the user's yes.
 >
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
@@ -94,3 +94,24 @@
 - Compute: minutes to a couple of hours on the laptop, no GPU, no Colab.
 - Biggest risks: server Node requirement versus this machine; no ready-made scripted doubles opponents (S2); a Champions regulation that Showdown does not implement; team preview picks (bring 6, choose 4) not being exposed cleanly by `poke-env`; throughput too low for a 56-run phase.
 - A tie between Kairi and Kaiser remains the likely outcome of a full phase and is a valid result (spec 5.6).
+
+## Progress log (2026-10-26)
+
+Done (scratch dir `~/xp-showdown-spike/`, nothing in the repo changed):
+- `poke-env` 0.10.0 installs in a Python 3.9.6 venv (gymnasium 1.1.1, pettingzoo 1.26.1, numpy 2.0.2).
+- Showdown server needs Node >=22.18; local Node v22.23.4 (arm64 tarball) in the scratch dir. Server checkout at `pokemon-showdown/`, started with `node pokemon-showdown start --no-security`.
+- The `bindaddress` config setting is ignored by this server version; the scratch checkout was patched (`server/sockets.ts`, `PSBINDADDR: '127.0.0.1'`) so it listens on localhost only. Re-apply after any re-clone.
+- **Exact format exists:** `[Gen 9 Champions] VGC 2026 Reg M-C`, format ID `gen9championsvgc2026regmc` (Champions mod, doubles, Flat Rules, VGC Timer, Open Team Sheets). No custom format needed.
+- Built-in players: `RandomPlayer` and `MaxBasePowerPlayer` support doubles; `SimpleHeuristicsPlayer` falls back to random moves in doubles. A third, stronger opponent must be written (S2).
+- Gotcha: a rejected team makes `poke-env` hang with no exception; the reason appears only as a `|popup|` line at debug log level. The full phase needs a team-validation check before any run.
+- Placeholder teams taken from the random-doubles generator are illegal in Reg M-C (7 Pokémon, then Item Clause). Real teams are needed; two failed attempts, so stopped.
+
+
+Done later the same day, without teams (proxy format `gen9randomdoublesbattle`, because `poke-env` cannot parse the Champions-only forms, see below):
+- **S1 finding (important):** `poke-env` 0.10.0's bundled Pokedex lacks 54 species that the server's Champions mod defines (mostly new Mega forms such as `hawluchamega`, `dragonitemega`, `raichumegax`; also 5 non-Mega species) and 2 moves (`nihillight`, `polarflare`). A battle that touches one of them raises `KeyError` inside the message handler, which `poke-env` logs and then **hangs** the battle. Teams using those Megas will not run unless `poke-env`'s data files are patched from the server's data (a modest data-patch task, not yet tried). Teams without them should work.
+- **S2 (ladder, proxy format, 300 battles per pairing):** MaxBasePower beats Random 291/300 (0.97); the new damage heuristic (`DamageHeuristicPlayer`, ~50 lines, scripts in `scripts/spikes/showdown_*.py`, throwaway) beats MaxBasePower 225/300 (0.75) and Random 297/300 (0.99). A graded 3-tier ladder exists. Not yet measured on Reg M-C teams.
+- **S3 (partial):** about 25-34 battles per second for scripted players on one server process in random doubles (no team preview, short battles). An upper bound for Reg M-C; the real number needs the exact format.
+- Gotchas: Showdown strips underscores and truncates usernames to 18 characters, so over-long or underscored account names silently break challenges (battle hangs). Use short alphanumeric names.
+- **Task 5 sketch:** `DoublesEnv` exposes `MultiDiscrete([107, 107])` per turn for gen9 (1 pass + 6 switches + 4 moves x 5 targets x 5 gimmick variants; the gimmick slots include Mega, which Champions uses), so the factored action head is two 107-way categoricals with masking by `battle.available_moves/switches/force_switch`. **Team preview is not in the env action space:** it goes through `Player.teampreview()` (a `/team` string; pick 4 of 6 and the lead pair are chosen by ordering), so a policy needs its own head or a scripted rule for it. Features available per Pokemon: species, HP fraction, status, boosts, item, ability, known moves (with base power, type, category), Tera/Mega flags; field: weather, terrain and side conditions in `battle`. Main risk for the full phase: a fixed identical feature encoding must cover Pokemon and moves the agent has not seen, and the 107x107 joint action space is large.
+
+Remaining: S1 step 6 (one full Reg M-C battle on real teams), S2 on real teams, S3 on real teams, S4 (needs two disjoint team lists and a seed check), then Task 6. Blocking: at least 3 tune and 3 eval Reg M-C teams from the user (pokepaste); optional next step: patch `poke-env` data for the missing species (unblocks teams with the new Megas).
