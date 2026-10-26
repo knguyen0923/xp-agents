@@ -77,15 +77,21 @@
 
   <div class="verdict"><p><b>Kaiser is faster on all 10 evaluation seeds.</b> The interval for the step gap runs from <span data-source="mr_paired" data-where="metric=steps_to_95" data-field="lo" data-fmt="M">—</span> to <span data-source="mr_paired" data-where="metric=steps_to_95" data-field="hi" data-fmt="M">—</span> steps, nowhere near zero. This is the project's first confirmed exploration-bonus advantage in MiniGrid.</p></div>
 
+  <h2>Chapter 6: Crafter, a world we tried and set aside</h2>
+  <p>Crafter is a much larger world: the agent sees an image and can unlock 22 achievements, from collecting wood to making an iron pickaxe. Before spending days on it, we ran a spike with plain PPO only (no exploration bonus), one seed at each of two world sizes, 1M steps each. The test was set in advance: the agent had to average at least 5 distinct achievements per episode, because a near-random policy already averages about 3.</p>
+  <div class="card"><h3>Plain PPO, achievements per episode (mean of the last 100 episodes)</h3><p class="note">Dashed line: the pass mark of 5. Both worlds were still climbing at 1M steps but ended below it.</p><div class="chart" id="crafter-chart" data-source="crafter"></div></div>
+  <div class="verdict"><p><b>Neither world reached the pass mark:</b> 4.52 achievements in the small world and 4.37 in the large one. The agent learned wood, sapling, water, cow and zombie, but never placed a table, so the tools and iron stayed out of reach. The full study would have cost about 20 to 50 hours, so we closed Crafter as a documented spike. We may come back to it; it was set aside for time, and the question is still open. No exploration-bonus result was read.</p></div>
+
   <h2>What this does and does not show</h2>
   <ul>
+    <li><b>Crafter is a spike, not a result.</b> One seed per world size, plain PPO only. It shows the world is hard for plain PPO at 1M steps, not whether an exploration bonus would help.</li>
     <li><b>One level.</b> It says nothing about other room counts, and DoorKey still shows no benefit.</li>
     <li><b>The design came after the probe.</b> The level, target and bonus range were chosen after seeing it, and two tuning seeds overlap the probe seeds. Only the evaluation seeds are fresh.</li>
     <li><b>Kairi's failures are budget failures.</b> The budget was fitted to Kairi's tuning seeds, and in the probe plain PPO solved every seed given 5M steps. Trust the speed gaps (steps, AUC) more than the solved-or-not counts.</li>
     <li><b>Steps, not time.</b> The bonus adds compute per step; wall-clock was not compared.</li>
     <li><b>Frozen settings are brittle.</b> In the bandit, Kaiser's tuned values transfer worse than Kairi's. The advice is to retune it after a large shift.</li>
   </ul>
-  <p class="note">Sources: results tables in the project repository (<code>docs/FINDINGS.md</code>, <code>docs/MULTIROOM_EVALUATION.md</code>, <code>docs/spikes/</code>, <code>figs/</code>). The bandit, retune, DoorKey, probe and MultiRoom tables are copies of those files; the MultiRoom curves are sampled every 4th logged point.</p>
+  <p class="note">Sources: results tables in the project repository (<code>docs/FINDINGS.md</code>, <code>docs/MULTIROOM_EVALUATION.md</code>, <code>docs/spikes/</code>, <code>figs/</code>). The bandit, retune, DoorKey, probe, MultiRoom and Crafter tables are copies of those files; the MultiRoom curves are sampled every 4th logged point.</p>
 </div>
 
 <script>
@@ -321,6 +327,38 @@
     }).on('mouseleave', hideTip);
   }
 
+  function drawCrafter() {
+    var el = document.getElementById('crafter-chart');
+    var rows = rowsOf('crafter');
+    if (!rows) { el.innerHTML = ''; return; }
+    var rs = rows.map(function (r) { return { a: r.area, x: Number(r.steps), v: Number(r.ach_100) }; });
+    var c = mk(el, 300, { l: 40, r: 10, t: 14, b: 38 });
+    var x = d3.scaleLinear().domain([0, d3.max(rs, function (r) { return r.x; })]).range([0, c.w]);
+    var y = d3.scaleLinear().domain([0, 6]).range([c.h, 0]);
+    axes(c, x, y, { grid: true, yt: 6, xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'training steps' });
+    c.g.append('line').attr('x1', 0).attr('x2', c.w).attr('y1', y(5)).attr('y2', y(5)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
+    c.g.append('text').attr('x', 4).attr('y', y(5) - 5).attr('class', 'lbl').style('fill', 'var(--cds-chart-reference)').text('pass mark: 5');
+    var line = d3.line().x(function (d) { return x(d.x); }).y(function (d) { return y(d.v); });
+    [['32', 'var(--color-fg)', 'small world (area 32) '], ['64', 'var(--cds-chart-muted)', 'large world (area 64) ']].forEach(function (a) {
+      var pts = rs.filter(function (r) { return r.a === a[0]; });
+      c.g.append('path').attr('d', line(pts)).attr('fill', 'none').attr('stroke', a[1]).attr('stroke-width', 2.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+      var last = pts[pts.length - 1];
+      c.g.append('text').attr('x', c.w - 4).attr('y', y(last.v) + (a[0] === '32' ? -8 : 16)).attr('text-anchor', 'end').attr('class', 'lbl').style('fill', a[1]).text(a[2] + d3.format('.2f')(last.v));
+    });
+    var ov = c.g.append('rect').attr('width', c.w).attr('height', c.h).attr('fill', 'transparent');
+    ov.on('mousemove', function (ev) {
+      var xv = x.invert(d3.pointer(ev)[0]);
+      var lines = [d3.format('.2f')(xv / 1e6) + 'M steps'];
+      [['32', 'Area 32'], ['64', 'Area 64']].forEach(function (a) {
+        var mine = rs.filter(function (r) { return r.a === a[0]; });
+        var near = d3.min(mine, function (r) { return Math.abs(r.x - xv); });
+        var hit = mine.filter(function (r) { return Math.abs(r.x - xv) === near; })[0];
+        lines.push(a[1] + ': ' + d3.format('.2f')(hit.v));
+      });
+      showTip(ev, lines);
+    }).on('mouseleave', hideTip);
+  }
+
   // ---- Seed dumbbells
   function drawPairs() {
     var el = document.getElementById('pairs-chart');
@@ -366,7 +404,7 @@
   }
 
   dash.onData(function () {
-    drawBandit(); drawRetune(); drawDoorkey(); drawProbe(); drawTuning(); drawCurves(); drawPairs(); drawTable(); fillMarks();
+    drawBandit(); drawRetune(); drawDoorkey(); drawProbe(); drawTuning(); drawCurves(); drawCrafter(); drawPairs(); drawTable(); fillMarks();
   });
 })();
 </script>

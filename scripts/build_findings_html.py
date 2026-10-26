@@ -70,6 +70,7 @@ def datasets(run):
         paired.append({"metric": m, "label": lab, "kairi": f"{x.mean():.4g}", "kaiser": f"{y.mean():.4g}",
                        "diff": f"{diff.mean():.4g}", "lo": f"{lo:.4g}", "hi": f"{hi:.4g}", "better_seeds": f"{better}/{len(diff)}"})
     d["mr_paired"] = paired
+    d["crafter"] = read("docs/spikes/crafter_spike_curves.csv")
     return d
 
 
