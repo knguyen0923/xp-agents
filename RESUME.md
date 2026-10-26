@@ -1,6 +1,6 @@
 # XP — Resume
 
-Nothing running. **Crafter spike DONE (2026-10-26)**: plain PPO, 1 seed, 1M steps: area 32 final ach_100 4.52, area 64 4.37; G1 (needs 5) fails at both, G2 passes; recommendation STOP unless the user amends S (see `docs/spikes/crafter_spike.md`, spec 5.5 "Spike results"). **Next step: ask the user go/no-go on the full Crafter phase** (plan Task 5 step 5). Nothing pushed (needs the user's yes). Showdown not approved. `crafter-spike.log` is untracked scratch; delete it. SDD ledger (git-ignored): `.superpowers/sdd/2026-10-25-crafter-spike/`.
+Nothing running. **Crafter spike DONE (2026-10-26)**: plain PPO, 1 seed, 1M steps: area 32 final ach_100 4.52, area 64 4.37; G1 (needs 5) fails at both, G2 passes; recommendation STOP unless the user amends S (see `docs/spikes/crafter_spike.md`, spec 5.5 "Spike results"). **PAUSED by the user (2026-10-26): the go/no-go on the full Crafter phase is deferred; do not start anything.** When the user returns, re-present the choice: (1) no-go, close Crafter as a documented spike (recommended), or (2) go with a spec amendment raising S to 2-3M at area 32 (about 40-60 h full phase), amended before any RND result is read. Nothing pushed (needs the user's yes). Showdown not approved. `crafter-spike.log` is untracked scratch; delete it. SDD ledger (git-ignored): `.superpowers/sdd/2026-10-25-crafter-spike/`.
 
 ---
 
