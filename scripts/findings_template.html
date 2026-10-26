@@ -7,11 +7,10 @@
 .xp .lede { font-size: 1.05rem; color: var(--color-fg); max-width: 46rem; }
 .xp .muted { color: var(--color-fg-muted); }
 .xp .note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0 0 var(--cds-gap-sm); max-width: none; }
-.xp .grid { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); margin: var(--cds-gap-md) 0; }
+.xp .grid { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); margin: var(--cds-gap-md) 0; }
 .xp .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; position: relative; }
-.xp .chart { min-height: 14rem; position: relative; }
-.xp .chart.tall { min-height: 19rem; }
-.xp svg text { fill: var(--color-fg-muted); font-size: 11px; font-family: var(--font-anthropic-sans); }
+.xp .chart { min-height: 340px; position: relative; }
+.xp svg text { fill: var(--color-fg-muted); font-size: 13px; font-family: var(--font-anthropic-sans); }
 .xp svg .lbl { fill: var(--color-fg); }
 .xp .legend { display: flex; gap: var(--cds-gap-md); flex-wrap: wrap; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-xs); }
 .xp .sw { display: inline-block; width: .7rem; height: .7rem; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
@@ -68,7 +67,7 @@
   <p class="muted" style="margin-top:var(--cds-gap-md)">Kairi's pick is noisy: with 3 seeds and all-or-nothing outcomes, its winner rests on a couple of take-off times. Kaiser's larger bonus values all learn fast, so its pick is steadier.</p>
 
   <h3 style="margin-top:2rem">Result on 10 fresh seeds, success while training</h3>
-  <div class="card"><div class="legend"><span><i class="sw" style="background:var(--k1)"></i>Kairi</span><span><i class="sw" style="background:var(--k2)"></i>Kaiser</span></div><div class="chart tall" id="curves-chart" data-source="mr_curves"></div><p class="note">Thin lines are single seeds, thick lines the mean. Dashed line: 95% success. Kaiser takes off early and nearly together; Kairi's seeds take off anywhere from the middle of the run to past its end.</p></div>
+  <div class="card"><div class="legend"><span><i class="sw" style="background:var(--k1)"></i>Kairi</span><span><i class="sw" style="background:var(--k2)"></i>Kaiser</span></div><div class="chart" id="curves-chart" data-source="mr_curves"></div><p class="note">Thin lines are single seeds, thick lines the mean. Dashed line: 95% success. Kaiser takes off early and nearly together; Kairi's seeds take off anywhere from the middle of the run to past its end.</p></div>
 
   <div class="card" style="margin-top:var(--cds-gap-md)"><h3>Seed by seed</h3><p class="note">Steps to 95% for each evaluation seed. A seed that never reached 95% counts as the full budget (right edge).</p><div class="chart" id="pairs-chart" data-source="mr_pairs"></div></div>
 
@@ -79,7 +78,7 @@
 
   <h2>Chapter 6: Crafter, a world we tried and set aside</h2>
   <p>Crafter is a much larger world: the agent sees an image and can unlock 22 achievements, from collecting wood to making an iron pickaxe. Before spending days on it, we ran a spike with plain PPO only (no exploration bonus), one seed at each of two world sizes, 1M steps each. The test was set in advance: the agent had to average at least 5 distinct achievements per episode, because a near-random policy already averages about 3.</p>
-  <div class="card"><h3>Plain PPO, achievements per episode (mean of the last 100 episodes)</h3><p class="note">Dashed line: the pass mark of 5. Both worlds were still climbing at 1M steps but ended below it.</p><div class="chart" id="crafter-chart" data-source="crafter"></div></div>
+  <div class="card"><h3>Plain PPO, achievements per episode (mean of the last 100 episodes)</h3><p class="note">Dashed line: the pass mark of 5. Both worlds were still climbing at 1M steps but ended below it.</p><div class="legend"><span><i class="sw" style="background:#d99a1e"></i>Small world (area 32), final 4.52</span><span><i class="sw" style="background:#2a9d8f"></i>Large world (area 64), final 4.37</span></div><div class="chart" id="crafter-chart" data-source="crafter"></div></div>
   <div class="verdict"><p><b>Neither world reached the pass mark:</b> 4.52 achievements in the small world and 4.37 in the large one. The agent learned wood, sapling, water, cow and zombie, but never placed a table, so the tools and iron stayed out of reach. The full study would have cost about 20 to 50 hours, so we closed Crafter as a documented spike. We may come back to it; it was set aside for time, and the question is still open. No exploration-bonus result was read.</p></div>
 
   <h2>What this does and does not show</h2>
@@ -150,12 +149,13 @@
     return c;
   }
 
+  var CH = 340, M = { l: 66, r: 18, t: 22, b: 58 };
   function mk(el, h, m) {
     el.innerHTML = '';
     var W = Math.max(240, el.clientWidth || 300);
     var svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', '0 0 ' + W + ' ' + h);
     var g = svg.append('g').attr('transform', 'translate(' + m.l + ',' + m.t + ')');
-    return { svg: svg, g: g, w: W - m.l - m.r, h: h - m.t - m.b };
+    return { svg: svg, g: g, m: m, w: W - m.l - m.r, h: h - m.t - m.b };
   }
   function axes(c, x, y, o) {
     o = o || {};
@@ -163,8 +163,8 @@
     var ay = c.g.append('g').call(d3.axisLeft(y).ticks(o.yt || 5).tickFormat(o.yf || null).tickSizeOuter(0));
     [ax, ay].forEach(function (a) { a.attr('font-size', null).attr('font-family', null); a.selectAll('line,path').attr('stroke', 'var(--cds-chart-axis)'); });
     if (o.grid) c.g.append('g').call(d3.axisLeft(y).ticks(o.yt || 5).tickSize(-c.w).tickFormat('')).call(function (s) { s.select('.domain').remove(); s.selectAll('line').attr('stroke', 'var(--cds-chart-grid)'); });
-    if (o.xlabel) c.g.append('text').attr('x', c.w).attr('y', c.h + 32).attr('text-anchor', 'end').text(o.xlabel);
-    if (o.ylabel) c.g.append('text').attr('x', 0).attr('y', -8).attr('text-anchor', 'start').text(o.ylabel);
+    if (o.xlabel) c.g.append('text').attr('x', c.w / 2).attr('y', c.h + 46).attr('text-anchor', 'middle').attr('class', 'lbl').text(o.xlabel);
+    if (o.ylabel) c.g.append('text').attr('transform', 'rotate(-90)').attr('x', -c.h / 2).attr('y', -c.m.l + 16).attr('text-anchor', 'middle').attr('class', 'lbl').text(o.ylabel);
   }
   var fmtNum = function (v) { return d3.format('.3~g')(v); };
 
@@ -174,26 +174,30 @@
     var rows = rowsOf('bandit');
     if (!rows) { host.innerHTML = ''; return; }
     var worlds = ['jump rate', 'noise sigma', 'arms k', 'drift', 'reversed tuning'];
+    var xlabels = { 'jump rate': 'jump rate (per step)', 'noise sigma': 'reward noise (sigma)', 'arms k': 'number of arms', 'drift': 'arm drift (per step)', 'reversed tuning': 'jump rate (per step)' };
     var titles = { 'jump rate': 'How often the best arm jumps', 'noise sigma': 'Reward noise', 'arms k': 'Number of arms', 'drift': 'Drift of arm values', 'reversed tuning': 'Tuned at the fast-jump end, swept the other way' };
     host.innerHTML = '';
+    var later = [];
     worlds.forEach(function (wd) {
       var rs = rows.filter(function (r) { return r.world === wd; }).map(function (r) { return { agent: r.agent, x: r.knob, v: num(r.regret), lo: num(r.lo), hi: num(r.hi) }; });
       var card = document.createElement('div'); card.className = 'card';
       var h = document.createElement('h3'); h.textContent = titles[wd]; card.appendChild(h);
-      var p = document.createElement('p'); p.className = 'note'; p.textContent = 'x: setting of the world · y: regret per step'; card.appendChild(p);
-      var el = document.createElement('div'); el.className = 'chart'; card.appendChild(el); host.appendChild(card);
-      var c = mk(el, 220, { l: 38, r: 10, t: 14, b: 36 });
+      var p = document.createElement('p'); p.className = 'note'; p.textContent = 'Lines are means; shaded bands are 95% intervals.'; card.appendChild(p);
+      var el = document.createElement('div'); el.className = 'chart'; card.appendChild(el); host.appendChild(card); later.push(function () {
+      var c = mk(el, CH, M);
       var xs = Array.from(new Set(rs.map(function (r) { return r.x; }))).sort(function (a, b) { return Number(a) - Number(b); });
       var x = d3.scalePoint().domain(xs).range([0, c.w]).padding(0.3);
       var y = d3.scaleLinear().domain([Math.min(0, d3.min(rs, function (r) { return r.lo; })), d3.max(rs, function (r) { return r.hi; })]).nice().range([c.h, 0]);
-      axes(c, x, y, { grid: true, yt: 4, yf: d3.format('.2f') });
+      axes(c, x, y, { grid: true, yt: 5, yf: d3.format('.2f'), xf: function (v) { return d3.format('.3~g')(Number(v)); }, xlabel: xlabels[wd], ylabel: 'regret per step (lower is better)' });
       [['kairi', C1], ['kaiser', C2]].forEach(function (a) {
         var pts = xs.map(function (k) { return rs.filter(function (r) { return r.agent === a[0] && r.x === k; })[0]; }).filter(Boolean);
         c.g.append('path').attr('d', d3.area().x(function (d) { return x(d.x); }).y0(function (d) { return y(d.lo); }).y1(function (d) { return y(d.hi); })(pts)).attr('fill', a[1]).attr('opacity', 0.16);
         c.g.append('path').attr('d', d3.line().x(function (d) { return x(d.x); }).y(function (d) { return y(d.v); })(pts)).attr('fill', 'none').attr('stroke', a[1]).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
-        pts.forEach(function (d) { dot(c.g, x(d.x), y(d.v), 3, a[1], [wd + ' ' + d.x, a[0] + ': ' + fmtNum(d.v), '95% CI ' + fmtNum(d.lo) + ' to ' + fmtNum(d.hi)]); });
+        pts.forEach(function (d) { dot(c.g, x(d.x), y(d.v), 4, a[1], [wd + ' ' + d.x, a[0] + ': ' + fmtNum(d.v), '95% CI ' + fmtNum(d.lo) + ' to ' + fmtNum(d.hi)]); });
+      });
       });
     });
+    later.forEach(function (f) { f(); });
   }
 
   // ---- Retune forest
@@ -204,23 +208,26 @@
     host.innerHTML = '';
     var shifts = Array.from(new Set(rows.map(function (r) { return r.shift; })));
     var names = { 'retuned at k=50': 'Both agents retuned for many arms', 'retuned at drift 0.1': 'Both agents retuned for fast drift' };
+    var later = [];
     shifts.forEach(function (sh) {
       var rs = rows.filter(function (r) { return r.shift === sh; }).map(function (r) { return { x: r.knob, v: num(r.kairi_minus_kaiser), lo: num(r.lo), hi: num(r.hi) }; });
       var card = document.createElement('div'); card.className = 'card';
       var h = document.createElement('h3'); h.textContent = names[sh] || sh; card.appendChild(h);
-      var p = document.createElement('p'); p.className = 'note'; p.textContent = 'Above zero: Kaiser better. Below: Kairi better. x: setting of the world.'; card.appendChild(p);
-      var el = document.createElement('div'); el.className = 'chart'; card.appendChild(el); host.appendChild(card);
-      var c = mk(el, 230, { l: 42, r: 10, t: 14, b: 36 });
+      var p = document.createElement('p'); p.className = 'note'; p.textContent = 'Above zero: Kaiser better. Below: Kairi better.'; card.appendChild(p);
+      var el = document.createElement('div'); el.className = 'chart'; card.appendChild(el); host.appendChild(card); later.push(function () {
+      var c = mk(el, CH, M);
       var x = d3.scalePoint().domain(rs.map(function (r) { return r.x; })).range([0, c.w]).padding(0.4);
       var y = d3.scaleLinear().domain([d3.min(rs, function (r) { return Math.min(r.lo, 0); }), d3.max(rs, function (r) { return Math.max(r.hi, 0); })]).nice().range([c.h, 0]);
-      axes(c, x, y, { grid: true, yt: 4, yf: d3.format('.2f') });
+      axes(c, x, y, { grid: true, yt: 5, yf: d3.format('.2f'), xf: function (v) { return d3.format('.3~g')(Number(v)); }, xlabel: sh === 'retuned at k=50' ? 'number of arms' : 'arm drift (per step)', ylabel: 'Kairi − Kaiser regret per step' });
       c.g.append('line').attr('x1', 0).attr('x2', c.w).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
       rs.forEach(function (d) {
         var col = d.lo > 0 ? C2 : d.hi < 0 ? C1 : 'var(--cds-chart-muted)';
         c.g.append('line').attr('x1', x(d.x)).attr('x2', x(d.x)).attr('y1', y(d.lo)).attr('y2', y(d.hi)).attr('stroke', col).attr('stroke-width', 2).attr('stroke-linecap', 'round');
         dot(c.g, x(d.x), y(d.v), 4.5, col, ['setting ' + d.x, 'Kairi − Kaiser: ' + fmtNum(d.v), '95% CI ' + fmtNum(d.lo) + ' to ' + fmtNum(d.hi), d.lo > 0 ? 'Kaiser better' : d.hi < 0 ? 'Kairi better' : 'tie']);
       });
+      });
     });
+    later.forEach(function (f) { f(); });
   }
 
   // ---- DoorKey grouped bars
@@ -229,12 +236,12 @@
     var rows = rowsOf('doorkey');
     if (!rows) { el.innerHTML = ''; return; }
     var rs = rows.map(function (r) { return { agent: r.agent, x: r.size, v: num(r.success), lo: num(r.lo), hi: num(r.hi) }; });
-    var c = mk(el, 240, { l: 40, r: 10, t: 14, b: 38 });
+    var c = mk(el, CH, M);
     var sizes = Array.from(new Set(rs.map(function (r) { return r.x; }))).sort(function (a, b) { return a - b; });
     var x0 = d3.scaleBand().domain(sizes).range([0, c.w]).padding(0.25);
     var x1 = d3.scaleBand().domain(['kairi', 'kaiser']).range([0, x0.bandwidth()]).padding(0.1);
     var y = d3.scaleLinear().domain([0, 1]).range([c.h, 0]);
-    axes(c, x0, y, { grid: true, yf: d3.format('.0%'), xf: function (s) { return 'size ' + Number(s); } });
+    axes(c, x0, y, { grid: true, yf: d3.format('.0%'), xf: function (s) { return Number(s); }, xlabel: 'maze size (grid cells per side)', ylabel: 'success rate' });
     rs.forEach(function (d) {
       var col = d.agent === 'kairi' ? C1 : C2, bx = x0(d.x) + x1(d.agent), bw = x1.bandwidth();
       var r = c.g.append('rect').attr('x', bx).attr('y', y(d.v)).attr('width', bw).attr('height', Math.max(0, c.h - y(d.v))).attr('rx', 4).attr('fill', col);
@@ -251,10 +258,10 @@
     var lab = function (r) { return r.agent === 'ppo' ? 'Plain PPO' : 'RND ' + r.rnd_coef; };
     var cats = ['Plain PPO', 'RND 0.01', 'RND 0.03', 'RND 0.1'];
     var rs = rows.map(function (r) { return { cat: lab(r), s: num(r.steps_to_95) / 1e6, ok: r.reached_95 === 'True', seed: r.seed }; });
-    var c = mk(el, 280, { l: 40, r: 10, t: 14, b: 36 });
+    var c = mk(el, CH, M);
     var x = d3.scalePoint().domain(cats).range([0, c.w]).padding(0.5);
     var y = d3.scaleLinear().domain([0, 5.2]).range([c.h, 0]);
-    axes(c, x, y, { grid: true, yf: function (v) { return v + 'M'; } });
+    axes(c, x, y, { grid: true, yf: function (v) { return v + 'M'; }, xlabel: 'agent and bonus strength', ylabel: 'steps to 95% success' });
     cats.forEach(function (cat, i) {
       var v = rs.filter(function (r) { return r.cat === cat; });
       var med = d3.median(v, function (r) { return r.s; });
@@ -272,24 +279,27 @@
     var rows = rowsOf('mr_tuning'), tuned = rowsOf('mr_tuned');
     if (!rows || !tuned) { host.innerHTML = ''; return; }
     host.innerHTML = '';
+    var later = [];
     [['kairi', 'Kairi: entropy coefficient', C1], ['kaiser', 'Kaiser: RND bonus strength', C2]].forEach(function (a) {
       var cell = document.createElement('div'); cell.style.minWidth = '0';
       var h = document.createElement('p'); h.className = 'cap'; h.textContent = a[1]; cell.appendChild(h);
-      var el = document.createElement('div'); el.className = 'chart'; cell.appendChild(el); host.appendChild(cell);
+      var el = document.createElement('div'); el.className = 'chart'; cell.appendChild(el); host.appendChild(cell); later.push(function () {
       var rs = rows.filter(function (r) { return r.agent === a[0]; }).map(function (r) { return { x: r.coef, auc: num(r.auc), seed: r.seed }; });
       var best = tuned.filter(function (r) { return r.agent === a[0] && Number(r.best) === 1; })[0];
       var cats = Array.from(new Set(rs.map(function (r) { return r.x; }))).sort(function (p, q) { return Number(p) - Number(q); });
-      var c = mk(el, 230, { l: 38, r: 8, t: 14, b: 34 });
+      var c = mk(el, CH, M);
       var x = d3.scaleBand().domain(cats).range([0, c.w]).padding(0.25);
       var y = d3.scaleLinear().domain([0, 1]).range([c.h, 0]);
-      axes(c, x, y, { grid: true, yf: d3.format('.1f') });
+      axes(c, x, y, { grid: true, yf: d3.format('.1f'), xlabel: a[0] === 'kairi' ? 'entropy coefficient' : 'RND bonus strength', ylabel: 'training AUC of success' });
       cats.forEach(function (k) {
         var v = rs.filter(function (r) { return r.x === k; }), m = d3.mean(v, function (r) { return r.auc; });
         var isBest = best && String(best.coef) === String(k);
         c.g.append('rect').attr('x', x(k)).attr('y', y(m)).attr('width', x.bandwidth()).attr('height', Math.max(0, c.h - y(m))).attr('rx', 4).attr('fill', isBest ? a[2] : 'var(--cds-chart-muted)').attr('opacity', isBest ? 1 : 0.55);
-        v.forEach(function (r) { dot(c.g, x(k) + x.bandwidth() / 2, y(r.auc), 3, 'var(--color-fg)', [a[0] + ' ' + k + ', seed ' + r.seed, 'AUC ' + d3.format('.3f')(r.auc), 'mean ' + d3.format('.3f')(m)]); });
+        v.forEach(function (r) { dot(c.g, x(k) + x.bandwidth() / 2, y(r.auc), 4, 'var(--color-fg)', [a[0] + ' ' + k + ', seed ' + r.seed, 'AUC ' + d3.format('.3f')(r.auc), 'mean ' + d3.format('.3f')(m)]); });
+      });
       });
     });
+    later.forEach(function (f) { f(); });
   }
 
   // ---- Eval curves
@@ -298,11 +308,11 @@
     var rows = rowsOf('mr_curves');
     if (!rows) { el.innerHTML = ''; return; }
     var rs = rows.map(function (r) { var v = num(r.success); return { a: r.agent, s: r.seed, x: Number(r.steps), v: isNaN(v) ? 0 : v }; });
-    var c = mk(el, 320, { l: 40, r: 10, t: 14, b: 38 });
+    var c = mk(el, CH, M);
     var xmax = d3.max(rs, function (r) { return r.x; });
     var x = d3.scaleLinear().domain([0, xmax]).range([0, c.w]);
     var y = d3.scaleLinear().domain([0, 1]).range([c.h, 0]);
-    axes(c, x, y, { grid: true, yf: d3.format('.0%'), xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'training steps' });
+    axes(c, x, y, { grid: true, yf: d3.format('.0%'), xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'training steps', ylabel: 'success rate' });
     c.g.append('line').attr('x1', 0).attr('x2', c.w).attr('y1', y(0.95)).attr('y2', y(0.95)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
     var line = d3.line().x(function (d) { return x(d.x); }).y(function (d) { return y(d.v); });
     [['kairi', C1], ['kaiser', C2]].forEach(function (a) {
@@ -332,18 +342,16 @@
     var rows = rowsOf('crafter');
     if (!rows) { el.innerHTML = ''; return; }
     var rs = rows.map(function (r) { return { a: r.area, x: Number(r.steps), v: Number(r.ach_100) }; });
-    var c = mk(el, 300, { l: 40, r: 10, t: 14, b: 38 });
+    var c = mk(el, CH, M);
     var x = d3.scaleLinear().domain([0, d3.max(rs, function (r) { return r.x; })]).range([0, c.w]);
     var y = d3.scaleLinear().domain([0, 6]).range([c.h, 0]);
-    axes(c, x, y, { grid: true, yt: 6, xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'training steps' });
+    axes(c, x, y, { grid: true, yt: 6, xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'training steps', ylabel: 'achievements per episode' });
     c.g.append('line').attr('x1', 0).attr('x2', c.w).attr('y1', y(5)).attr('y2', y(5)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3');
     c.g.append('text').attr('x', 4).attr('y', y(5) - 5).attr('class', 'lbl').style('fill', 'var(--cds-chart-reference)').text('pass mark: 5');
     var line = d3.line().x(function (d) { return x(d.x); }).y(function (d) { return y(d.v); });
-    [['32', 'var(--color-fg)', 'small world (area 32) '], ['64', 'var(--cds-chart-muted)', 'large world (area 64) ']].forEach(function (a) {
+    [['32', '#d99a1e'], ['64', '#2a9d8f']].forEach(function (a) {
       var pts = rs.filter(function (r) { return r.a === a[0]; });
       c.g.append('path').attr('d', line(pts)).attr('fill', 'none').attr('stroke', a[1]).attr('stroke-width', 2.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
-      var last = pts[pts.length - 1];
-      c.g.append('text').attr('x', c.w - 4).attr('y', y(last.v) + (a[0] === '32' ? -8 : 16)).attr('text-anchor', 'end').attr('class', 'lbl').style('fill', a[1]).text(a[2] + d3.format('.2f')(last.v));
     });
     var ov = c.g.append('rect').attr('width', c.w).attr('height', c.h).attr('fill', 'transparent');
     ov.on('mousemove', function (ev) {
@@ -366,10 +374,10 @@
     if (!rows) { el.innerHTML = ''; return; }
     var rs = rows.map(function (r) { return { seed: r.seed, a: num(r.kairi), b: num(r.kaiser) }; });
     var budget = d3.max(rs, function (r) { return Math.max(r.a, r.b); });
-    var c = mk(el, 28 * rs.length + 60, { l: 44, r: 16, t: 10, b: 38 });
+    var c = mk(el, CH, M);
     var x = d3.scaleLinear().domain([0, budget]).range([0, c.w]);
     var y = d3.scaleBand().domain(rs.map(function (r) { return r.seed; })).range([0, c.h]).padding(0.4);
-    axes(c, x, y, { xt: 6, xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'steps to 95%' });
+    axes(c, x, y, { xt: 6, xf: function (v) { return d3.format('.1f')(v / 1e6) + 'M'; }, xlabel: 'steps to 95% success', ylabel: 'evaluation seed' });
     rs.forEach(function (r) {
       var yy = y(r.seed) + y.bandwidth() / 2;
       c.g.append('line').attr('x1', x(r.b)).attr('x2', x(r.a)).attr('y1', yy).attr('y2', yy).attr('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 2).attr('stroke-linecap', 'round');
