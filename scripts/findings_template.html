@@ -82,13 +82,21 @@
   <div class="verdict"><p><b>Neither world reached the pass mark:</b> 4.52 achievements in the small world and 4.37 in the large one. The agent learned wood, sapling, water, cow and zombie, but never placed a table, so the tools and iron stayed out of reach. The full study would have cost about 20 to 50 hours, so we closed Crafter as a documented spike. We may come back to it; it was set aside for time, and the question is still open. No exploration-bonus result was read.</p></div>
 
   <h2>What this does and does not show</h2>
+  <h3>What it shows</h3>
   <ul>
-    <li><b>Crafter is a spike, not a result.</b> One seed per world size, plain PPO only. It shows the world is hard for plain PPO at 1M steps, not whether an exploration bonus would help.</li>
-    <li><b>One level.</b> It says nothing about other room counts, and DoorKey still shows no benefit.</li>
-    <li><b>The design came after the probe.</b> The level, target and bonus range were chosen after seeing it, and two tuning seeds overlap the probe seeds. Only the evaluation seeds are fresh.</li>
-    <li><b>Kairi's failures are budget failures.</b> The budget was fitted to Kairi's tuning seeds, and in the probe plain PPO solved every seed given 5M steps. Trust the speed gaps (steps, AUC) more than the solved-or-not counts.</li>
-    <li><b>Steps, not time.</b> The bonus adds compute per step; wall-clock was not compared.</li>
-    <li><b>Frozen settings are brittle.</b> In the bandit, Kaiser's tuned values transfer worse than Kairi's. The advice is to retune it after a large shift.</li>
+    <li><b>Bandit:</b> Kaiser beats Kairi at every jump rate tested, and still does when tuned at the other end or when reward noise changes. Kairi only wins at 50 arms and at fast drift, and both wins reverse when the two agents are retuned there. Those wins came from Kaiser's frozen settings, not from exploring hurting.</li>
+    <li><b>DoorKey:</b> the exploration bonus gave no measurable benefit. The small Kairi lead at sizes 8 and 12 disappears at other equally good bonus strengths and when Kaiser uses Kairi's entropy.</li>
+    <li><b>MultiRoom, 4 small rooms:</b> under the full protocol Kaiser reached 95% success faster on all 10 fresh seeds, in 0.70M steps on average against 2.23M, and solved 10 of 10 seeds against 5 of 10.</li>
+  </ul>
+  <h3>What it does not show</h3>
+  <ul>
+    <li><b>That the bonus helps wherever exploring is hard.</b> MultiRoom is one level. Other room counts are untested, and DoorKey shows no benefit.</li>
+    <li><b>A fully clean test on MultiRoom.</b> The level, target and bonus range were chosen after the probe, and two tuning seeds overlap the probe seeds. Only the evaluation seeds are fresh.</li>
+    <li><b>That Kairi cannot solve it.</b> Kairi's failures are budget failures: the budget was fitted to its tuning seeds, and in the probe plain PPO solved every seed given 5M steps. Trust the speed gaps (steps, AUC) more than the solved-or-not counts.</li>
+    <li><b>A wall-clock win.</b> Results are in training steps. The bonus adds compute per step, and time was not compared.</li>
+    <li><b>Anything general about the bandit.</b> One bandit family and one horizon. The retuning that explains Kairi's wins uses information the real protocol does not allow, so it is an explanation after the fact.</li>
+    <li><b>Small effects on DoorKey.</b> With 10 seeds, a small effect in either direction cannot be ruled out, and the training budget missed its calibration target.</li>
+    <li><b>Anything about Crafter's exploration bonus.</b> That chapter is a spike: one seed per world size, plain PPO only. It shows the world is hard for plain PPO at 1M steps, nothing more.</li>
   </ul>
   <p class="note">Sources: results tables in the project repository (<code>docs/FINDINGS.md</code>, <code>docs/MULTIROOM_EVALUATION.md</code>, <code>docs/spikes/</code>, <code>figs/</code>). The bandit, retune, DoorKey, probe, MultiRoom and Crafter tables are copies of those files; the MultiRoom curves are sampled every 4th logged point.</p>
 </div>
