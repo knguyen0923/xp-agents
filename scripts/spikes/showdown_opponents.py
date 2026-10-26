@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import random
-from poke_env.battle import DoubleBattle
+from poke_env.battle import DoubleBattle, Move
 from poke_env.player import Player
 from poke_env.player.battle_order import DoubleBattleOrder, SingleBattleOrder, DefaultBattleOrder
 
@@ -43,6 +43,11 @@ class DamageHeuristicPlayer(Player):
                 orders.append(SingleBattleOrder(move, move_target=random.choice(tg)))
             else:
                 orders.append(SingleBattleOrder(best[0], move_target=best[1]))
+        for slot, order in enumerate(orders):
+            # one Mega per side per battle: take the first slot that can
+            if isinstance(order, SingleBattleOrder) and isinstance(order.order, Move) and battle.can_mega_evolve[slot]:
+                order.mega = True
+                break
         if orders[0] or orders[1]:
             return DoubleBattleOrder(orders[0], orders[1])
         return self.choose_random_doubles_move(battle)
