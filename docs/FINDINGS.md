@@ -174,5 +174,8 @@ Spec amendment 5.4: MultiRoom, 4 rooms, max room size 4, single familiar level; 
 - Report post-hoc robustness checks next to the headline, not instead of it; do not pick a variant by its eval score.
 - Seed-level failures (one outright failure in 10) move means a lot; always report them with the CI.
 
+## Crafter spike (2026-10-26)
+Plain PPO, one seed per area, 1M steps: final mean achievements per episode 4.52 (area 32) and 4.37 (area 64), below the pre-set G1 gate of 5; curves still rising. No Crafter phase gate passed, recommendation is stop unless the user amends the budget. No RND result was read. See `docs/spikes/crafter_spike.md`.
+
 ## Next
 Nothing required; step B was closed as a documented spike.

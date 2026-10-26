@@ -1,12 +1,6 @@
 # XP — Resume
 
-## >>> TO CONTINUE: say "resume" (or "read RESUME.md and continue"). Then do exactly this: <<<
-**Execute the Crafter spike plan with subagent-driven development** (the user chose subagent-driven, 2026-10-25).
-1. Read this file, `STATUS.md`, the spec section 5.5 (`docs/superpowers/specs/2026-10-22-xp-design.md`) and the plan `docs/superpowers/plans/2026-10-25-crafter-spike.md`. Do not redo the reading of the spec or the earlier MultiRoom work; it is done and pushed.
-2. Invoke `superpowers:subagent-driven-development` on that plan. The ledger lives in the git-ignored `.superpowers/sdd/2026-10-25-crafter-spike/progress.md`; if it exists, trust it and `git log` over memory.
-3. Tasks 1 and 2 (tests, throughput) can run without asking. **Task 3 is a hard stop: ask the user for the go-ahead before the two 1M-step runs (Task 4).** Never push without the user's yes. Plain PPO only; read no RND result.
-4. State of the tree at handoff: script `scripts/spikes/crafter_spike.py` and the spec G1 edit (raised 3 to 5) are COMMITTED; `tests/test_crafter_spike.py` does not exist yet (Task 1 creates it); `crafter` 1.8.3 is installed in `.venv` (not in requirements). Smoke test already done: 41k steps, area 32, CPU 572 / MPS 701 steps/s, near-random `ach_100` about 3.
-5. Keep STATUS.md current (commit other files first, then a STATUS-only marker commit). Showdown (spec 5.6) is specified but NOT approved for building.
+Nothing running. **Crafter spike DONE (2026-10-26)**: plain PPO, 1 seed, 1M steps: area 32 final ach_100 4.52, area 64 4.37; G1 (needs 5) fails at both, G2 passes; recommendation STOP unless the user amends S (see `docs/spikes/crafter_spike.md`, spec 5.5 "Spike results"). **Next step: ask the user go/no-go on the full Crafter phase** (plan Task 5 step 5). Nothing pushed (needs the user's yes). Showdown not approved. `crafter-spike.log` is untracked scratch; delete it. SDD ledger (git-ignored): `.superpowers/sdd/2026-10-25-crafter-spike/`.
 
 ---
 
