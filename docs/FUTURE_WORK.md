@@ -1,6 +1,6 @@
 # XP — future-work sketch: Crafter and Pokémon Showdown
 
-**Update 2026-10-26:** the Crafter spike ran and failed its usable-range gate (G1) at both areas; the user closed Crafter as a documented spike (`docs/spikes/crafter_spike.md`).
+**Update 2026-10-26:** the Crafter spike ran and failed its usable-range gate (G1) at both areas; the user closed Crafter as a documented spike (`docs/spikes/crafter_spike.md`). We may reconsider Crafter in the future; the user decided against building it for now because of time, not because the question is answered.
 
 **Update 2026-10-25:** both worlds are now specified as generality tests (single familiar level, no shift knob) in spec sections 5.5 (Crafter, in scope, spike first) and 5.6 (Showdown, not approved for building). The sketch below is the earlier thinking.
 

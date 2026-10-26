@@ -1,6 +1,6 @@
 # XP — Resume
 
-Nothing running, nothing in progress. **Crafter closed as a documented spike (user decision 2026-10-26)**: plain PPO reached 4.52 (area 32) and 4.37 (area 64) achievements per episode, below the G1 gate of 5; see `docs/spikes/crafter_spike.md`. Reopening needs a spec amendment raising S (2-3M, about 40-60 h full phase) before any RND result is read. Showdown is specified but NOT approved for building. All commits are pushed through the polish pass (CI green) once this closing commit is pushed (needs the user's yes).
+Nothing running, nothing in progress. **Crafter closed as a documented spike (user decision 2026-10-26)**: plain PPO reached 4.52 (area 32) and 4.37 (area 64) achievements per episode, below the G1 gate of 5; closed for time, may be reconsidered later; see `docs/spikes/crafter_spike.md`. Reopening needs a spec amendment raising S (2-3M, about 40-60 h full phase) before any RND result is read. Showdown is specified but NOT approved for building. All commits are pushed through the polish pass (CI green) once this closing commit is pushed (needs the user's yes).
 
 ---
 
