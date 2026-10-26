@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 3870850 -->
+<!-- STATUS_COMMIT: 276f44e -->
 
 ## Current state
 
@@ -55,7 +55,7 @@ progress," read it first.
 
 2026-10-25 (commit fc2cd16)
 
-## Last updated 2026-10-26 (commit 3870850)
+## Last updated 2026-10-26 (commit 276f44e)
 - Crafter spike in progress (plan `docs/superpowers/plans/2026-10-25-crafter-spike.md`, subagent-driven, ledger in git-ignored `.superpowers/sdd/2026-10-25-crafter-spike/`). Task 1 DONE: `tests/test_crafter_spike.py` (5 tests, 161 total pass). Task 2 DONE (throughput + cost table in `docs/spikes/crafter_spike.md`). Colab notebook `notebooks/run_crafter_spike.ipynb` written (user chose Colab for Task 4; script upload cell because unpushed). Next: Task 3 asks the user's go-ahead before the two 1M-step runs; then Task 5 write-up. No push without the user's yes; Showdown not approved.
 - Crafter spike DONE: G1 fails at both areas (4.52 / 4.37 < 5), recommendation stop; awaiting the user's go/no-go. See RESUME.md.
 - Paused 2026-10-26: Crafter go/no-go deferred by the user.
@@ -65,3 +65,4 @@ progress," read it first.
 - Crafter closed for time; may be reconsidered later (docs say so).
 - findings.html has a Crafter chapter (chart of the two spike curves).
 - findings.html charts: uniform height, axis labels on every chart, 13px text, fixed small-panel sizing bug.
+- findings.html last section split into shows / does not show.
