@@ -1,50 +1,11 @@
 # XP — Resume
 
-Nothing running, nothing in progress. **Crafter closed as a documented spike (user decision 2026-10-26)**: plain PPO reached 4.52 (area 32) and 4.37 (area 64) achievements per episode, below the G1 gate of 5; closed for time, may be reconsidered later; see `docs/spikes/crafter_spike.md`. Reopening needs a spec amendment raising S (2-3M, about 40-60 h full phase) before any RND result is read. Showdown is specified but NOT approved for building. All commits are pushed through the polish pass (CI green) once this closing commit is pushed (needs the user's yes).
+Nothing running, nothing in progress. All work is committed and pushed.
 
----
-
-IN PROGRESS (2026-10-25): the user lifted the Crafter scope rule and asked for both Crafter and Showdown to be specified as generality tests (single familiar world, no shift knob; Showdown agents = PPO vs PPO+RND on structured features). Spec amendments 5.5 (Crafter) and 5.6 (Showdown) are WRITTEN and committed in `docs/superpowers/specs/2026-10-22-xp-design.md`; CLAUDE.md scope updated (Crafter in scope, spike first; Showdown specified but NOT approved for building). The user approved the spec; the Crafter SPIKE PLAN is written: docs/superpowers/plans/2026-10-25-crafter-spike.md (5 tasks; Task 3 asks the user's go-ahead before the two 1M-step runs). Awaiting the user's choice of execution mode. The Crafter spike is NOT done: only `pip install crafter` (1.8.3, in .venv, not in requirements) and env timing (random policy: ~1000 / 395 / 141 steps/s at area 32 / 64 / 96) were done; no spike script exists. Next: execute the spike plan (script scripts/spikes/crafter_spike.py is written, smoke-tested at 41k steps on CPU 572 / MPS 701 steps/s, and UNCOMMITTED until plan Task 1). G1 was raised from 3 to 5 in spec 5.5 because a near-random policy already averages ~3 achievements. Do not build Showdown. Pushes need the user's yes. Everything else below is history; MultiRoom is complete and pushed.
-
-Nothing is running. **MiniGrid is closed** (user decision 2026-10-24): entropy check done (matched-entropy Kaiser ties Kairi at every size, n=10, README post-hoc);
-step A (30 seeds, matched entropy) is shelved, see `docs/superpowers/plans/2026-10-24-phase2-step-a.md`. Do not reopen without the user asking.
-Phase 1 extra shifts DONE (reversed, sigma, k, drift; docs/FINDINGS.md, figs/shifts/): Kaiser robust to reversed tuning and noise; Kairi wins at k=50 and drift 0.1 (crossovers in (20,50) and (0.02,0.1)).
-Polish DONE (user chose to go straight to it, 2026-10-24): CI exists and is green on Python 3.9 and 3.12; README has a Summary and figures; short write-up `docs/WRITEUP.md`; MiniGrid robustness figure `figs/minigrid_robustness.png`.
-Ablations DONE (2026-10-24, user asked for both optional steps): retuning both agents at k=50 / drift 0.1 reverses both Kairi wins (Kaiser wins by 0.086 and 0.168); regret trace at k=50 refutes the early-exploration-cost explanation. See docs/FINDINGS.md "Ablations", figs/ablations/. Result: the Kairi wins are Kaiser's frozen-tuning brittleness.
-Step B CLOSED as a documented spike (user chose option 1 after the 28-run MultiRoom spike): RND never helped (docs/FINDINGS.md "Step B spike", docs/spikes/multiroom_spike.csv, scripts/spikes/). No environment code was added.
-Nothing is running. The 5M-step RND probe FINISHED (2026-10-24): at 4 MultiRoom rooms (size <= 4), RND coef 0.1 reached 95% training success in a median 1.44M steps vs 2.66M for plain PPO, faster on 5/5 seeds (mean 1.17M fewer steps, CI [0.53M, 1.75M]); 0.03 slower, 0.01 mixed with one failed seed. This is POST-HOC (best of 3 coefs, top of range, tune-pool seeds); docs/FINDINGS.md, README, WRITEUP updated; summary in docs/spikes/multiroom_probe.csv, scripts/spikes/probe_summary.py.
-IN PROGRESS (2026-10-25): the user chose Option 1 (single-level, fully protocol-legal MultiRoom confirmation) and approved the design. Spec amendment 5.4 is WRITTEN and committed (0959b04, `docs/superpowers/specs/2026-10-22-xp-design.md`): 4 rooms, max room size 4; tuning objective = training AUC of success; Kairi ent_coef {0.003,0.006,0.01,0.02,0.05,0.1}, Kaiser rnd_coef {0.01,0.03,0.1,0.3,0.6,1.0} with Kaiser entropy = Kairi's tuned value; 3 tune seeds, 10 eval seeds; S = default-Kairi 95% success on tune seeds, cap 5M. Nothing else built, nothing running, no push.
-VERIFIED 2026-10-25: amendment 5.4 was cross-checked against FINDINGS.md, the probe CSV, step-A plan and xp/minigrid + xp/protocol code, and corrected (AUC padded over [0,S] because training stops at 95%; objective is a config switch; held-out test success replaces "training success at S"; probe-seed overlap limitation; code-change list; cost 10-13 h incl. calibration). Do not redo this reading. Still unchecked: how xp.report / xp.stats handle a one-point sweep (plan item).
-PLAN WRITTEN (2026-10-25): docs/superpowers/plans/2026-10-25-multiroom-confirmation.md (8 tasks, TDD). Spec 5.4 corrected again: Learner.train has NO early stop (always trains the full S), so AUC needs no padding; cost 11-13 h at S=5M.
-EXECUTING (2026-10-25) via subagent-driven development on branch feat/multiroom-confirmation (local only, from main bc78c22). Ledger: .superpowers/sdd/2026-10-25-multiroom-confirmation/progress.md (git-ignored; trust it and `git log` after a compaction). Tasks 1-6 complete (152 tests green, smoke run OK). Final whole-branch review found no Critical issues; its fix wave (57643c8 training curves kept + two guards; 0930c43 plan launch-hardening notes) is committed and its scoped re-review was in flight. Task 7 (calibrate, freeze S, 11-13 h run; launch from a git worktree, see plan Task 7) needs the user's go-ahead; Task 8 is the write-up. No push, no merge to main without a yes.
-DONE: the MultiRoom run FINISHED 2026-10-25 19:0x (20/20 seed jobs, not provisional) and the report, evaluation doc and write-up are committed (5d442de). Results: Kairi ent 0.01, Kaiser rnd 0.6; Kaiser faster on 10/10 seeds. Nothing is running. Results are in results/multiroom (git-ignored, with run.log). Cleanup DONE and everything pushed (user said cleanup and push): worktree ../xp-agents-run, the SDD workspace and branch feat/multiroom-confirmation are removed.
-HISTORY: RESUMED 18:21 on 2026-10-25 (was PAUSED 16:36 by the user; the line below is history): run processes are SIGSTOPped (pids in scratchpad paused_pids.txt: 9616 9617 9632 11706 11707 11708); resume with `kill -CONT 9616 9617 9632 11706 11707 11708`. If they are gone (reboot/logout), relaunch the same command in ../xp-agents-run with the same --out: finished jobs are cached, only in-flight ones restart. At pause: 12 of 20 seed jobs done (Kairi 100-109, Kaiser 100-101); Kairi tuned ent_coef 0.01, Kaiser tuned rnd_coef 0.6.
-RUNNING (2026-10-25, before pause): user gave the go-ahead. S frozen = 2,938,880 (commit 32e41e2, calibration-multiroom.json). Full run launched from git worktree ../xp-agents-run (at 32e41e2), log ../xp-agents-run/run.log, results ../xp-agents-run/results/multiroom (resumable; expect 11-13 h). Do NOT commit to xp/ or configs/ meanwhile. On resume use the same worktree and --out. Then report (plan Task 7 step 6) and Task 8. Branch not merged/pushed (user has not answered).
-OLD NEXT STEP (superseded): read the ledger, finish the fix-wave re-review, then use superpowers:finishing-a-development-branch and ask the user for the Task 7 go-ahead (mention the risks listed in plan Task 7).
-All commits are pushed through the probe summary commit (user asked to push when the probe finished).
-Nothing from this session is pushed (needs the user's yes).
-
-## Agreed direction (brainstorm, 2026-10-24)
-User wants a mix of: (1) polish, (2) a stronger research claim, (3) fixing weaknesses. Compute budget: **overnight is fine**.
-Order: entropy check -> A (make Phase 2 conclusive) -> cheap Phase 1 extra shifts -> B spike (world where exploration matters) -> C (polish).
-Skip other exploration methods (count-based, ICM): they change Kaiser's definition. Do not build Crafter/Showdown.
-
-## Entropy check (done; design kept for reference)
-Why: Kairi tuned `ent_coef` (picked 0.03); Kaiser's `ent_coef` is fixed at 0.01 and only `rnd_coef` is tuned (config: `agents.kaiser.fixed.ent_coef`).
-Kairi at 0.01 and Kaiser at `rnd_coef` 0 are the same agent and tied in tuning, so Kaiser's deficit at sizes 8/12 may be an entropy effect, not RND.
-Design: copy the config with Kaiser `fixed.ent_coef` = 0.03, re-tune `rnd_coef` on the 6-value grid with tune seeds only (protocol-legal), then evaluate
-on the same 10 eval seeds and compare with the main Kairi results, paired by seed. Small script like `scripts/tie_robustness.py`: Kaiser tuning (`_tune_agent`)
-plus `seed_job`, output `results/ent-fair/`; reuse Kairi's existing results (do not rerun Kairi). Report in the README as a post-hoc extra check, not a replacement
-for the main result. Cost ~2 h (about 50 min tuning, 30-60 min eval); use `caffeinate -i -w <pid>` and a background watcher.
-Outcome: tie, so A reruns with matched entropy for both agents.
-
-## Then
-- A: SHELVED (MiniGrid closed).
-- Cheap Phase 1 shifts: DONE.
-- B spike: harder-exploration MiniGrid (KeyCorridor/MultiRoom) or CoinRun; DoorKey sizes can sit at 0% for all agents (spec risk table).
-- C last: CI on every push (spec requires it; check whether it exists), figures in the README, short write-up.
-
-## Facts to remember
-- Phase 2 headline (README): curves do not cross; Kairi >= Kaiser everywhere; Kairi's size 8/12 lead holds only for the AUC-selected Kaiser `rnd_coef` (0.001); at 0.01 they tie. One Kaiser seed fails outright at 0.001 (seed 101) and 0.003 (seed 105).
-- Stop hook: `STATUS_COMMIT` must equal the commit whose diff to HEAD touches only `STATUS.md` (put other file changes, e.g. this file, in the earlier commit, then a STATUS-only marker commit).
+- **Crafter** closed as a documented spike (user decision 2026-10-26): plain PPO reached 4.52 (area 32) and 4.37 (area 64) achievements per episode, below the G1 gate of 5. May be reconsidered; reopening needs a spec amendment raising S (2-3M, about 40-60 h) before any RND result is read. See `docs/spikes/crafter_spike.md`.
+- **Showdown** is specified (spec 5.6) but NOT approved for building.
+- **MiniGrid DoorKey** is closed (2026-10-24); **MultiRoom confirmation** is complete (2026-10-25). Do not reopen either without the user asking.
 - Pushes need the user's yes each time.
+- Stop hook: `STATUS_COMMIT` in `STATUS.md` must equal the commit whose diff to HEAD touches only `STATUS.md` (commit other files first, then a STATUS-only marker commit).
+
+Optional longer follow-ups (hours of compute, none approved): other MultiRoom room counts, a bigger budget, more DoorKey seeds. See `docs/FUTURE_WORK.md`.
