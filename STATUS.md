@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: e99fbe4 -->
+<!-- STATUS_COMMIT: 1fe7453 -->
 
 ## Current state
 
@@ -28,9 +28,9 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-Nothing running. Showdown spike is planned (`docs/superpowers/plans/2026-10-26-showdown-spike.md`) and waiting on the user's teams and go-ahead. Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
+Nothing running. Showdown spike is in progress (paused, waiting on the user's Reg M-C teams; see RESUME.md and the plan's progress log). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
 budget, more DoorKey seeds, reopening Crafter. Pushes need the user's yes.
 
 ## Last updated
 
-2026-10-26 (commit e99fbe4)
+2026-10-26 (commit 1fe7453)
