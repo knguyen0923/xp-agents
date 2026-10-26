@@ -1,6 +1,6 @@
 # Crafter spike (spec 5.5)
 
-Status: DONE 2026-10-26. Plain PPO only; no RND result was read. Script: `scripts/spikes/crafter_spike.py`; plan: `docs/superpowers/plans/2026-10-25-crafter-spike.md`.
+Status: DONE 2026-10-26; CLOSED as a documented spike by the user (2026-10-26), no full phase. Plain PPO only; no RND result was read. Script: `scripts/spikes/crafter_spike.py`; plan: `docs/superpowers/plans/2026-10-25-crafter-spike.md`.
 
 ## Throughput (40,960-step runs, 8 envs, PPO with a small CNN, includes start-up)
 | area | CPU steps/s | MPS steps/s |

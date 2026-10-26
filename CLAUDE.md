@@ -78,4 +78,4 @@ value on eval seeds. 4. Report degradation curves, gaps, crossovers with 95% boo
 - The unit of resampling is the independent seed; paired comparisons share eval seeds.
 - Runs are resumable (one CSV per agent and knob), keyed by config hash. A hash mismatch raises.
 - Python floor 3.9; every module starts with `from __future__ import annotations`.
-- Scope: bandit and MiniGrid are the core. Crafter was brought into scope on 2026-10-25 (user lifted the rule), starting with a spike only; a full phase needs a spec amendment and plan first (`docs/FUTURE_WORK.md`). Showdown is specified (spec 5.6) but not approved for building; do not start it until the user says so.
+- Scope: bandit and MiniGrid are the core. Crafter was spiked and then CLOSED as a documented spike on 2026-10-26 (user decision; plain PPO missed the usable-range gate, see `docs/spikes/crafter_spike.md`); reopening needs a spec amendment raising the budget S first. Showdown is specified (spec 5.6) but not approved for building; do not start it until the user says so.

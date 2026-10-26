@@ -177,7 +177,7 @@ Spec amendment 5.4: MultiRoom, 4 rooms, max room size 4, single familiar level; 
 - A spike can be the result: it is cheaper to find out that a world has no usable range (Crafter, MultiRoom at 2M steps) than to run the full protocol and read noise.
 
 ## Crafter spike (2026-10-26)
-Plain PPO, one seed per area, 1M steps: final mean achievements per episode 4.52 (area 32) and 4.37 (area 64), below the pre-set G1 gate of 5; curves still rising. No Crafter phase gate passed, recommendation is stop unless the user amends the budget. No RND result was read. See `docs/spikes/crafter_spike.md`.
+Plain PPO, one seed per area, 1M steps: final mean achievements per episode 4.52 (area 32) and 4.37 (area 64), below the pre-set G1 gate of 5; curves still rising. No gate passed; the user closed Crafter as a documented spike (2026-10-26), no full phase. No RND result was read. See `docs/spikes/crafter_spike.md`.
 
 ## Next
-Nothing required. Open decision for the user: whether to go on with Crafter (needs a spec amendment raising the budget S; see the Crafter spike section) or close it as a documented spike. Showdown is not approved.
+Nothing required. Crafter is closed as a documented spike (reopening needs a spec amendment raising S). Showdown is not approved.

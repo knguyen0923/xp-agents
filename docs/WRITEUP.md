@@ -39,4 +39,4 @@ coefficient was fixed (not tuned) in the main run, which the matched-entropy che
 
 ## Future work
 The MultiRoom confirmation at other room counts, and a deep-RL tag-team agent. A Crafter spike (plain PPO, 1M steps, one seed per area) reached 4.5 and 4.4 achievements per episode against a pre-set gate of 5, so
-the Crafter phase is on hold pending a decision (`docs/spikes/crafter_spike.md`). Showdown is specified but not approved.
+Crafter was closed as a documented spike by the user's decision (`docs/spikes/crafter_spike.md`). Showdown is specified but not approved.
