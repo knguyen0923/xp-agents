@@ -182,7 +182,7 @@ Caveats: one level; the level and grid were chosen after the probe, so only the 
 
 ## Future work
 
-Crafter, Showdown, the MultiRoom confirmation at other room counts (the 4-room confirmation is done), and a deep-RL tag-team agent. A design sketch for Crafter and Showdown (knobs, costs, risks, go/no-go criteria; not approved for building) is in `docs/FUTURE_WORK.md`.
+Open: the MultiRoom confirmation at other room counts (the 4-room confirmation is done) and a deep-RL tag-team agent. Crafter was spiked (2026-10-26): plain PPO reached only 4.5 distinct achievements per episode at 1M steps, below the pre-set gate of 5, so the full phase is on hold pending the user's decision (`docs/spikes/crafter_spike.md`). Showdown is specified but not approved for building. A design sketch for Crafter and Showdown (knobs, costs, risks, go/no-go criteria; not approved for building) is in `docs/FUTURE_WORK.md`.
 
 ## Reproducing
 

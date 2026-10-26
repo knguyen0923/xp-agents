@@ -31,11 +31,12 @@ from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two o
 | MiniGrid MultiRoom, 2M steps, 2 seeds | PPO no worse; RND never helped |
 | MiniGrid MultiRoom 4 small rooms, 5M steps, 5 seeds (post-hoc) | RND at coef 0.1 (about 2x fewer steps); no benefit at 0.01 or 0.03 |
 | MiniGrid MultiRoom 4 small rooms, full protocol, 10 eval seeds | Kaiser (rnd 0.6): 1.5M fewer steps to 95%, faster on 10/10 seeds |
+| Crafter (spike only, plain PPO, 1 seed) | not run: no area met the pre-set usable-range gate at 1M steps |
 
 ## Limitations
 One bandit family and horizon; agents are frozen after tuning once (no per-shift retuning); no multiplicity correction across knob values; the ablations that explain the Kairi wins are post-hoc, cover only those two shifts, and use oracle retuning the protocol does not allow. MiniGrid: one familiar size, a 2M-step budget that missed the 80% calibration target, 10 eval seeds, and Kaiser's entropy
 coefficient was fixed (not tuned) in the main run, which the matched-entropy check addresses post-hoc. See `docs/FINDINGS.md`.
 
 ## Future work
-The MultiRoom confirmation at other room counts, and a deep-RL tag-team agent. Crafter and Showdown
-remain out of scope.
+The MultiRoom confirmation at other room counts, and a deep-RL tag-team agent. A Crafter spike (plain PPO, 1M steps, one seed per area) reached 4.5 and 4.4 achievements per episode against a pre-set gate of 5, so
+the Crafter phase is on hold pending a decision (`docs/spikes/crafter_spike.md`). Showdown is specified but not approved.

@@ -173,9 +173,11 @@ Spec amendment 5.4: MultiRoom, 4 rooms, max room size 4, single familiar level; 
 - Pre-declare the tie-break rule and check how many grid points tie; a saturated tuning objective (5 of 6 values at 0.000) makes the "tuned" choice arbitrary.
 - Report post-hoc robustness checks next to the headline, not instead of it; do not pick a variant by its eval score.
 - Seed-level failures (one outright failure in 10) move means a lot; always report them with the CI.
+- Pre-register the spike gates and read nothing downstream before they are met: the Crafter gate was raised from 3 to 5 achievements after a smoke test showed a near-random policy already scores about 3, and the spike then correctly failed instead of passing on a trivial threshold.
+- A spike can be the result: it is cheaper to find out that a world has no usable range (Crafter, MultiRoom at 2M steps) than to run the full protocol and read noise.
 
 ## Crafter spike (2026-10-26)
 Plain PPO, one seed per area, 1M steps: final mean achievements per episode 4.52 (area 32) and 4.37 (area 64), below the pre-set G1 gate of 5; curves still rising. No Crafter phase gate passed, recommendation is stop unless the user amends the budget. No RND result was read. See `docs/spikes/crafter_spike.md`.
 
 ## Next
-Nothing required; step B was closed as a documented spike.
+Nothing required. Open decision for the user: whether to go on with Crafter (needs a spec amendment raising the budget S; see the Crafter spike section) or close it as a documented spike. Showdown is not approved.
