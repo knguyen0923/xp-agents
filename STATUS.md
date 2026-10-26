@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: fc2cd16 -->
+<!-- STATUS_COMMIT: 9829342 -->
 
 ## Current state
 
@@ -54,3 +54,6 @@ progress," read it first.
 ## Last updated
 
 2026-10-25 (commit fc2cd16)
+
+## Last updated 2026-10-26 (commit 9829342)
+- Crafter spike in progress (plan `docs/superpowers/plans/2026-10-25-crafter-spike.md`, subagent-driven, ledger in git-ignored `.superpowers/sdd/2026-10-25-crafter-spike/`). Task 1 DONE: `tests/test_crafter_spike.py` (5 tests, 161 total pass). Task 2 (throughput benchmark, `docs/spikes/crafter_spike.md`) running. Next: Task 3 asks the user's go-ahead before the two 1M-step runs; then Task 5 write-up. No push without the user's yes; Showdown not approved.
