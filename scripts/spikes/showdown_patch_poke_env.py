@@ -15,9 +15,10 @@ import os
 import shutil
 import sys
 
+import poke_env
 from poke_env.data import GenData
 
-ROOT = os.path.join(os.path.dirname(GenData.__module__ and __import__("poke_env").__file__), "data", "static")
+ROOT = os.path.join(os.path.dirname(poke_env.__file__), "data", "static")
 PDEX = os.path.join(ROOT, "pokedex", "gen9pokedex.json")
 MOVES = os.path.join(ROOT, "moves", "gen9moves.json")
 
