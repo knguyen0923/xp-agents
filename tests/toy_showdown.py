@@ -37,3 +37,6 @@ class ToyVec:
 
     def recent_window_full(self):
         return len(self.results) == self.results.maxlen
+
+    def close(self):
+        pass
