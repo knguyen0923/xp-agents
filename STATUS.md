@@ -8,7 +8,7 @@ progress," read it first.
 
 ## Current state
 
-The project is essentially finished. 198 fast tests pass; CI was green on Python 3.9 and 3.12 before the Showdown work; the Showdown install and patch steps have not yet run in CI (Python 3.12 + poke-env untested), so check the next CI run.
+The project is essentially finished. 212 fast tests pass; CI was green on Python 3.9 and 3.12 before the Showdown work; the Showdown install and patch steps have not yet run in CI (Python 3.12 + poke-env untested), so check the next CI run.
 Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments). Plans: `docs/superpowers/plans/`.
 
 - **Phase 1 (bandit)**: done, including extra shifts (reversed tuning, sigma, k, drift) and ablations.
@@ -21,14 +21,14 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
   2.23M steps for Kairi (ent_coef 0.01), faster on 10/10 seeds. See `docs/MULTIROOM_EVALUATION.md`.
 - **Crafter**: spiked and closed (G1 gate failed, 4.52 / 4.37 < 5); may be reconsidered. Needs a spec
   amendment raising the budget first. `docs/spikes/crafter_spike.md`.
-- **Showdown**: spiked, build approved 2026-10-26, and the budget gate is done (`docs/spikes/showdown_gate.md`). Built and tested in `xp/showdown/`: team pools, encoder, env, Champions data patch, action masks, scripted ladder, vector env, masked PPO learner, gate CLI. User decided: opponent DamageHeuristic, S = 250k (about 15 h for 56 runs). Next: Plan C (RND/Kaiser, config, phase wiring, report).
+- **Showdown**: spiked, gated and built: team pools, encoder, env, masks, ladder, vec env, masked PPO, RND/Kaiser learner, phase module, configs (opponent DamageHeuristic, S = 250k, threshold 0.30: all user decisions), launcher. Smoke run passed on the real server (`docs/spikes/showdown_smoke.md`). The full run (about 12 to 15 h) has NOT started; the user wants to be asked right before launching, then run overnight.
 - Write-ups: `README.md`, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`
   (built by `scripts/build_findings_html.py`), `docs/FUTURE_WORK.md`.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), branch `main`, all pushed.
 
 ## Next
 
-Nothing running. The Showdown gate is finished; the user has set opponent and S (spec 5.6); Plan C is next (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
+Nothing running. The Showdown phase is built and smoke-tested; the full run waits for the user's go (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
 budget, more DoorKey seeds, reopening Crafter. Pushes need the user's yes.
 
 ## Last updated
