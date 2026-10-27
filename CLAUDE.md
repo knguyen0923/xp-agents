@@ -51,6 +51,8 @@ python -m xp.run --phase minigrid --config configs/minigrid.yaml --out results -
 python -m xp.report --phase minigrid --config configs/minigrid.yaml --out results --figs figs
 ```
 
+Showdown tests that need the server: `XP_NODE=<node 22+ binary> pytest -m showdown` (server started as in `RESUME.md`; `pip install -r requirements-showdown.txt -e .` first).
+
 Full runs go to Colab via `notebooks/run_phase.ipynb` (Phase 1) and `notebooks/run_minigrid.ipynb` (Phase 2); do not burn the laptop on them.
 
 ## Architecture
@@ -63,6 +65,8 @@ Full runs go to Colab via `notebooks/run_phase.ipynb` (Phase 1) and `notebooks/r
 - `xp/minigrid/` is PyTorch PPO (`Learner`; Kaiser adds RND). The unit of work is one trained agent per
   (agent, training seed); tuning scores and per-seed results are cached by config hash. Train, validation and
   test layouts come from disjoint seed pools (`xp/minigrid/env.py`). Never import it from `xp.protocol`.
+- `xp/showdown/` is the Pokemon Showdown phase (`poke-env` doubles env, fixed feature encoder, team pools). It needs a local Showdown server
+  (outside the repo) only for tests marked `showdown`, which the default `pytest` run excludes. Never import it from `xp.protocol`.
 - `xp/stats/` and `xp/plots/` read only the tidy results table
   (`phase, agent, knob, seed, metric, value, provisional, config_hash`).
 
@@ -78,4 +82,4 @@ value on eval seeds. 4. Report degradation curves, gaps, crossovers with 95% boo
 - The unit of resampling is the independent seed; paired comparisons share eval seeds.
 - Runs are resumable (one CSV per agent and knob), keyed by config hash. A hash mismatch raises.
 - Python floor 3.9; every module starts with `from __future__ import annotations`.
-- Scope: bandit and MiniGrid are the core. Crafter was spiked and then CLOSED as a documented spike on 2026-10-26 (user decision, for time; may be reconsidered later; plain PPO missed the usable-range gate, see `docs/spikes/crafter_spike.md`); reopening needs a spec amendment raising the budget S first. Showdown is specified (spec 5.6) but not approved for building; do not start it until the user says so.
+- Scope: bandit and MiniGrid are the core. Crafter was spiked and then CLOSED as a documented spike on 2026-10-26 (user decision, for time; may be reconsidered later; plain PPO missed the usable-range gate, see `docs/spikes/crafter_spike.md`); reopening needs a spec amendment raising the budget S first. Showdown was spiked (`docs/spikes/showdown_spike.md`) and building was approved by the user on 2026-10-26 under the spec 5.6 amendment; the budget cap S needs the user's approval before any RND result is read.
