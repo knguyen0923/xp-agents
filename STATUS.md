@@ -21,7 +21,7 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
   2.23M steps for Kairi (ent_coef 0.01), faster on 10/10 seeds. See `docs/MULTIROOM_EVALUATION.md`.
 - **Crafter**: spiked and closed (G1 gate failed, 4.52 / 4.37 < 5); may be reconsidered. Needs a spec
   amendment raising the budget first. `docs/spikes/crafter_spike.md`.
-- **Showdown**: spiked, gated and built: team pools, encoder, env, masks, ladder, vec env, masked PPO, RND/Kaiser learner, phase module, configs (opponent DamageHeuristic, S = 250k, threshold 0.30: all user decisions), launcher. Smoke run passed on the real server (`docs/spikes/showdown_smoke.md`). The full run (about 12 to 15 h) has NOT started; the user wants to be asked right before launching, then run overnight.
+- **Showdown**: spiked, gated and built: team pools, encoder, env, masks, ladder, vec env, masked PPO, RND/Kaiser learner, phase module, configs (opponent DamageHeuristic, S = 250k, threshold 0.30: all user decisions), launcher. Smoke run passed on the real server (`docs/spikes/showdown_smoke.md`). The first full run was stopped on 2026-10-27 (Kairi optimum on the ent_coef grid edge, 0.1); Kairi's grid was widened to [0.02, 0.05, 0.1, 0.2, 0.4, 0.8] and the run relaunched into a fresh `results/showdown` (see RESUME.md).
 - Write-ups: `README.md`, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`
   (built by `scripts/build_findings_html.py`), `docs/FUTURE_WORK.md`.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), branch `main`, all pushed.
