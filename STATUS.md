@@ -21,14 +21,14 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
   2.23M steps for Kairi (ent_coef 0.01), faster on 10/10 seeds. See `docs/MULTIROOM_EVALUATION.md`.
 - **Crafter**: spiked and closed (G1 gate failed, 4.52 / 4.37 < 5); may be reconsidered. Needs a spec
   amendment raising the budget first. `docs/spikes/crafter_spike.md`.
-- **Showdown**: spiked (`docs/spikes/showdown_spike.md`, S1 to S4 pass) and building approved by the user 2026-10-26. Foundations plan: `docs/superpowers/plans/2026-10-26-showdown-phase-foundations.md` (not yet executed); the learner/phase plan (Plan B) follows it.
+- **Showdown**: spiked (`docs/spikes/showdown_spike.md`) and building approved 2026-10-26. Foundations built and tested (`xp/showdown/`: team pools, encoder, env; plan `docs/superpowers/plans/2026-10-26-showdown-phase-foundations.md`). Next: Plan B (learner, throughput, budget cap S needing user approval, phase wiring, report).
 - Write-ups: `README.md`, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`
   (built by `scripts/build_findings_html.py`), `docs/FUTURE_WORK.md`.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), branch `main`, all pushed.
 
 ## Next
 
-Nothing running. Showdown build is approved; the foundations plan is written and awaiting execution (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
+Nothing running. Showdown foundations are done; Plan B (learner and phase wiring) is next (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
 budget, more DoorKey seeds, reopening Crafter. Pushes need the user's yes.
 
 ## Last updated
