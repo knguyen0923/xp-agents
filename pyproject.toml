@@ -17,6 +17,9 @@ showdown = ["poke-env==0.10.0"]
 [tool.setuptools.packages.find]
 include = ["xp*"]
 
+[tool.setuptools.package-data]
+"xp.showdown" = ["champions_patch.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q -m 'not showdown'"

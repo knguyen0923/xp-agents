@@ -51,6 +51,7 @@ python -m xp.run --phase minigrid --config configs/minigrid.yaml --out results -
 python -m xp.report --phase minigrid --config configs/minigrid.yaml --out results --figs figs
 ```
 
+After installing `poke-env`, run `python -m xp.showdown.patch` once (it lacks the Champions-only species; without the patch a Mega battle hangs, and a guard test fails).
 Showdown tests that need the server: `XP_NODE=<node 22+ binary> pytest -m showdown` (server started as in `RESUME.md`; `pip install -r requirements-showdown.txt -e .` first).
 
 Full runs go to Colab via `notebooks/run_phase.ipynb` (Phase 1) and `notebooks/run_minigrid.ipynb` (Phase 2); do not burn the laptop on them.
