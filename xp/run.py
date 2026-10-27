@@ -4,7 +4,7 @@ import argparse
 
 from xp.protocol.phase import load_config
 
-PHASES = {"bandit": "xp.bandit.phase", "minigrid": "xp.minigrid.phase"}
+PHASES = {"bandit": "xp.bandit.phase", "minigrid": "xp.minigrid.phase", "showdown": "xp.showdown.phase"}
 
 
 def main(argv=None) -> None:
@@ -12,15 +12,15 @@ def main(argv=None) -> None:
     parser.add_argument("--phase", required=True, choices=sorted(PHASES))
     parser.add_argument("--config", required=True)
     parser.add_argument("--out", required=True)
-    parser.add_argument("--workers", type=int, default=1, help="parallel training jobs (minigrid only)")
+    parser.add_argument("--workers", type=int, default=1, help="parallel training jobs (minigrid and showdown)")
     parser.add_argument("--allow-code-change", action="store_true",
-                        help="minigrid only: allow resuming a run started under a different git commit")
+                        help="minigrid and showdown: allow resuming a run started under a different git commit")
     args = parser.parse_args(argv)
     cfg = load_config(args.config)
     if cfg["phase"] != args.phase:
         raise SystemExit(f"config phase {cfg['phase']!r} does not match --phase {args.phase!r}")
     module = __import__(PHASES[args.phase], fromlist=["run_phase"])
-    if args.phase == "minigrid":
+    if args.phase in ("minigrid", "showdown"):
         module.run_phase(cfg, args.out, workers=args.workers, allow_code_change=args.allow_code_change)
     else:
         module.run_phase(cfg, args.out)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import random
 import subprocess
 from pathlib import Path
@@ -21,6 +22,14 @@ def load_pool(directory) -> Dict[str, str]:
     if not paths:
         raise ProtocolError(f"no team files in {directory}")
     return {p.stem: p.read_text() for p in paths}
+
+
+def pool_digest(pool: Dict[str, str]) -> str:
+    """Short hash of a pool's names and normalised team texts; a config pins it so edited team files cannot reuse old caches."""
+    h = hashlib.sha256()
+    for name in sorted(pool):
+        h.update(name.encode() + b"\0" + normalise(pool[name]).encode() + b"\0")
+    return h.hexdigest()[:12]
 
 
 def assert_disjoint(tune: Dict[str, str], evals: Dict[str, str]) -> None:
