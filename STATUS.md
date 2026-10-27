@@ -28,7 +28,7 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-Nothing running. Showdown build is approved; the foundations plan is written and awaiting execution (see RESUME.md).md`). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
+Nothing running. Showdown build is approved; the foundations plan is written and awaiting execution (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
 budget, more DoorKey seeds, reopening Crafter. Pushes need the user's yes.
 
 ## Last updated
