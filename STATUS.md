@@ -21,14 +21,14 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
   2.23M steps for Kairi (ent_coef 0.01), faster on 10/10 seeds. See `docs/MULTIROOM_EVALUATION.md`.
 - **Crafter**: spiked and closed (G1 gate failed, 4.52 / 4.37 < 5); may be reconsidered. Needs a spec
   amendment raising the budget first. `docs/spikes/crafter_spike.md`.
-- **Showdown**: specified (spec 5.6), not approved for building.
+- **Showdown**: specified (spec 5.6), not approved for building. Spike DONE 2026-10-26 (S1 to S4 pass; `docs/spikes/showdown_spike.md`, recommendation "go with conditions"), awaiting the user's go/no-go.
 - Write-ups: `README.md`, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`
   (built by `scripts/build_findings_html.py`), `docs/FUTURE_WORK.md`.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), branch `main`, all pushed.
 
 ## Next
 
-Nothing running. Showdown spike is in progress (paused, waiting on the user's Reg M-C teams; see RESUME.md and the plan's progress log). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
+Nothing running. Showdown spike is done and awaiting the user's go/no-go (see RESUME.md and `docs/spikes/showdown_spike.md`). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
 budget, more DoorKey seeds, reopening Crafter. Pushes need the user's yes.
 
 ## Last updated
