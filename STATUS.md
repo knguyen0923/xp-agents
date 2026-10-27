@@ -21,14 +21,14 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
   2.23M steps for Kairi (ent_coef 0.01), faster on 10/10 seeds. See `docs/MULTIROOM_EVALUATION.md`.
 - **Crafter**: spiked and closed (G1 gate failed, 4.52 / 4.37 < 5); may be reconsidered. Needs a spec
   amendment raising the budget first. `docs/spikes/crafter_spike.md`.
-- **Showdown**: spiked, build approved 2026-10-26, and the budget gate is done (`docs/spikes/showdown_gate.md`). Built and tested in `xp/showdown/`: team pools, encoder, env, Champions data patch, action masks, scripted ladder, vector env, masked PPO learner, gate CLI. Waiting on the user's cap S and familiar opponent (recommended: DamageHeuristic, S = 250k, about 15 h for 56 runs); then Plan C (RND/Kaiser, config, phase wiring, report).
+- **Showdown**: spiked, build approved 2026-10-26, and the budget gate is done (`docs/spikes/showdown_gate.md`). Built and tested in `xp/showdown/`: team pools, encoder, env, Champions data patch, action masks, scripted ladder, vector env, masked PPO learner, gate CLI. User decided: opponent DamageHeuristic, S = 250k (about 15 h for 56 runs). Next: Plan C (RND/Kaiser, config, phase wiring, report).
 - Write-ups: `README.md`, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`
   (built by `scripts/build_findings_html.py`), `docs/FUTURE_WORK.md`.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), branch `main`, all pushed.
 
 ## Next
 
-Nothing running. The Showdown gate is finished; waiting on the user's cap S and opponent decisions, then Plan C (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
+Nothing running. The Showdown gate is finished; the user has set opponent and S (spec 5.6); Plan C is next (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
 budget, more DoorKey seeds, reopening Crafter. Pushes need the user's yes.
 
 ## Last updated
