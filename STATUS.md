@@ -8,7 +8,7 @@ progress," read it first.
 
 ## Current state
 
-The project is essentially finished. 212 fast tests pass; CI was green on Python 3.9 and 3.12 before the Showdown work; the Showdown install and patch steps have not yet run in CI (Python 3.12 + poke-env untested), so check the next CI run.
+The project is essentially finished. 212 fast tests pass; CI was green on Python 3.9 and 3.12 at the last push (27bec98, including the Showdown install and patch steps); the newer commits (Plan C) are not pushed yet, so CI has not seen them.
 Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments). Plans: `docs/superpowers/plans/`.
 
 - **Phase 1 (bandit)**: done, including extra shifts (reversed tuning, sigma, k, drift) and ablations.
