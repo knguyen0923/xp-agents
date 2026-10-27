@@ -12,10 +12,12 @@ dependencies = ["numpy", "pandas", "pyyaml", "matplotlib"]
 [project.optional-dependencies]
 dev = ["pytest"]
 minigrid = ["torch>=2.0", "minigrid>=3.0"]
+showdown = ["poke-env==0.10.0"]
 
 [tool.setuptools.packages.find]
 include = ["xp*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -m 'not showdown'"
+markers = ["showdown: needs a running local Pokemon Showdown server (excluded from the default run)"]

@@ -1,0 +1,2 @@
+-r requirements.txt
+poke-env==0.10.0
