@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: cfa62f3 -->
+<!-- STATUS_COMMIT: 6ca759c -->
 
 ## Current state
 
@@ -28,9 +28,9 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-Nothing running. The Showdown phase is built and smoke-tested; the full run waits for the user's go (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
+Nothing running. The Showdown phase is built and smoke-tested; the full run was paused twice on swap growth. The cause (the Showdown server keeps finished battles for 10 minutes) was found and fixed with a one-line patch in the scratch checkout; see `docs/spikes/showdown_memory.md`. The full run waits for the user's go (see RESUME.md). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger
 budget, more DoorKey seeds, reopening Crafter. Pushes need the user's yes.
 
 ## Last updated
 
-2026-10-28 (commit cfa62f3)
+2026-10-28 (commit 6ca759c)
