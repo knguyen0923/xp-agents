@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 359db0f -->
+<!-- STATUS_COMMIT: cfa62f3 -->
 
 ## Current state
 
@@ -33,4 +33,4 @@ budget, more DoorKey seeds, reopening Crafter. Pushes need the user's yes.
 
 ## Last updated
 
-2026-10-27 (commit 359db0f)
+2026-10-28 (commit cfa62f3)
