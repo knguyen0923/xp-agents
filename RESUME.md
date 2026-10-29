@@ -2,7 +2,7 @@
 
 ## Matchup features spec awaiting review (2026-10-29)
 
-The user deferred the replay recording ("later") and asked to give the agents type-chart information. Spec `docs/superpowers/specs/2026-10-29-showdown-matchup-features-design.md` (commit ca7cee5) is written and committed, not pushed. **Next:** the user reviews the spec; then, on their yes, the writing-plans skill for an implementation plan. Nothing is built. The replay recording steps below are still pending (smoke replay checked in Chrome: renders and plays).
+The user deferred the replay recording ("later") and asked to give the agents type-chart information. Spec `docs/superpowers/specs/2026-10-29-showdown-matchup-features-design.md` (commit ca7cee5) is written and committed, not pushed. **Next:** the user reviews the spec; then, on their yes, the writing-plans skill for an implementation plan. The spec also has the incoming-threat block (user assumption: agent knows all moves and abilities, only unrevealed opponent moves are hidden). Matchup features are not built. The recorder's readable account names are built and committed (fast tests pass; check on the real server at the next recording). The replay recording steps below are still pending (smoke replay checked in Chrome: renders and plays).
 
 ## Battle replays in progress (2026-10-28, after the full run)
 
