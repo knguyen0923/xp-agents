@@ -38,6 +38,21 @@ def pool():
     return teams
 
 
+def real_first_battle():
+    """A live battle right after reset(): for other server tests (needs the server and a Showdown checkout)."""
+    suffix = str(random.randrange(10**5))
+    env = XPDoublesEnv(
+        battle_format=FORMAT, team=PoolTeambuilder(load_pool(TEAMS / "tune"), 3), strict=True, log_level=40,
+        account_configuration1=AccountConfiguration("ra" + suffix, None), account_configuration2=AccountConfiguration("rb" + suffix, None),
+    )
+    wrapped = SingleAgentWrapper(env, RandomPlayer(battle_format=FORMAT, start_listening=False))
+    try:
+        wrapped.reset()
+        return env.battle1
+    finally:
+        wrapped.close()
+
+
 def test_fast_masks_equal_the_decoder_reference_and_every_masked_action_is_accepted(pool):
     suffix = str(random.randrange(10**5))
     env = XPDoublesEnv(
