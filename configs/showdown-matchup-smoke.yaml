@@ -1,0 +1,78 @@
+# MATCHUP-FEATURES SMOKE condition (spec docs/superpowers/specs/2026-10-29-showdown-matchup-features-design.md). Same pipeline as configs/showdown-smoke.yaml, env.matchup on. The numbers mean nothing.
+# The grid ends are declared natural limits ONLY so a 2-value grid is not 'provisional' (every point of a 2-value grid is an edge).
+phase: showdown
+knob:
+  name: opponent
+  familiar: 1
+  sweep:
+  - 1
+env:
+  format: gen9championsvgc2026regmc
+  matchup: true
+  opponent: damage
+  tune_teams: configs/showdown_teams/tune
+  eval_teams: configs/showdown_teams/eval
+  tune_teams_sha: 4ebb9de5ef49
+  eval_teams_sha: bcc8a297c758
+tuning:
+  objective: auc
+seeds:
+  tune:
+  - 0
+  - 2
+  eval:
+  - 100
+  - 102
+  chunk: 1
+  agent_seed: 0
+budget:
+  steps: 3072
+  target_win: 0.3
+eval:
+  battles: 20
+ppo:
+  n_envs: 8
+  n_steps: 128
+  epochs: 4
+  minibatches: 4
+  lr: 0.0003
+  gamma: 0.99
+  lam: 0.95
+  clip: 0.2
+  vf_coef: 0.5
+  rnd_lr: 0.0001
+agents:
+  kairi:
+    grid:
+      ent_coef:
+      - 0.01
+      - 0.05
+    natural_limits:
+      ent_coef:
+      - 0.01
+      - 0.05
+  kaiser:
+    fixed:
+      ent_coef: 0.01
+      ent_coef_from: kairi
+    grid:
+      rnd_coef:
+      - 0.1
+      - 0.5
+    natural_limits:
+      rnd_coef:
+      - 0.1
+      - 0.5
+report:
+  metric: auc
+  lower_is_better: false
+  agents:
+  - kairi
+  - kaiser
+  extra_metrics:
+    win_eval: false
+    steps_to_30: true
+    reached_30: false
+  xlabel: Showdown VGC doubles vs DamageHeuristic (single familiar level)
+  ylabel: training AUC of win rate (95% CI)
+  title: Showdown SMOKE (3 updates, not a result)
