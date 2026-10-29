@@ -1,6 +1,10 @@
 # XP — Resume
 
-## Matchup features spec awaiting review (2026-10-29)
+## Matchup plan executing on branch `matchup-features` (2026-10-29)
+
+Subagent-driven execution in progress; see the ledger `.superpowers/sdd/2026-10-29-showdown-matchup-features/progress.md` and `git log matchup-features` for which tasks are done. Task 1 (server probe) needs the user's yes before it runs. Nothing is pushed.
+
+## Matchup features spec (2026-10-29)
 
 The user deferred the replay recording ("later") and asked to give the agents type-chart information. Spec `docs/superpowers/specs/2026-10-29-showdown-matchup-features-design.md` (commit ca7cee5) is written and committed, not pushed. **Plan written:** `docs/superpowers/plans/2026-10-29-showdown-matchup-features.md`; **Next:** the user picks subagent-driven or inline execution (Task 1 needs the Showdown server and the user's yes). Earlier: the user reviews the spec; then, on their yes, the writing-plans skill for an implementation plan. The spec also has the incoming-threat block (user assumption: agent knows all moves and abilities, only unrevealed opponent moves are hidden). Matchup features are not built. The recorder's readable account names are built and committed (fast tests pass; check on the real server at the next recording). The replay recording steps below are still pending (smoke replay checked in Chrome: renders and plays).
 
