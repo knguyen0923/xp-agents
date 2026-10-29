@@ -70,6 +70,14 @@ def test_missing_stats_are_filled_from_base_stats_at_the_fallback_spread(monkeyp
     assert all(isinstance(v, (int, float)) for v in seen["d_stats"].values())
 
 
+def test_partial_stats_keep_known_values_and_fill_only_the_missing_ones():
+    d = mon("heatran")
+    d._stats = {"hp": 150, "atk": 80, "def": None, "spa": None, "spd": 90, "spe": None}
+    ES._fill_stats(d)
+    assert (d.stats["hp"], d.stats["atk"], d.stats["spd"]) == (150, 80, 90)
+    assert all(isinstance(d.stats[k], int) for k in ("def", "spa", "spe"))
+
+
 @pytest.mark.showdown
 def test_real_battle_estimates_are_finite_and_cheap():
     """Needs the local server. After the first decision every estimate is None or in range, and a decision costs under 50 ms."""

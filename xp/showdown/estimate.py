@@ -23,7 +23,9 @@ def _fill_stats(mon: Pokemon) -> None:
     if mon.stats and all(isinstance(v, (int, float)) for v in mon.stats.values()):
         return
     raw = compute_raw_stats(mon.species, [FALLBACK_EV] * 6, [FALLBACK_IV] * 6, FALLBACK_LEVEL, FALLBACK_NATURE, GenData.from_gen(9))
-    mon.stats = {k: int(v) for k, v in zip(_STAT_ORDER, raw)}
+    fallback = {k: int(v) for k, v in zip(_STAT_ORDER, raw)}
+    known = mon.stats or {}
+    mon.stats = {k: (known[k] if isinstance(known.get(k), (int, float)) else fallback[k]) for k in _STAT_ORDER}
 
 
 class PokeEnvEstimator:
