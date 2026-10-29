@@ -60,16 +60,18 @@ class Learner:
     Slot 1's mask is conditioned on slot 0's sampled action (no duplicate switch, one Mega).
     """
 
-    def __init__(self, ppo: dict, ent_coef: float, seed: int, device: str = "cpu", rnd_coef: Optional[float] = None):
+    def __init__(self, ppo: dict, ent_coef: float, seed: int, device: str = "cpu", rnd_coef: Optional[float] = None,
+                 obs_dim: int = OBS_DIM):
         self.ppo, self.ent_coef, self.seed, self.rnd_coef = ppo, ent_coef, int(seed), rnd_coef
+        self.obs_dim = int(obs_dim)
         self.device = torch.device(device)
         torch.manual_seed(self.seed)
         np.random.seed(self.seed)
-        self.net = ActorCritic(intrinsic=rnd_coef is not None).to(self.device)
+        self.net = ActorCritic(obs_dim=self.obs_dim, intrinsic=rnd_coef is not None).to(self.device)
         self.opt = torch.optim.Adam(self.net.parameters(), lr=ppo["lr"], eps=1e-5)
         self.rnd = self.rnd_opt = self.scaler = None
         if rnd_coef is not None:
-            self.rnd = VectorRND().to(self.device)
+            self.rnd = VectorRND(obs_dim=self.obs_dim).to(self.device)
             self.rnd_opt = torch.optim.Adam(self.rnd.pred.parameters(), lr=ppo.get("rnd_lr", 0.0001))
             self.scaler = IntrinsicScaler(ppo["n_envs"], ppo["gamma"])
         self.steps_trained = 0
@@ -122,7 +124,7 @@ class Learner:
             raise ValueError(f"the RND scaler was built for n_envs={c['n_envs']} but the env has {n} processes")
         batch = n * t_len
         updates = max(1, steps // batch)
-        obs_buf = np.zeros((t_len, n, OBS_DIM), dtype=np.float32)
+        obs_buf = np.zeros((t_len, n, self.obs_dim), dtype=np.float32)
         mask_buf = np.zeros((t_len, n, 2, N_ACTIONS), dtype=bool)
         act_buf = torch.zeros((t_len, n, 2), dtype=torch.long, device=device)
         logp_buf = torch.zeros((t_len, n), device=device)
@@ -142,7 +144,7 @@ class Learner:
                 rew_buf[t], done_buf[t] = env.step(actions)
 
             if rnd is not None:
-                next_seq = np.concatenate([obs_buf[1:], env.obs[None]], axis=0).reshape(-1, OBS_DIM)
+                next_seq = np.concatenate([obs_buf[1:], env.obs[None]], axis=0).reshape(-1, self.obs_dim)
                 x = rnd.normalize(next_seq, device)
                 with torch.no_grad():
                     raw = rnd.error(x).cpu().numpy().reshape(t_len, n)
@@ -165,7 +167,7 @@ class Learner:
                 adv_int = gae(torch.as_tensor(int_rewards, device=device), vint_buf, next_vint, torch.ones_like(nonterm), c["gamma"], c["lam"])
                 ret_int = adv_int + vint_buf
                 adv = adv_ext + self.rnd_coef * adv_int
-            b_obs = torch.as_tensor(obs_buf.reshape(-1, OBS_DIM), device=device)
+            b_obs = torch.as_tensor(obs_buf.reshape(-1, self.obs_dim), device=device)
             b_mask = torch.as_tensor(mask_buf.reshape(-1, 2, N_ACTIONS), device=device)
             b_act, b_logp = act_buf.reshape(-1, 2), logp_buf.reshape(-1)
             b_adv, b_ret = adv.reshape(-1), ret.reshape(-1)

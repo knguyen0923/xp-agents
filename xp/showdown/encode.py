@@ -16,6 +16,12 @@ MOVE_DIM = 3 + len(TYPES) + 3 + 2          # power, accuracy, priority | type | 
 MON_DIM = 3 + len(STATUSES) + len(BOOSTS) + len(TYPES) + len(STATS) + 1 + N_MOVES * MOVE_DIM
 FIELD_DIM = len(Weather) + len(Field) + 2 * len(SideCondition) + 1
 OBS_DIM = 2 * SLOTS * MON_DIM + FIELD_DIM
+MATCHUP_DIM = 2 * (2 * N_MOVES * 2) * 2 + 2 * N_MOVES   # outgoing 32 + incoming 32 + 8 revealed flags = 72
+
+
+def obs_dim(matchup: bool = False) -> int:
+    """Length of the observation vector; the matchup block (spec 2026-10-29) is appended only when switched on."""
+    return OBS_DIM + (MATCHUP_DIM if matchup else 0)
 
 
 def _onehot(item, order: list) -> np.ndarray:

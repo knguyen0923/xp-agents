@@ -106,3 +106,12 @@ def test_a_mismatched_env_size_is_a_clear_error_for_rnd():
     learner = Learner(PPO_N, 0.01, seed=0, rnd_coef=0.1)
     with pytest.raises(ValueError, match="n_envs=16"):
         learner.train(ToyVec(8), steps=8 * 16, log_every=1)
+
+
+def test_learner_takes_the_observation_size_and_defaults_to_obs_dim():
+    from xp.showdown.encode import OBS_DIM
+
+    assert Learner(PPO, 0.01, seed=0).net.body[0].in_features == OBS_DIM
+    big = Learner(PPO_N, 0.01, seed=0, rnd_coef=0.1, obs_dim=OBS_DIM + 72)
+    assert big.obs_dim == OBS_DIM + 72
+    assert big.net.body[0].in_features == OBS_DIM + 72 and big.rnd.obs_dim == OBS_DIM + 72

@@ -99,3 +99,8 @@ def test_weather_sets_exactly_one_field_bit_in_the_weather_block():
     out = E.encode_battle(battle(own, [mon("gholdengo")], own, [None, None], weather={Weather.SUNNYDAY: 1}))
     field = out[2 * E.SLOTS * E.MON_DIM:]
     assert field[:len(Weather)].sum() == 1 and field[list(Weather).index(Weather.SUNNYDAY)] == 1
+
+
+def test_obs_dim_helper_is_unchanged_with_the_flag_off():
+    assert E.obs_dim() == E.obs_dim(False) == E.OBS_DIM
+    assert E.MATCHUP_DIM == 72 and E.obs_dim(True) == E.OBS_DIM + 72
