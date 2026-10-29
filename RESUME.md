@@ -2,7 +2,7 @@
 
 ## Matchup plan executing on branch `matchup-features` (2026-10-29)
 
-Subagent-driven execution in progress; see the ledger `.superpowers/sdd/2026-10-29-showdown-matchup-features/progress.md` and `git log matchup-features` for which tasks are done. Task 1 (server probe) needs the user's yes before it runs. Nothing is pushed.
+Subagent-driven execution is FINISHED and reviewed (final review fixes done); what remains is the user's call on the 75 s real-server smoke run (also measures the estimator slowdown), then merging `matchup-features` into main, then approving the full run (12 to 15 h). Ledger `.superpowers/sdd/2026-10-29-showdown-matchup-features/progress.md` and `git log matchup-features` for which tasks are done. Task 1 (server probe) needs the user's yes before it runs. Nothing is pushed.
 
 ## Matchup features spec (2026-10-29)
 
