@@ -87,15 +87,15 @@ def score_battle(lines: List[str], agent_name: str) -> Optional[Dict[str, float]
     return parts
 
 
-def rank_replays(folder, agent_suffix: str = "a") -> List[dict]:
-    """Score every replay page in `folder` written for the agent's own account (usernames ending in `agent_suffix`).
+def rank_replays(folder, agent_suffix: str = "a", agent_prefix: Optional[str] = None) -> List[dict]:
+    """Score every replay page in `folder` written for the agent's own account (usernames starting with `agent_prefix` if given, else ending in `agent_suffix`).
 
     Highest score first; ties break on more turns, then on the file name, so the order is deterministic.
     """
     rows = []
     for path in sorted(Path(folder).glob("*.html")):
         m = _NAME.match(path.name)
-        if not m or not m.group(1).endswith(agent_suffix):
+        if not m or not (m.group(1).startswith(agent_prefix) if agent_prefix else m.group(1).endswith(agent_suffix)):
             continue
         parts = score_battle(read_log(path.read_text(encoding="utf-8")), m.group(1))
         if parts is not None:

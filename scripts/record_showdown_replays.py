@@ -24,6 +24,8 @@ from xp.showdown.replays import rank_replays
 from xp.showdown.teams import load_pool
 from xp.showdown.vec_env import ShowdownVecEnv
 
+OPPONENT_LABELS = {"damage": "Heuristic", "maxbp": "MaxBP", "random": "Random"}
+
 
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -59,8 +61,10 @@ def main(argv=None) -> None:
         state["rnd"] = learner.rnd.state_dict()
     torch.save(state, out / "policy.pt")
 
+    agent_label = args.agent.capitalize()
     rec = ShowdownVecEnv(cfg["ppo"]["n_envs"], cfg["env"]["format"], load_pool(sp.team_dir(cfg, "eval")), cfg["env"]["opponent"],
-                         seed=args.seed + 1000, save_replays=str(all_dir))  # new team draws; recording env
+                         seed=args.seed + 1000, save_replays=str(all_dir),
+                         account_labels=(agent_label, OPPONENT_LABELS.get(cfg["env"]["opponent"], "Opponent")))  # new team draws; recording env
     try:
         result = learner.evaluate(rec, args.battles)
     finally:
@@ -68,7 +72,7 @@ def main(argv=None) -> None:
     if learner.fingerprint() != frozen:
         raise RuntimeError("the frozen agent changed while recording")
 
-    ranking = rank_replays(all_dir)
+    ranking = rank_replays(all_dir, agent_prefix=agent_label)
     for i, row in enumerate(ranking[: args.keep], 1):
         shutil.copy(all_dir / row["file"], top_dir / f"{i:02d}_{row['file']}")
     if ranking:

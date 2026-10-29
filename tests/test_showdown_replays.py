@@ -73,3 +73,15 @@ def test_rank_skips_the_opponents_account_and_orders_deterministically(tmp_path)
         (tmp_path / name).write_text(page(lines), encoding="utf-8")
     rows = rank_replays(tmp_path)
     assert [r["file"] for r in rows] == ["vxa - battle-g-1.html", "vxa - battle-g-2.html"]
+
+
+def test_rank_by_agent_name_prefix(tmp_path):
+    def renamed(agent, opp):
+        return [ln.replace("vxa", agent).replace("vxb", opp) for ln in close_comeback()]
+
+    for name, lines in (("Kaiser3x472 - battle-g-1.html", renamed("Kaiser3x472", "Heuristic3x472")),
+                        ("Heuristic3x472 - battle-g-1.html", renamed("Kaiser3x472", "Heuristic3x472")),
+                        ("Kaiser4x472 - battle-g-2.html", renamed("Kaiser4x472", "Heuristic4x472"))):
+        (tmp_path / name).write_text(page(lines), encoding="utf-8")
+    rows = rank_replays(tmp_path, agent_prefix="Kaiser")
+    assert sorted(r["file"] for r in rows) == ["Kaiser3x472 - battle-g-1.html", "Kaiser4x472 - battle-g-2.html"]

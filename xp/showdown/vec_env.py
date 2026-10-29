@@ -8,6 +8,12 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 
+def account_names(labels: Tuple[str, str], i: int, token: str) -> Tuple[str, str]:
+    """Readable account names for env `i`: `<label><i>x<token>`, the label cut so the tail (which keeps them unique) survives."""
+    tail = f"{i}x{token}"
+    return tuple(f"{label[: 18 - len(tail)]}{tail}" for label in labels)
+
+
 def _worker(conn, cfg: dict) -> None:
     """One process = one env (two accounts on the local server) against one scripted opponent, auto-resetting."""
     from poke_env import AccountConfiguration
@@ -20,8 +26,8 @@ def _worker(conn, cfg: dict) -> None:
 
     env = XPDoublesEnv(
         battle_format=cfg["battle_format"], team=PoolTeambuilder(cfg["teams"], cfg["team_seed"]), strict=False, log_level=40, save_replays=cfg.get("save_replays") or False,
-        account_configuration1=AccountConfiguration(cfg["name"] + "a", None),
-        account_configuration2=AccountConfiguration(cfg["name"] + "b", None),
+        account_configuration1=AccountConfiguration(cfg.get("agent_account") or cfg["name"] + "a", None),
+        account_configuration2=AccountConfiguration(cfg.get("opp_account") or cfg["name"] + "b", None),
     )
     wrapped = SingleAgentWrapper(env, make_opponent(cfg["opponent"], cfg["battle_format"]))
     try:
@@ -51,15 +57,17 @@ class ShowdownVecEnv:
     """
 
     def __init__(self, n: int, battle_format: str, teams: Dict[str, str], opponent: str, seed: int, name: str = "v",
-                 save_replays: Optional[str] = None):
+                 save_replays: Optional[str] = None, account_labels: Optional[Tuple[str, str]] = None):
         ctx = multiprocessing.get_context("spawn")
         self.n = n
         suffix = "%05d" % random.SystemRandom().randrange(10**5)  # fresh per run, NOT from the seed: stale accounts/battles from an old run block reused names
         self.conns, self.procs = [], []
         for i in range(n):
             parent, child = ctx.Pipe()
+            agent_account, opp_account = account_names(account_labels, i, suffix[:3]) if account_labels else (None, None)
             cfg = {"battle_format": battle_format, "teams": teams, "opponent": opponent, "team_seed": seed * 1000 + i,
-                   "name": f"{name}{suffix}{i}"[:16], "save_replays": save_replays}
+                   "name": f"{name}{suffix}{i}"[:16], "save_replays": save_replays,
+                   "agent_account": agent_account, "opp_account": opp_account}
             proc = ctx.Process(target=_worker, args=(child, cfg), daemon=True)
             proc.start()
             self.conns.append(parent)
