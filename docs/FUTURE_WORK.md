@@ -58,6 +58,25 @@ Context: the 5M-step probe (`docs/FINDINGS.md`, `docs/spikes/multiroom_probe.csv
 
 **Decisions still open if this is picked up:** which option; the tuning objective and tie-break (pre-declare); the RND grid values above 0.1 (for example up to 0.3 or 1.0, with equal-sized grids for both agents); number of tune seeds; the budget rule (spec's calibration vs a fixed S). Next step is the brainstorming process: scope decision, then a spec amendment, then a plan.
 
+## Showdown: tempo and format-specific features (raised 2026-10-29; nothing decided, nothing built)
+Context: the Showdown run ended in a tie, and a look at the observation (`xp/showdown/encode.py`) showed what the agents are not told. The matchup-features build (spec `docs/superpowers/specs/2026-10-29-showdown-matchup-features-design.md`, plan `docs/superpowers/plans/2026-10-29-showdown-matchup-features.md`) covers type multipliers and damage estimates only. It does nothing for the items below.
+
+**What the agents do not see today**
+- Speed: only base Speed (scaled by 255) and boosts. No actual Speed stats, no "who moves first" comparison, no Choice Scarf or paralysis effects.
+- Priority: one scaled number per move; no priority-bracket ordering. Trick Room is only recognizable by its -7 priority; Tailwind looks like any other Flying status move, because move identity is not encoded (only power, accuracy, priority, type, category, Protect and spread flags).
+- Trick Room, Tailwind, weather, terrain and screens: on/off flags only, with no remaining duration. The only clock is the turn counter, capped at 40.
+- IVs, EVs and natures: not in the observation for either side, including the agent's own Pokemon (real stat spreads are not seen).
+- The foe's Open Team Sheet: poke-env does not expose it (probe: `docs/spikes/showdown_matchup_probe.md`); foe stats are `None` and abilities and items are mostly unknown, so ability immunities (Levitate, Flash Fire) are mostly missed.
+
+**What the opponent does:** `DamageHeuristicPlayer` only picks damaging moves, so it never sets Trick Room or Tailwind. Training against it gives almost no signal for field and tempo management; a win rate here says little about it.
+
+**Candidate follow-ups (each a spec amendment plus a full run, about 12 to 15 hours)**
+1. A switchable "tempo" block: speed-order comparison per pair of actives (including Trick Room, Tailwind and priority), effect durations, move-identity flags (sets Trick Room, sets Tailwind, and similar).
+2. Fill each foe's ability and item from the team pool the env itself draws (exact, and what an Open Team Sheet would show); keep foe moves hidden until revealed.
+3. A scripted opponent that uses Trick Room and Tailwind, so field management is tested and not just available.
+4. Probe the saved policies for type-chart sensitivity (vary only the target's type and compare the policy's preference with the real multiplier); the replay recorder saves one `policy.pt` per agent.
+Learning aids for the network (pretraining on the type table, auxiliary losses) were left out of scope of the matchup spec; revisit only if the feature result is interesting.
+
 ## Also still open (smaller)
 - The protocol-legal confirmation of the 5M-step MultiRoom probe: see the section above (options and costs written down, scope undecided).
 - A deep-RL retune-at-the-shift check (size 8 DoorKey); judged low value, config-only if wanted.
