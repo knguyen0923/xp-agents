@@ -409,6 +409,8 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 
 Rules (from the spec): multiplier = `defender.damage_multiplier(move)`, forced to 0 when the calculator says the move deals 0 although it has base power and the type multiplier is positive (ability immunity, Protect). Damage fraction = mean of the calculator's min and max roll divided by the target's current HP in points (`stats["hp"] * current_hp_fraction`). Status and zero-power moves give `None`. If a calculator call raises, return `None` and increment `PokeEnvEstimator.errors`.
 
+**Task 1 findings (binding, `docs/spikes/showdown_matchup_probe.md`):** foe `stats` are all `None` (own stats are real), so `_fill_stats` runs for foes and is a no-op for own mons; without it every own-to-foe `calculate_damage` raises `AssertionError: defender stats not defined`. Foe abilities and items are mostly unknown, so the estimator must not assume them. Foe `moves` is empty until revealed. The identifier form (keys of `battle.team` / `battle.opponent_team`) works. Filling foe `stats` in place is acceptable (the main encoder reads `base_stats` only); say so in the report.
+
 - [ ] **Step 1: Write the failing tests (no server; a fake battle and a patched calculator)**
 
 ```python
@@ -577,6 +579,9 @@ def test_real_battle_estimates_are_finite_and_cheap():
                 r = est(a, d, move)
                 assert r is None or (0.0 <= r[0] <= 4.0 and 0.0 <= r[1] <= 1.0)
     assert (time.perf_counter() - t0) < 0.05
+    # own -> foe must work through the base-stat fallback (the probe saw every such call raise without it)
+    own_to_foe = [est(a, d, m) for a in battle.active_pokemon for d in battle.opponent_active_pokemon for m in a.moves.values() if m.base_power > 0]
+    assert any(r is not None for r in own_to_foe) and est.errors == 0
 ```
 
 Add `real_first_battle()` to `tests/test_showdown_vec.py` by reusing the setup that file already uses for its server tests (build `XPDoublesEnv` with `PoolTeambuilder`, reset through `SingleAgentWrapper`, return `env.battle1`, close the env). Run it with the server up: `XP_NODE=... pytest -m showdown tests/test_showdown_estimate.py -v`. Expected: PASS. If the 50 ms budget fails, switch both features to the base-stat-only path as the spec allows, and say so in the commit message.

@@ -42,12 +42,16 @@ A switchable observation block, off by default.
 - It asserts that both Pokemon have known `stats`. Where the opponent's stats are unknown, fall back to
   estimates from base stats at level 50 with a fixed, stated spread (decided in the plan and written here
   before any run). If the calculator raises for a move, that entry is 0 and a counter records it.
-- Abilities and items: the opponent's are taken as known through Open Team Sheets, but only their moves are
-  hidden. Open item to verify first: whether poke-env fills the opponent's abilities and items at battle start
-  or only after they trigger; if it does not, fill them from the sheet in the encoder. The estimate is only
-  as good as that.
-- Open item: measure the cost on the smoke config. If the calculator slows training noticeably, use the
-  base-stat formula for both the multiplier and the damage fraction.
+- Abilities and items (probe result, `docs/spikes/showdown_matchup_probe.md`): poke-env does NOT expose the Open
+  Team Sheet. After `reset()` foe items are `unknown_item`, foe abilities are only set for single-ability species
+  (and one value looked wrong, Gardevoir `pickpocket`), foe stats are all `None`, foe `moves` is empty and only
+  the two leads are in `opponent_team`. So the estimate uses own abilities and items, and foe abilities only where
+  poke-env has them. Foe ability immunities (Levitate, Flash Fire, ...) are therefore missed unless revealed or
+  single-ability. This falls short of the user's assumption that abilities are known; reading each foe's sheet from
+  the team pool the env itself draws (exact, and what OTS would show) is a deferred follow-up, not part of this build.
+- Foe stats are `None`, so they are always filled from base stats at the fallback spread; own stats are real.
+- Measured cost (probe): a working calculator call is under 1 ms, so about 10 to 20 ms per decision worst case;
+  re-measure on the smoke config.
 
 ### Code shape
 
