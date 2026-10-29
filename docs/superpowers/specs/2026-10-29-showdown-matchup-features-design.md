@@ -1,6 +1,6 @@
 # Showdown matchup features (spec 5.6 amendment)
 
-Status: draft for the user's review (2026-10-29). Nothing here is built or approved to run.
+Status: draft for the user's review (2026-10-29), amended the same day after the user's modelling assumption (below). Nothing here is built or approved to run.
 
 ## Why
 
@@ -17,13 +17,21 @@ A switchable observation block, off by default.
 
 - Config key `env.matchup: true|false` (absent means false). With it off, the observation, `OBS_DIM`, config
   hashes, results and tests of the existing run are unchanged; a test pins this.
-- With it on, for each of my 2 actives, each of its 4 moves, and each of the 2 opposing actives, add two floats
-  (2 x 4 x 2 x 2 = 32 more floats):
-  1. type multiplier, taken from the damage calculation so ability effects (Levitate, Flash Fire, Sap Sipper,
-     Wonder Guard, ...) show up; scaled into the observation range. Status and zero-power moves, empty
-     slots, and fainted or absent targets give 0.
-  2. estimated damage as a fraction of the target's current HP, `min(1, expected damage / current HP)`. A value
-     of 1 means a likely KO.
+- Modelling assumption (user, 2026-10-29): the agent is taken to know what every move and ability does. The only
+  hidden information is the opponent's moveset, which is unknown until each move is revealed. The features
+  below are computed in code from that knowledge; the network sees only the resulting numbers.
+- With it on, add two blocks of 2 floats per (attacker, move, target) triple:
+  - **Outgoing:** each of my 2 actives, each of its 4 moves, each of the 2 opposing actives: 2 x 4 x 2 x 2 = 32 floats.
+  - **Incoming:** each of the 2 opposing actives, each of its 4 move slots, each of my 2 actives, 32 floats, plus
+    one `revealed` flag per opposing move slot (2 x 4 = 8). Unrevealed slots are all zeros with `revealed` 0, so
+    a revealed immune move (value 0, `revealed` 1) differs from an unknown move. Unrevealed moves are never
+    guessed. In total 72 more floats with the flag on.
+  - The two numbers per triple:
+    1. type multiplier, taken from the damage calculation so ability effects (Levitate, Flash Fire, Sap Sipper,
+       Wonder Guard, ...) show up; scaled into the observation range.
+    2. estimated damage as a fraction of the target's current HP, `min(1, expected damage / current HP)`. A value
+       of 1 means a likely KO.
+  - Status and zero-power moves, empty slots, and fainted or absent targets give 0.
 - Both agents use the identical block (spec 5.6: the encoding is the same for both and frozen before tuning).
 
 ### Damage estimate
@@ -34,8 +42,10 @@ A switchable observation block, off by default.
 - It asserts that both Pokemon have known `stats`. Where the opponent's stats are unknown, fall back to
   estimates from base stats at level 50 with a fixed, stated spread (decided in the plan and written here
   before any run). If the calculator raises for a move, that entry is 0 and a counter records it.
-- Open item to verify first: whether poke-env fills the opponent's abilities and items at battle start from
-  Open Team Sheets, or only after they trigger. The estimate is only as good as that.
+- Abilities and items: the opponent's are taken as known through Open Team Sheets, but only their moves are
+  hidden. Open item to verify first: whether poke-env fills the opponent's abilities and items at battle start
+  or only after they trigger; if it does not, fill them from the sheet in the encoder. The estimate is only
+  as good as that.
 - Open item: measure the cost on the smoke config. If the calculator slows training noticeably, use the
   base-stat formula for both the multiplier and the damage fraction.
 
@@ -44,7 +54,7 @@ A switchable observation block, off by default.
 - Make the observation size a value passed from the config instead of an import-time constant. `OBS_DIM` is
   imported by `ppo.py` (4 uses), `rnd.py`, `env.py` and `vec_env.py`. The flag-off value stays equal to today's.
 - `xp.protocol` stays phase-agnostic; nothing here touches it.
-- Tests (no server): block shape and zeros for status moves and empty slots; flag off gives a vector identical
+- Tests (no server): block shape (72 extra floats) and zeros for status moves, empty slots and unrevealed move slots, with the `revealed` flag set only for revealed moves; flag off gives a vector identical
   to the current encoder; a known matchup (for example a Water move into a Fire target gives 2x, into a
   Levitate target a Ground move gives 0) using constructed poke-env objects.
 
