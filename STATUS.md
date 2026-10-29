@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 16a9d58 -->
+<!-- STATUS_COMMIT: 60a477c -->
 
 ## Current state
 
@@ -32,4 +32,4 @@ Nothing running. Remaining: optionally add Showdown to `docs/findings.html`, the
 
 ## Last updated
 
-2026-10-28 (commit 16a9d58)
+2026-10-28 (commit 60a477c)
