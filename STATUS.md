@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 5c5329f -->
+<!-- STATUS_COMMIT: 1b48a3c -->
 
 ## Current state
 
@@ -40,4 +40,4 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Last updated
 
-2026-10-29 (commit 5c5329f)
+2026-10-29 (commit 1b48a3c)
