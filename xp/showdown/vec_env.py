@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import multiprocessing
+import sys
 import random
 from collections import deque
 from typing import Dict, List, Optional, Tuple
@@ -47,6 +48,8 @@ def _worker(conn, cfg: dict) -> None:
     except BaseException as e:  # report instead of letting the parent wait forever
         conn.send(("error", repr(e)))
     finally:
+        if cfg.get("matchup", False):
+            print(f"matchup estimator errors={env.estimator_errors} of calls={env.estimator_calls} ({cfg['name']})", file=sys.stderr, flush=True)
         wrapped.close()
 
 

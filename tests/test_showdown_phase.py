@@ -49,6 +49,10 @@ def test_real_config_matches_the_user_decisions_and_the_protocol():
     assert cfg["ppo"]["n_steps"] * cfg["ppo"]["n_envs"] % cfg["ppo"]["minibatches"] == 0
 
 
+def test_real_config_hash_is_pinned_to_the_finished_run():
+    assert Phase.from_config(load_config(ROOT / "configs" / "showdown.yaml")).config_hash == "fdac28308815"
+
+
 def test_config_team_hashes_match_the_files_in_the_repo():
     for name in ("showdown", "showdown-smoke"):
         cfg = load_config(ROOT / "configs" / f"{name}.yaml")

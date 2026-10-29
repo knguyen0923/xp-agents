@@ -115,3 +115,7 @@ def test_flag_off_vector_is_identical_and_flag_on_appends_the_block():
     assert on.shape == (E.obs_dim(True),)
     assert on[: E.OBS_DIM].tolist() == base.tolist()
     assert on[E.OBS_DIM] == pytest.approx(0.5)      # first outgoing multiplier: 2 / 4
+
+
+def test_obs_dim_literals_are_pinned():
+    assert E.OBS_DIM == 1811 and E.obs_dim(True) == 1811 + 72

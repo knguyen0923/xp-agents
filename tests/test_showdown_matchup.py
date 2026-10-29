@@ -69,3 +69,36 @@ def test_a_revealed_immune_move_differs_from_an_unknown_one():
     foes = [mon("rotom", "surf"), None]
     out = matchup_block([mon("garchomp"), None], foes, stub(mult=0.0, frac=0.0))
     assert out[64] == 1.0 and not out[32:36].any()
+
+
+def test_every_estimate_and_flag_lands_at_its_spec_index():
+    """A stub that encodes (direction, attacker, target, move slot) in its value: all 64 entries and 8 flags at the spec indices."""
+    own = [mon("garchomp", "earthquake", "surf", "flamethrower", "icebeam"), mon("heatran", "thunderbolt", "tackle", "recover", "protect")]
+    foes = [mon("rotom", "voltswitch", "shadowball"), mon("gardevoir", "moonblast", "psychic")]
+    slot = {id(m): {mv.id: i for i, mv in enumerate(m.moves.values())} for m in own + foes}
+    who = {id(m): i for i, m in enumerate(own)} | {id(m): i for i, m in enumerate(foes)}
+    is_own = {id(m) for m in own}
+
+    def code(att, tgt, move):
+        d = 0 if id(att) in is_own else 1
+        return 1 + ((d * 2 + who[id(att)]) * 2 + who[id(tgt)]) * 4 + slot[id(att)][move.id]   # 1..64
+
+    def estimate(att, tgt, move):
+        c = code(att, tgt, move)
+        return c / 16.0, c / 64.0
+
+    out = matchup_block(own, foes, estimate)
+    expect = np.zeros(E.MATCHUP_DIM, dtype=np.float32)
+    for d, (atts, tgts) in enumerate(((own, foes), (foes, own))):
+        for a, att in enumerate(atts):
+            for m, mv in enumerate(list(att.moves.values())[:4]):
+                for t, tgt in enumerate(tgts):
+                    i = d * 32 + ((a * 4 + m) * 2 + t) * 2
+                    c = code(att, tgt, mv)
+                    expect[i], expect[i + 1] = c / 64.0, c / 64.0     # multiplier c/16 is divided by 4 in the block
+    for f in range(2):
+        for m in range(2):
+            expect[64 + f * 4 + m] = 1.0
+    assert np.allclose(out, expect)
+    assert out[64:].tolist() == [1, 1, 0, 0, 1, 1, 0, 0]
+    assert np.count_nonzero(out[:64]) == 32 + 16   # 16 outgoing cells + 8 incoming cells (foes reveal 2 of 4 moves), 2 numbers each

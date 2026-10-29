@@ -27,11 +27,14 @@ A switchable observation block, off by default.
     a revealed immune move (value 0, `revealed` 1) differs from an unknown move. Unrevealed moves are never
     guessed. In total 72 more floats with the flag on.
   - The two numbers per triple:
-    1. type multiplier, taken from the damage calculation so ability effects (Levitate, Flash Fire, Sap Sipper,
-       Wonder Guard, ...) show up; scaled into the observation range.
+    1. type multiplier: the type-chart multiplier (`damage_multiplier`), set to 0 only when the calculator returns 0
+       damage for a damaging move. So immunities (Levitate, Flash Fire, Sap Sipper, Wonder Guard, Protect) show up
+       in this number; damage reducers (Thick Fat, Filter) show only in the damage fraction; special-case moves
+       (Scrappy, Freeze-Dry, Ring Target) can make the two numbers disagree. Scaled into the observation range.
     2. estimated damage as a fraction of the target's current HP, `min(1, expected damage / current HP)`. A value
        of 1 means a likely KO.
-  - Status and zero-power moves, empty slots, and fainted or absent targets give 0.
+  - Status and zero-power moves, empty slots, and fainted or absent targets give 0. Low Kick (variable power, listed
+    with base power 0 in the data) therefore always reads 0 under the zero-power rule.
 - Both agents use the identical block (spec 5.6: the encoding is the same for both and frozen before tuning).
 
 ### Damage estimate
@@ -41,10 +44,12 @@ A switchable observation block, off by default.
   special moves).
 - It asserts that both Pokemon have known `stats`. Where the opponent's stats are unknown, fall back to
   estimates from base stats at level 50 with a fixed, stated spread (decided in the plan and written here
-  before any run). If the calculator raises for a move, that entry is 0 and a counter records it.
+  before any run). The fallback spread is level 50, 0 EVs, 31 IVs, neutral nature ("serious"), recomputed from the
+  foe's current `base_stats` on every call (so a Mega Evolved foe follows its new stats). Bias: real VGC foes have
+  invested stats, so KO chances on them are overstated and their damage to me is understated. If the calculator raises for a move, that entry is 0 and a counter records it.
 - Abilities and items (probe result, `docs/spikes/showdown_matchup_probe.md`): poke-env does NOT expose the Open
   Team Sheet. After `reset()` foe items are `unknown_item`, foe abilities are only set for single-ability species
-  (and one value looked wrong, Gardevoir `pickpocket`), foe stats are all `None`, foe `moves` is empty and only
+  (Gardevoir `pickpocket` is Trace copying our Weavile's Pickpocket, an ability revealed in battle, see the probe doc), foe stats are all `None`, foe `moves` is empty and only
   the two leads are in `opponent_team`. So the estimate uses own abilities and items, and foe abilities only where
   poke-env has them. Foe ability immunities (Levitate, Flash Fire, ...) are therefore missed unless revealed or
   single-ability. This falls short of the user's assumption that abilities are known; reading each foe's sheet from

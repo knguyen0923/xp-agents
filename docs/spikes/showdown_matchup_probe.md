@@ -10,8 +10,8 @@ Items: not known. Run 1: `opp sneasler ... item unknown_item`, `opp gardevoir ..
 Abilities: partly. Run 1 `opp sneasler ability None`, `opp gardevoir ability pickpocket`; run 2
 `opp indeedeef ability None`, `opp hydreigon ability levitate`. A species with a single possible ability gets it
 filled in (Hydreigon: levitate); species with several get `None` (Sneasler, Indeedee). Gardevoir `pickpocket` is not
-one of its real abilities and is unexplained (it matches Weavile's ability on our side in run 1, so it may be a
-poke-env parsing quirk); do not trust it. `moves` is `[]` for both foes. The opponent bench is also unknown:
+one of its own abilities: the pool set has `Ability: Trace`, so this is Trace copying our Weavile's Pickpocket, an
+ability revealed in battle (not a parsing quirk). Revealed abilities are real information; the unrevealed rest stays unknown. `moves` is `[]` for both foes. The opponent bench is also unknown:
 `opp team keys ['p2: Sneasler', 'p2: Gardevoir']` (only the two leads, not 4 or 6). The team sheet is not exposed
 in what I printed; I did not find it. Treat foe abilities and items as unknown unless revealed in battle.
 
@@ -38,5 +38,7 @@ Own -> own control: 0.67 ms (first call), 0.22 ms, 0.07 ms, 0.01 ms (status/zero
 
 ## Conclusion
 
-Task 4 path: base-stat formula only for foes (calculator cannot run on foe stats, which are `None` and `moves` empty);
-the calculator may be used for own -> own style checks only, which Task 4 does not need.
+Update after Task 4: the calculator cannot run on foe stats as they arrive (`None`), but it does run on foes once their
+stats are filled from base stats at the fallback spread (level 50, 0 EVs, 31 IVs, neutral nature; recomputed from the
+current `base_stats` each call). Task 4 therefore uses the calculator for own -> foe and foe -> own estimates (foe moves
+only once revealed). The earlier reading, "own -> own checks only", is out of date.

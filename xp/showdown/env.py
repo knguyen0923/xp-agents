@@ -17,11 +17,21 @@ class XPDoublesEnv(DoublesEnv):
     def __init__(self, matchup: bool = False, **kwargs):
         super().__init__(**kwargs)
         self.matchup = bool(matchup)
+        self.estimator_calls = 0     # matchup estimates attempted / failed over this env's life; the worker reports them on close
+        self.estimator_errors = 0
         space = Box(-2.0, 2.0, shape=(obs_dim(self.matchup),), dtype=np.float32)  # move priority reaches -7 / 5 = -1.4
         self.observation_spaces = {agent: space for agent in self.possible_agents}
 
     def embed_battle(self, battle) -> np.ndarray:
-        return encode_battle(battle, matchup=self.matchup)
+        if not self.matchup:
+            return encode_battle(battle)
+        from xp.showdown.estimate import PokeEnvEstimator
+        est = PokeEnvEstimator(battle)
+        try:
+            return encode_battle(battle, matchup=True, estimator=est)
+        finally:
+            self.estimator_calls += est.calls
+            self.estimator_errors += est.errors
 
     def calc_reward(self, battle) -> float:
         if battle.won:

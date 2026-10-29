@@ -1,4 +1,5 @@
 # MATCHUP-FEATURES condition (spec docs/superpowers/specs/2026-10-29-showdown-matchup-features-design.md). Same pipeline as configs/showdown.yaml, env.matchup on.
+# Output folder: use `--out results/showdown-matchup` (never results/showdown, which holds the original run). Recorder: `scripts/record_showdown_replays.py --tuned results/showdown-matchup/showdown/tuning`; without it the recorder defaults to the original run's tuning.
 # Phase name "showdown"; the knob block is the protocol's minimum for one level (value 1 = the familiar opponent).
 phase: showdown
 knob:

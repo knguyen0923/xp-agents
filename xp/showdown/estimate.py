@@ -47,6 +47,7 @@ class PokeEnvEstimator:
     def __init__(self, battle) -> None:
         self.battle = battle
         self.errors = 0
+        self.calls = 0   # damaging-move estimates attempted (those that reach the calculator)
 
     def _is_foe(self, mon: Pokemon) -> bool:
         return any(value is mon for value in self.battle.opponent_team.values())
@@ -61,6 +62,7 @@ class PokeEnvEstimator:
     def __call__(self, attacker: Pokemon, defender: Pokemon, move: Move) -> Optional[Tuple[float, float]]:
         if move.category == MoveCategory.STATUS or move.base_power <= 0:
             return None
+        self.calls += 1
         multiplier = float(defender.damage_multiplier(move))
         try:
             _fill_stats(attacker, self._is_foe(attacker))

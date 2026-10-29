@@ -131,3 +131,25 @@ def test_real_battle_estimates_are_finite_and_cheap():
     assert (time.perf_counter() - t0) < 0.05
     own_to_foe = [est(a, d, m) for a in battle.active_pokemon for d in battle.opponent_active_pokemon for m in a.moves.values() if m.base_power > 0]
     assert any(r is not None for r in own_to_foe) and est.errors == 0
+
+
+def test_env_accumulates_estimator_calls_and_errors_across_embeds(monkeypatch):
+    from xp.showdown.env import XPDoublesEnv
+    from tests.test_showdown_encode import battle
+
+    me, foe = mon("garchomp", "earthquake", "protect"), mon("heatran", "flamethrower")
+    b = battle([me], [foe], [me, None], [foe, None])
+
+    def boom(*args, **kw):
+        raise AssertionError("stats not defined")
+
+    monkeypatch.setattr(ES, "calculate_damage", boom)
+    env = object.__new__(XPDoublesEnv)                      # no server needed: only embed_battle and its counters
+    env.matchup, env.estimator_calls, env.estimator_errors = True, 0, 0
+    env.embed_battle(b)
+    assert (env.estimator_calls, env.estimator_errors) == (2, 2)   # earthquake into heatran, flamethrower into garchomp
+    env.embed_battle(b)
+    assert (env.estimator_calls, env.estimator_errors) == (4, 4)
+    env.matchup = False
+    env.embed_battle(b)
+    assert (env.estimator_calls, env.estimator_errors) == (4, 4)
