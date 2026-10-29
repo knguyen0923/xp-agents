@@ -3,7 +3,7 @@ from __future__ import annotations
 import multiprocessing
 import random
 from collections import deque
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -19,7 +19,7 @@ def _worker(conn, cfg: dict) -> None:
     from xp.showdown.teams import PoolTeambuilder
 
     env = XPDoublesEnv(
-        battle_format=cfg["battle_format"], team=PoolTeambuilder(cfg["teams"], cfg["team_seed"]), strict=False, log_level=40,
+        battle_format=cfg["battle_format"], team=PoolTeambuilder(cfg["teams"], cfg["team_seed"]), strict=False, log_level=40, save_replays=cfg.get("save_replays") or False,
         account_configuration1=AccountConfiguration(cfg["name"] + "a", None),
         account_configuration2=AccountConfiguration(cfg["name"] + "b", None),
     )
@@ -50,7 +50,8 @@ class ShowdownVecEnv:
     `recent_stats() -> (win_rate over the last 100 finished battles, count)`, `recent_window_full()`, `close()`.
     """
 
-    def __init__(self, n: int, battle_format: str, teams: Dict[str, str], opponent: str, seed: int, name: str = "v"):
+    def __init__(self, n: int, battle_format: str, teams: Dict[str, str], opponent: str, seed: int, name: str = "v",
+                 save_replays: Optional[str] = None):
         ctx = multiprocessing.get_context("spawn")
         self.n = n
         suffix = "%05d" % random.SystemRandom().randrange(10**5)  # fresh per run, NOT from the seed: stale accounts/battles from an old run block reused names
@@ -58,7 +59,7 @@ class ShowdownVecEnv:
         for i in range(n):
             parent, child = ctx.Pipe()
             cfg = {"battle_format": battle_format, "teams": teams, "opponent": opponent, "team_seed": seed * 1000 + i,
-                   "name": f"{name}{suffix}{i}"[:16]}
+                   "name": f"{name}{suffix}{i}"[:16], "save_replays": save_replays}
             proc = ctx.Process(target=_worker, args=(child, cfg), daemon=True)
             proc.start()
             self.conns.append(parent)
