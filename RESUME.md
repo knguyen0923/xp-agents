@@ -1,5 +1,9 @@
 # XP — Resume
 
+## Full matchup run IN PROGRESS (scheduled start 2026-10-29 12:00 local, HEAD frozen)
+
+Command: `caffeinate -i scripts/run_showdown.sh configs/showdown-matchup.yaml results/showdown-matchup 2` (started in the background by the session; log `results/showdown-matchup/run.log`; expected 12 to 15 hours). Do NOT commit while it runs: a resume refuses if git HEAD moved (use `ALLOW_CODE_CHANGE=1` only if a code change is deliberate). To resume after an interruption: check swap (`sysctl vm.swapusage`), kill orphans (`pgrep -fl "xp.run|multiprocessing.spawn|room-battle"`; `pkill -f` patterns can match the calling shell), then run the same command again; tuning and eval jobs are cached. When it finishes: run the report (`python -m xp.report --phase showdown --config configs/showdown-matchup.yaml --out results/showdown-matchup --figs figs/showdown-matchup`), compare with the original run per agent and Kairi vs Kaiser, write it up. Worker stderr lines `matchup estimator errors=N` appear in the log; N should stay 0.
+
 ## Matchup plan executing on branch `matchup-features` (2026-10-29)
 
 Subagent-driven execution is FINISHED and reviewed (final review fixes done); the real-server smoke run passed (81 s vs 72 s for the original smoke, estimator errors 0) and the branch was merged into local main (not pushed). What remains is the user's approval of the full matchup run (12 to 15 h; `scripts/run_showdown.sh configs/showdown-matchup.yaml results/showdown-matchup 2`, budget approval before any RND result is read). Ledger `.superpowers/sdd/2026-10-29-showdown-matchup-features/progress.md` and `git log matchup-features` for which tasks are done. Task 1 (server probe) needs the user's yes before it runs. Nothing is pushed.
