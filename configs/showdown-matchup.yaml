@@ -40,7 +40,7 @@ ppo:
 agents:
   kairi:
     grid:
-      ent_coef: [0.003, 0.006, 0.01, 0.02, 0.05, 0.1]
+      ent_coef: [0.001, 0.002, 0.003, 0.006, 0.01, 0.02, 0.05, 0.1]
     natural_limits:
       ent_coef: [0.0, null]
   kaiser:
@@ -48,7 +48,7 @@ agents:
       ent_coef: 0.01            # default entropy: used only if a rnd_coef of 0 is tuned; tuning uses Kairi's tuned value
       ent_coef_from: kairi
     grid:
-      rnd_coef: [0.01, 0.03, 0.1, 0.3, 0.6, 1.0]
+      rnd_coef: [0.01, 0.03, 0.1, 0.3, 0.6, 1.0, 2.0, 3.0]
     natural_limits:
       rnd_coef: [0.0, null]
 report:
