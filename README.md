@@ -17,6 +17,7 @@ Kairi winning some regimes is a valid result. Design: `docs/superpowers/specs/20
   world, Kaiser wins at both points.
 - **MiniGrid:** on DoorKey the RND bonus gave no measurable benefit, but a post-hoc 5M-step probe on an exploration-heavy MultiRoom level found RND at a large coefficient reaches 95% success in about half the steps of plain PPO (5 seeds; not a protocol result), and a protocol-legal confirmation on that level (tuned, matched entropy, 10 fresh seeds) found Kaiser about 1.5M steps faster, on 10 of 10 seeds (paired CI 0.9M to 2.1M). On DoorKey, Kairi (PPO) looked better at sizes 8 and 12 with the tuned settings, but that gap disappears at other tuning-tied settings and with
   matched entropy (10 seeds), so the supported claim is a tie, not "RND hurts".
+- **Showdown (Pokémon VGC doubles, one familiar opponent):** a tie. Tuned Kairi and Kaiser reach the same training AUC (0.406 vs 0.403, CIs overlap) and the same final win rate (0.455 vs 0.451); Kairi reaches a 30% win rate about 5k decisions sooner, but the interval includes 0. There is no shift knob, so this is a generality check, not a breaking-point map.
 - **Map:** the exploration bonus helps in a changing bandit; Kaiser's *tuned settings* are more brittle than Kairi's under large shifts (retune them when the world changes a lot); and RND helps only where exploration is the bottleneck, at a large enough bonus and budget (post-hoc MultiRoom probe), not in the sparse-but-learnable DoorKey.
 - Short write-up: `docs/WRITEUP.md`; full analysis with evidence and caveats: `docs/FINDINGS.md`; design: `docs/superpowers/specs/2026-10-22-xp-design.md`.
 
@@ -157,6 +158,13 @@ So RND helps here, but only at a large enough coefficient and budget. This is po
 Kaiser reached 95% training success in a mean 0.70M steps against 2.23M for Kairi (difference −1.52M, paired 95% CI [−2.12M, −0.93M]), faster on 10 of 10 seeds; training AUC 0.78 vs 0.26 (+0.52 [+0.31, +0.73]); Kaiser solved 10/10 seeds within the budget, Kairi 5/10.
 Caveats: one level; the level and grid were chosen after the probe, so only the eval seeds are fresh; Kairi's failures are budget-limited (S was fit to its tune seeds), so the step and AUC gaps are the robust numbers; steps, not wall-clock, were compared. Full write-up: `docs/MULTIROOM_EVALUATION.md`; data: `docs/spikes/multiroom_confirmation.csv`.
 
+## Phase 4 — Pokémon Showdown (VGC doubles)
+
+One familiar level (opponent DamageHeuristic, format `gen9championsvgc2026regmc`), no shift knob (spec 5.6). S = 250,000 decisions per run, threshold 0.30 (user decisions, 2026-10-26). Tune seeds 0 to 2, 6-value grids for both agents, 10 eval seeds (100 to 109), 200 fresh battles per frozen policy. Tuned: Kairi `ent_coef` 0.01, Kaiser `rnd_coef` 0.03 (interior, not provisional). Run 2026-10-28 on a laptop (about 16:37 to 20:19 on top of cached tuning jobs).
+
+Training AUC of the win rate: Kairi 0.406 [0.397, 0.413], Kaiser 0.403 [0.394, 0.410]; paired difference (Kaiser − Kairi, same eval seeds) −0.003 [−0.015, +0.008]. Win rate of the frozen policy over 200 fresh battles: 0.455 [0.431, 0.479] vs 0.451 [0.426, 0.478], difference −0.004 [−0.047, +0.042]. Decisions to first reach a 30% win rate: Kairi 29,696 [24,576, 34,816], Kaiser 34,816 [31,744, 37,888], difference +5,120 [−1,024, +11,264] (all 20 seeds reached it). 
+So the RND bonus neither helped nor hurt on this opponent at this budget. Caveats: one opponent, 10 seeds, S fixed at 250k, Kaiser's tuning scores nearly flat across its grid (its pick is noisy), decisions not wall-clock; `figs/showdown/degradation.png` has a zoomed y-axis, so use the tables. Details: `docs/FINDINGS.md`; spikes and gates: `docs/spikes/showdown_*.md`.
+
 ## Limitations
 
 - Phase 1: the `tt_*` agents go beyond the original two-agent design; Kaiser and `tt_triggered` tie at low λ.
@@ -178,15 +186,16 @@ Caveats: one level; the level and grid were chosen after the probe, so only the 
   The supported conclusion is "no measurable RND benefit on DoorKey", not "RND hurts". RND adds per-step cost (Kaiser seed jobs took ~2.5x as long). A plausible but
   untested reason for no benefit: extrinsic reward is reachable with plain exploration. The agents break down together as size grows (size 12 near the floor).
   MiniGrid DoorKey is closed here (the MultiRoom spike below found no RND benefit at 2M steps; a post-hoc 5M-step probe and then a protocol-legal confirmation found one at a large coefficient on 4 small rooms); a 30-seed rerun with matched entropy was planned and shelved (`docs/superpowers/plans/2026-10-24-phase2-step-a.md`).
+- **Showdown (Phase 4):** neither agent wins on the familiar opponent (tie within CIs on AUC, final win rate and steps to 30%). It cannot say where either breaks, since there is a single level.
 - So the exploration bonus helps in the nonstationary bandit; Kaiser's frozen tuned settings break down far from the tuned point (many arms, fast drift) but not once retuned there; and it does not help in this sparse-but-learnable MiniGrid family.
 
 ## Future work
 
-Open: the MultiRoom confirmation at other room counts (the 4-room confirmation is done) and a deep-RL tag-team agent. Crafter was spiked (2026-10-26): plain PPO reached only 4.5 distinct achievements per episode at 1M steps, below the pre-set gate of 5, so Crafter is closed as a documented spike with no full phase (`docs/spikes/crafter_spike.md`). We may reconsider it in the future; it was decided against for now because of time. Showdown is specified but not approved for building. A design sketch for Crafter and Showdown (knobs, costs, risks, go/no-go criteria; not approved for building) is in `docs/FUTURE_WORK.md`.
+Open: the MultiRoom confirmation at other room counts (the 4-room confirmation is done) and a deep-RL tag-team agent. Crafter was spiked (2026-10-26): plain PPO reached only 4.5 distinct achievements per episode at 1M steps, below the pre-set gate of 5, so Crafter is closed as a documented spike with no full phase (`docs/spikes/crafter_spike.md`). We may reconsider it in the future; it was decided against for now because of time. Showdown was built and run (Phase 4, above); a battle-replay recorder for it is planned and deferred (`docs/superpowers/plans/2026-10-27-showdown-battle-replays.md`). A design sketch for Crafter and Showdown (knobs, costs, risks, go/no-go criteria) is in `docs/FUTURE_WORK.md`.
 
 ## Repository map
 
-- `xp/protocol/` phase-agnostic protocol (tuner, evaluator, results store); `xp/bandit/` and `xp/minigrid/` the two phases; `xp/stats/`, `xp/plots/` read only the tidy results table.
+- `xp/protocol/` phase-agnostic protocol (tuner, evaluator, results store); `xp/bandit/`, `xp/minigrid/` and `xp/showdown/` the phases (Showdown needs a local server, see `CLAUDE.md`); `xp/stats/`, `xp/plots/` read only the tidy results table.
 - `configs/` run configs; `calibration*.json` frozen MiniGrid budgets; `tests/` the fast suite.
 - `docs/` write-up (`WRITEUP.md`), full analysis (`FINDINGS.md`), the MultiRoom evaluation, spike data (`docs/spikes/`), the design spec and plans (`docs/superpowers/`).
 - `scripts/` post-hoc analyses; `scripts/spikes/` the closed spikes (MultiRoom, Crafter). The Crafter spike needs `pip install crafter` (not in `requirements*.txt`, since no Crafter phase was built).

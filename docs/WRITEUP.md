@@ -21,6 +21,8 @@ two help mainly where the single agents fail; `tt_meta` is the most reliable.
 Kaiser at a different tuning-tied RND coefficient, or at Kairi's entropy coefficient, is statistically indistinguishable from Kairi at every size. The supported conclusion is no measurable benefit
 from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two of three RND settings, so seed-level failures matter. A post-hoc MultiRoom spike (28 runs, 2 seeds, 2M steps) on an exploration-heavy family found no RND benefit at that budget, but a follow-up probe at 5M steps on the borderline level (4 small rooms, 5 seeds) found that RND at coefficient 0.1 reaches 95% training success in a median 1.44M steps against 2.66M for plain PPO, faster on all 5 seeds (mean 1.17M fewer steps, CI [0.53M, 1.75M]); coefficients 0.01 and 0.03 gave no benefit. This is post-hoc (best of three coefficients, top of the range tried, tune-pool seeds), so it is evidence, not a protocol result. A protocol-legal confirmation at that level (coefficients tuned on 3 tune seeds, Kaiser's entropy matched to Kairi's, 10 disjoint eval seeds, S = 2.94M steps) then found Kaiser (`rnd_coef` 0.6) faster on all 10 seeds: mean 0.70M against 2.23M steps to 95% (paired CI of the difference [−2.12M, −0.93M]), and 10/10 seeds solved against 5/10 for Kairi. One level only; the level and grid were chosen after the probe; the step and AUC gaps are the robust numbers because Kairi's failures depend on the budget.
 
+**Pokémon Showdown (VGC doubles vs DamageHeuristic, one familiar level, S = 250k decisions, 10 eval seeds).** A tie. Training AUC 0.406 [0.397, 0.413] for Kairi (tuned `ent_coef` 0.01) and 0.403 [0.394, 0.410] for Kaiser (tuned `rnd_coef` 0.03), paired difference −0.003 [−0.015, +0.008]; final win rate 0.455 vs 0.451; Kairi reaches a 30% win rate about 5k decisions sooner but the interval [−1k, +11k] includes 0. One opponent and no shift knob, so this says the bonus did not hurt or help here, not where either breaks.
+
 ## Map: where each agent wins and breaks
 | regime | winner |
 |---|---|
@@ -31,12 +33,13 @@ from RND on DoorKey, not that it hurts. One Kaiser seed failed outright in two o
 | MiniGrid MultiRoom, 2M steps, 2 seeds | PPO no worse; RND never helped |
 | MiniGrid MultiRoom 4 small rooms, 5M steps, 5 seeds (post-hoc) | RND at coef 0.1 (about 2x fewer steps); no benefit at 0.01 or 0.03 |
 | MiniGrid MultiRoom 4 small rooms, full protocol, 10 eval seeds | Kaiser (rnd 0.6): 1.5M fewer steps to 95%, faster on 10/10 seeds |
+| Showdown VGC doubles vs DamageHeuristic, 250k decisions, 10 eval seeds | tie (AUC 0.406 vs 0.403, CIs overlap) |
 | Crafter (spike only, plain PPO, 1 seed) | not run: no area met the pre-set usable-range gate at 1M steps |
 
 ## Limitations
 One bandit family and horizon; agents are frozen after tuning once (no per-shift retuning); no multiplicity correction across knob values; the ablations that explain the Kairi wins are post-hoc, cover only those two shifts, and use oracle retuning the protocol does not allow. MiniGrid: one familiar size, a 2M-step budget that missed the 80% calibration target, 10 eval seeds, and Kaiser's entropy
-coefficient was fixed (not tuned) in the main run, which the matched-entropy check addresses post-hoc. See `docs/FINDINGS.md`.
+coefficient was fixed (not tuned) in the main run, which the matched-entropy check addresses post-hoc. Showdown: one opponent, 10 seeds, a fixed 250k-decision budget, and a noisy Kaiser tuning pick. See `docs/FINDINGS.md`.
 
 ## Future work
 The MultiRoom confirmation at other room counts, and a deep-RL tag-team agent. A Crafter spike (plain PPO, 1M steps, one seed per area) reached 4.5 and 4.4 achievements per episode against a pre-set gate of 5, so
-Crafter was closed as a documented spike (`docs/spikes/crafter_spike.md`). We may reconsider it in the future; it was decided against for now because of time. Showdown is specified but not approved.
+Crafter was closed as a documented spike (`docs/spikes/crafter_spike.md`). We may reconsider it in the future; it was decided against for now because of time. Showdown was run (above); recording a few of its battles for the replay viewer is planned and deferred.
