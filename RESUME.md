@@ -1,5 +1,9 @@
 # XP — Resume
 
+## Matchup features spec awaiting review (2026-10-29)
+
+The user deferred the replay recording ("later") and asked to give the agents type-chart information. Spec `docs/superpowers/specs/2026-10-29-showdown-matchup-features-design.md` (commit ca7cee5) is written and committed, not pushed. **Next:** the user reviews the spec; then, on their yes, the writing-plans skill for an implementation plan. Nothing is built. The replay recording steps below are still pending (smoke replay checked in Chrome: renders and plays).
+
 ## Battle replays in progress (2026-10-28, after the full run)
 
 The Showdown full run and write-ups are done and committed (see the Showdown section of `STATUS.md`). The user approved building the replay recorder and asked for the most interesting battles: record 40 per agent, keep the top 5. Built and committed: `xp/showdown/replays.py` (score = mean of closeness, comebacks, length, Mega/Tera use; winner inferred from faints because poke-env pages have no `|win|` line), `scripts/record_showdown_replays.py`, `tests/test_showdown_replays.py`. Smoke test passed (`--steps 4096 --battles 8`, output in the session scratchpad, not the repo).
