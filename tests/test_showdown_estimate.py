@@ -33,7 +33,7 @@ def test_multiplier_comes_from_the_types_and_fraction_from_the_calculator(monkey
     a._stats = dict(d._stats)
     d._current_hp, d._max_hp = 100, 100              # a bare Pokemon may report 0 HP, so set the fraction explicitly
     monkeypatch.setattr(ES, "calculate_damage", lambda *args, **kw: (60, 90))
-    mult, frac = ES.PokeEnvEstimator(fake_battle(a, d))(a, d, a.moves["earthquake"])
+    mult, frac = ES.PokeEnvEstimator(fake_battle(d, a))(a, d, a.moves["earthquake"])
     assert mult == pytest.approx(d.damage_multiplier(a.moves["earthquake"]))
     assert frac == pytest.approx(75 / 150)
 
@@ -43,7 +43,7 @@ def test_zero_damage_from_a_damaging_move_reads_as_an_immunity(monkeypatch):
     for p in (a, d):
         p._stats = {"hp": 150, "atk": 80, "def": 90, "spa": 120, "spd": 90, "spe": 70}
     monkeypatch.setattr(ES, "calculate_damage", lambda *args, **kw: (0, 0))
-    assert ES.PokeEnvEstimator(fake_battle(a, d))(a, d, a.moves["earthquake"]) == (0.0, 0.0)
+    assert ES.PokeEnvEstimator(fake_battle(d, a))(a, d, a.moves["earthquake"]) == (0.0, 0.0)
 
 
 def test_a_calculator_error_is_counted_and_returns_none(monkeypatch):
@@ -76,6 +76,41 @@ def test_partial_stats_keep_known_values_and_fill_only_the_missing_ones():
     ES._fill_stats(d)
     assert (d.stats["hp"], d.stats["atk"], d.stats["spd"]) == (150, 80, 90)
     assert all(isinstance(d.stats[k], int) for k in ("def", "spa", "spe"))
+
+
+def test_hp_fraction_halves_the_denominator_and_the_fraction_is_capped(monkeypatch):
+    a, d = mon("garchomp", "earthquake"), mon("heatran")
+    d._stats = {"hp": 100, "atk": 80, "def": 90, "spa": 120, "spd": 90, "spe": 70}
+    d._current_hp, d._max_hp = 50, 100
+    est = ES.PokeEnvEstimator(fake_battle(d, a))
+    monkeypatch.setattr(ES, "calculate_damage", lambda *args, **kw: (20, 40))   # mean 30 into 100 * 0.5 = 50 HP
+    assert est(a, d, a.moves["earthquake"])[1] == pytest.approx(0.6)
+    monkeypatch.setattr(ES, "calculate_damage", lambda *args, **kw: (80, 120))  # mean 100 > 50 HP: capped
+    assert est(a, d, a.moves["earthquake"])[1] == 1.0
+
+
+def test_a_foe_that_mega_evolves_gets_its_fallback_stats_from_the_mega_base_stats(monkeypatch):
+    from poke_env.stats import _raw_hp, _raw_stat
+
+    me, foe = mon("garchomp", "earthquake"), mon("charizard", "heatwave")
+    seen = []
+    monkeypatch.setattr(ES, "calculate_damage", lambda att, dfn, move, battle, **kw: (seen.append(dict(battle.opponent_team[att].stats)), (10, 10))[1])
+    est = ES.PokeEnvEstimator(fake_battle(me, foe))
+    est(foe, me, foe.moves["heatwave"])
+    assert (seen[0]["spa"], seen[0]["spd"]) == (_raw_stat(109, 0, 31, 50, 1.0), _raw_stat(85, 0, 31, 50, 1.0))
+    foe.mega_evolve("charizarditey")                       # poke-env keeps `species` and changes only `base_stats`
+    assert foe.species == "charizard" and foe.base_stats["spa"] == 159
+    est(foe, me, foe.moves["heatwave"])
+    assert seen[1]["spa"] == _raw_stat(159, 0, 31, 50, 1.0) == 179 and seen[1]["spd"] == _raw_stat(115, 0, 31, 50, 1.0) == 135
+    assert seen[1]["hp"] == _raw_hp(78, 0, 31, 50)
+
+
+def test_own_stats_are_never_overwritten_by_the_fallback(monkeypatch):
+    me, foe = mon("garchomp", "earthquake"), mon("heatran", "flamethrower")
+    me._stats = {"hp": 200, "atk": 150, "def": 100, "spa": 90, "spd": 100, "spe": 120}
+    monkeypatch.setattr(ES, "calculate_damage", lambda *args, **kw: (10, 10))
+    ES.PokeEnvEstimator(fake_battle(me, foe))(me, foe, me.moves["earthquake"])
+    assert me.stats == {"hp": 200, "atk": 150, "def": 100, "spa": 90, "spd": 100, "spe": 120}
 
 
 @pytest.mark.showdown
