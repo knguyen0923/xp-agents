@@ -1,6 +1,12 @@
 # XP — Resume
 
-## Nothing in progress (2026-10-28 20:30)
+## Battle replays in progress (2026-10-28, after the full run)
+
+The Showdown full run and write-ups are done and committed (see the Showdown section of `STATUS.md`). The user approved building the replay recorder and asked for the most interesting battles: record 40 per agent, keep the top 5. Built and committed: `xp/showdown/replays.py` (score = mean of closeness, comebacks, length, Mega/Tera use; winner inferred from faints because poke-env pages have no `|win|` line), `scripts/record_showdown_replays.py`, `tests/test_showdown_replays.py`. Smoke test passed (`--steps 4096 --battles 8`, output in the session scratchpad, not the repo).
+- **Next, ask the user first:** (1) check one replay page renders (`replays_smoke/.../all/*.html`; needs internet; Chrome extension was not connected, so the user may open it), (2) maybe cap the mechanics term at 1 (nearly every battle has a Mega), (3) real run: `XP_NODE=$HOME/xp-showdown-spike/node-v22.23.4-darwin-arm64/bin/node python scripts/record_showdown_replays.py --agent kairi --seed 100` then `--agent kaiser` (30 to 60 min of training each; server must be running; output goes to gitignored `replays/`).
+- A Showdown server is left running from the smoke test; the old swap notes below still apply to long runs.
+
+## Full run finished (2026-10-28 20:30)
 
 The Showdown full run FINISHED at 20:19 (started 16:37, resumed from cached tuning jobs; HEAD `f27411c`, `ALLOW_CODE_CHANGE=1`, 2 workers). All 20 eval seed jobs are done (10 Kairi, 10 Kaiser, seeds 100 to 109). The report was run: tables and `degradation.png` are in `figs/showdown` (gitignored, like `results/`). No server or workers are left running.
 

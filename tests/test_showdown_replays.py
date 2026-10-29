@@ -18,7 +18,7 @@ BASE = ["|player|p1|vxa|1|", "|player|p2|vxb|2|", "|teampreview|4", "|turn|1"]
 def close_comeback():
     """Agent falls behind 2 to 4 in alive count, comes back to lead, wins with one left; a Mega is used."""
     return BASE + ["|-mega|p1a: A|A|Venusaurite", "|faint|p1a: A", "|faint|p1b: B", "|turn|5", "|faint|p2a: X", "|faint|p2b: Y",
-                   "|faint|p2a: Z", "|turn|9", "|faint|p1a: C", "|win|vxa"]
+                   "|faint|p2a: Z", "|turn|9", "|faint|p1a: C", "|faint|p2b: W", "|win|vxa"]
 
 
 def stomp():
@@ -45,6 +45,20 @@ def test_winner_survivors_drive_closeness():
 
 def test_unfinished_battle_has_no_score():
     assert score_battle(BASE + ["|faint|p1a: A"], "vxa") is None
+
+
+def test_winner_is_inferred_when_the_win_line_is_missing():
+    s = score_battle([ln for ln in close_comeback() if not ln.startswith("|win|")], "vxa")
+    assert s["won"] == 1.0 and s["left"] == 1.0
+    lost = BASE + ["|faint|p1a: A", "|faint|p1b: B", "|faint|p1a: C", "|faint|p1b: D"]
+    assert score_battle(lost, "vxa")["won"] == 0.0
+
+
+def test_both_sides_out_together_is_a_draw():
+    lines = BASE + ["|faint|p1a: A", "|faint|p1b: B", "|faint|p1a: C", "|faint|p1b: D",
+                    "|faint|p2a: W", "|faint|p2b: X", "|faint|p2a: Y", "|faint|p2b: Z"]
+    s = score_battle(lines, "vxa")
+    assert s["won"] == 0.5 and s["closeness"] == 1.0
 
 
 def test_loss_counts_from_the_winner_side():

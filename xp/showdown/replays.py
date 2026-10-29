@@ -33,7 +33,7 @@ def read_log(page: str) -> List[str]:
 def score_battle(lines: List[str], agent_name: str) -> Optional[Dict[str, float]]:
     """Score one battle for the side played by `agent_name`; None if it has no winner (unfinished)."""
     names: Dict[str, str] = {}
-    brought, turns, mech, winner = 4, 0, 0, None
+    brought, turns, mech, winner, tie = 4, 0, 0, None, False
     alive: Dict[str, int] = {}
     last_sign, changes = 0, 0
     for ln in lines:
@@ -60,18 +60,30 @@ def score_battle(lines: List[str], agent_name: str) -> Optional[Dict[str, float]
                 last_sign = sign
         elif kind == "win" and len(f) > 2:
             winner = f[2]
-    if winner is None or agent_name not in names.values():
+        elif kind == "tie":
+            tie = True
+    if agent_name not in names.values():
         return None
+    # poke-env saves the page before the final `|win|` line arrives, so the winner is usually inferred from the faint counts
+    a1, a2 = alive.get("p1", brought), alive.get("p2", brought)
+    if winner is None:
+        if a1 > 0 and a2 > 0:
+            return None  # unfinished
+        if a1 == 0 and a2 == 0:
+            winner = ""  # both sides ran out together: a draw
+        else:
+            winner = names.get("p1" if a1 > 0 else "p2", "")
+    draw = winner == "" or tie
     win_side = "p1" if names.get("p1") == winner else "p2"
-    left = alive.get(win_side, brought)
+    left = 0 if draw else alive.get(win_side, brought)
     parts = {
-        "closeness": min(max((brought - left) / max(brought - 1, 1), 0.0), 1.0),
+        "closeness": 1.0 if draw else min(max((brought - left) / max(brought - 1, 1), 0.0), 1.0),
         "comebacks": min(changes, LEAD_CAP) / LEAD_CAP,
         "length": min(turns, TURN_CAP) / TURN_CAP,
         "mechanics": min(mech, MECH_CAP) / MECH_CAP,
     }
     parts["score"] = sum(parts.values()) / 4.0
-    parts.update(turns=float(turns), won=float(winner == agent_name), left=float(left), lead_changes=float(changes), mechanics_used=float(mech))
+    parts.update(turns=float(turns), won=0.5 if draw else float(winner == agent_name), left=float(left), lead_changes=float(changes), mechanics_used=float(mech))
     return parts
 
 

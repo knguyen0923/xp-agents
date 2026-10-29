@@ -28,7 +28,7 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-Nothing running. Remaining: optionally add Showdown to `docs/findings.html`, then the deferred battle-replay feature (plan `docs/superpowers/plans/2026-10-27-showdown-battle-replays.md`, needs the user's yes). Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger budget, more DoorKey seeds, reopening Crafter. Showdown commits are not pushed; pushes need the user's yes.
+Nothing running except a local Showdown server started for the replay smoke test (stop with `pkill -f "pokemon-showdown start"`). **Battle replays (user approved building, 2026-10-28):** recorder built and committed (`xp/showdown/replays.py` scorer, `scripts/record_showdown_replays.py`, `tests/test_showdown_replays.py`; `ShowdownVecEnv` has an optional `save_replays`). The user wants the most interesting battles: record 40 per agent, keep the top 5 by the agreed score (closeness, comebacks, length, Mega/Tera use). Smoke test on the real server passed (tiny budget); poke-env pages lack a `|win|` line, so the scorer infers the winner from faints. Still open: confirm a replay page renders in a browser (Chrome extension was not connected; the viewer loads from play.pokemonshowdown.com and may not know the Champions format), then the real recording (about 1 to 2 h: train kairi and kaiser on an eval seed, 40 battles each). `docs/findings.html` still has no Showdown section. Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger budget, more DoorKey seeds, reopening Crafter. Showdown commits are not pushed; pushes need the user's yes.
 
 ## Last updated
 
