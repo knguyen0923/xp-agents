@@ -13,6 +13,7 @@ from xp.protocol.manifest import write_manifest
 from xp.protocol.phase import Phase
 from xp.protocol.results import atomic_write, read_tune_job, seed_job_done, write_seed_job, write_tune_job
 from xp.showdown import patch
+from xp.showdown.encode import obs_dim
 from xp.showdown.ppo import Learner
 from xp.showdown.teams import assert_disjoint, load_pool, pool_digest, validate_team
 
@@ -29,19 +30,21 @@ def make_env(cfg: dict, stage: str, seed: int):
     """`n_envs` env processes against the configured opponent, drawing teams only from the stage's pool (`tune` or `eval`)."""
     from xp.showdown.vec_env import ShowdownVecEnv
 
-    return ShowdownVecEnv(cfg["ppo"]["n_envs"], cfg["env"]["format"], load_pool(team_dir(cfg, stage)), cfg["env"]["opponent"], seed=seed)
+    return ShowdownVecEnv(cfg["ppo"]["n_envs"], cfg["env"]["format"], load_pool(team_dir(cfg, stage)), cfg["env"]["opponent"], seed=seed,
+                          matchup=bool(cfg["env"].get("matchup", False)))
 
 
 def build_learner(cfg: dict, agent: str, params: dict, seed: int) -> Learner:
     """Kairi = PPO (tunes its entropy coefficient); Kaiser = the same PPO plus RND (tunes the RND coefficient)."""
     learner_seed = cfg["seeds"]["agent_seed"] + int(seed)
+    dim = obs_dim(bool(cfg["env"].get("matchup", False)))
     if agent == "kairi":
-        return Learner(cfg["ppo"], params["ent_coef"], learner_seed)
+        return Learner(cfg["ppo"], params["ent_coef"], learner_seed, obs_dim=dim)
     if agent == "kaiser":
         fixed_ent = params.get("ent_coef", cfg["agents"]["kaiser"]["fixed"]["ent_coef"])
         if params["rnd_coef"] == 0:  # no bonus: exactly plain PPO at the default entropy (no RND, no intrinsic head)
-            return Learner(cfg["ppo"], fixed_ent, learner_seed)
-        return Learner(cfg["ppo"], fixed_ent, learner_seed, rnd_coef=params["rnd_coef"])
+            return Learner(cfg["ppo"], fixed_ent, learner_seed, obs_dim=dim)
+        return Learner(cfg["ppo"], fixed_ent, learner_seed, rnd_coef=params["rnd_coef"], obs_dim=dim)
     raise ValueError(f"unknown agent {agent!r}")
 
 

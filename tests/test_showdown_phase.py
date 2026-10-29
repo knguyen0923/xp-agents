@@ -132,3 +132,16 @@ def test_run_phase_rejects_unequal_tuning_grids(tiny):
     cfg["agents"]["kaiser"]["grid"]["rnd_coef"] = [0.1]
     with pytest.raises(ProtocolError, match="equal size"):
         sp.run_phase(cfg, out)
+
+
+def test_matchup_flag_sets_the_learner_observation_size_and_the_hash(tiny):
+    from xp.protocol.phase import config_hash
+    from xp.showdown import encode
+
+    tiny_sd_cfg = tiny[0]
+    off = sp.build_learner(tiny_sd_cfg, "kairi", {"ent_coef": 0.01}, 0)
+    assert off.obs_dim == encode.OBS_DIM
+    on_cfg = {**tiny_sd_cfg, "env": {**tiny_sd_cfg["env"], "matchup": True}}
+    on = sp.build_learner(on_cfg, "kaiser", {"rnd_coef": 0.3, "ent_coef": 0.02}, 0)
+    assert on.obs_dim == encode.obs_dim(True) and on.rnd.obs_dim == encode.obs_dim(True)
+    assert config_hash(tiny_sd_cfg) != config_hash(on_cfg)

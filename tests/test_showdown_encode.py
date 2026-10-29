@@ -104,3 +104,14 @@ def test_weather_sets_exactly_one_field_bit_in_the_weather_block():
 def test_obs_dim_helper_is_unchanged_with_the_flag_off():
     assert E.obs_dim() == E.obs_dim(False) == E.OBS_DIM
     assert E.MATCHUP_DIM == 72 and E.obs_dim(True) == E.OBS_DIM + 72
+
+
+def test_flag_off_vector_is_identical_and_flag_on_appends_the_block():
+    own, opp = [mon("garchomp", "earthquake")], [mon("rotom", "surf")]
+    b = battle(own, opp, own + [None], opp + [None])
+    base = E.encode_battle(b)
+    assert E.encode_battle(b, matchup=False).tolist() == base.tolist()
+    on = E.encode_battle(b, matchup=True, estimator=lambda a, d, m: (2.0, 0.5) if m.base_power > 0 else None)
+    assert on.shape == (E.obs_dim(True),)
+    assert on[: E.OBS_DIM].tolist() == base.tolist()
+    assert on[E.OBS_DIM] == pytest.approx(0.5)      # first outgoing multiplier: 2 / 4

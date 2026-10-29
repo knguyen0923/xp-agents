@@ -4,7 +4,7 @@ import numpy as np
 from gymnasium.spaces import Box
 from poke_env.environment import DoublesEnv
 
-from xp.showdown.encode import OBS_DIM, encode_battle
+from xp.showdown.encode import encode_battle, obs_dim
 
 
 class XPDoublesEnv(DoublesEnv):
@@ -14,13 +14,14 @@ class XPDoublesEnv(DoublesEnv):
     default random pick of 4 for both sides. Pair with `SingleAgentWrapper(env, opponent)` for a gymnasium env.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, matchup: bool = False, **kwargs):
         super().__init__(**kwargs)
-        space = Box(-2.0, 2.0, shape=(OBS_DIM,), dtype=np.float32)  # move priority reaches -7 / 5 = -1.4
+        self.matchup = bool(matchup)
+        space = Box(-2.0, 2.0, shape=(obs_dim(self.matchup),), dtype=np.float32)  # move priority reaches -7 / 5 = -1.4
         self.observation_spaces = {agent: space for agent in self.possible_agents}
 
     def embed_battle(self, battle) -> np.ndarray:
-        return encode_battle(battle)
+        return encode_battle(battle, matchup=self.matchup)
 
     def calc_reward(self, battle) -> float:
         if battle.won:

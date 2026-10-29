@@ -75,8 +75,8 @@ def _conditions(table: dict, order: list) -> np.ndarray:
     return np.array([float(k in table) for k in order], dtype=np.float32)
 
 
-def encode_battle(battle) -> np.ndarray:
-    """Flat float32 vector of length OBS_DIM for a DoubleBattle (own side, opponent side, field)."""
+def encode_battle(battle, matchup: bool = False, estimator=None) -> np.ndarray:
+    """Flat float32 vector of length obs_dim(matchup) for a DoubleBattle (own side, opponent side, field[, matchup block])."""
     own = _side(battle.team.values(), list(battle.active_pokemon), list(battle.can_mega_evolve))
     opp = _side(battle.opponent_team.values(), list(battle.opponent_active_pokemon), [False, False])
     field = np.concatenate([
@@ -86,5 +86,11 @@ def encode_battle(battle) -> np.ndarray:
         np.array([min(battle.turn, 40) / 40.0], dtype=np.float32),
     ])
     out = np.concatenate([own, opp, field]).astype(np.float32)
-    assert out.shape == (OBS_DIM,)
-    return out
+    if matchup:
+        from xp.showdown.matchup import matchup_block  # lazy: matchup.py imports this module's constants
+        if estimator is None:
+            from xp.showdown.estimate import PokeEnvEstimator
+            estimator = PokeEnvEstimator(battle)
+        out = np.concatenate([out, matchup_block(list(battle.active_pokemon), list(battle.opponent_active_pokemon), estimator)])
+    assert out.shape == (obs_dim(matchup),)
+    return out.astype(np.float32)
