@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first.
 
-<!-- STATUS_COMMIT: 936c8df -->
+<!-- STATUS_COMMIT: fcddfc1 -->
 
 ## Current state
 
@@ -38,10 +38,12 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 **Update, 2026-10-29 afternoon (matchup run 2):** the resumed matchup run finished the 18 Kairi tuning jobs and stopped at the protocol guard: Kairi's tuned `ent_coef` 0.003 sat on the grid's lower edge. With the user's approval both grids were widened to 8 values each (Kairi `ent_coef` 0.001 to 0.1, Kaiser `rnd_coef` 0.01 to 3.0; config commit `5e14970`) and the run restarted in a fresh folder, `results/showdown-matchup2` (the old `results/showdown-matchup` is kept as a record, not mixed). About 14 to 17 hours; details and the resume command are at the top of `RESUME.md`. This supersedes "PAUSED" above. **Evening update:** run 2 was found dead at 18:59 (cause unknown), restarted briefly, then PAUSED on purpose at the user's request with 19 of 48 tuning jobs cached (all Kairi); resume steps are at the top of `RESUME.md`.
 
+**Tuning-grid review (2026-10-30):** read the bandit tuning tables in `results/*/bandit/tuning/`. No boundary flags; neighbors of the best point are within 1 to 10% except `bandit-drift` Kaiser (`gamma=1.0` natural limit, neighbor 40% worse). In the familiar condition Kairi's `epsilon` is flat, so its grid is effectively 1-D (`alpha`) while Kaiser's is 2-D, which may favor Kaiser. Caveats are in `docs/WRITEUP.md` Limitations only (not yet in FINDINGS). A finer Kairi `alpha` sweep on tune seeds was proposed, not run, not approved.
+
 **Future work noted (2026-10-29):** `docs/FUTURE_WORK.md` has a new section on Showdown tempo and format-specific features (speed order, priority brackets, Trick Room and Tailwind durations, IV/EV, foe sheet fill, an opponent that uses field moves). Nothing built for it.
 
 (Older notes follow.) Nothing running except a local Showdown server started for the replay smoke test (stop with `pkill -f "pokemon-showdown start"`). **Battle replays (user approved building, 2026-10-28):** recorder built and committed (`xp/showdown/replays.py` scorer, `scripts/record_showdown_replays.py`, `tests/test_showdown_replays.py`; `ShowdownVecEnv` has an optional `save_replays`). The user wants the most interesting battles: record 40 per agent, keep the top 5 by the agreed score (closeness, comebacks, length, Mega/Tera use). Smoke test on the real server passed (tiny budget); poke-env pages lack a `|win|` line, so the scorer infers the winner from faints. Still open: confirm a replay page renders in a browser (Chrome extension was not connected; the viewer loads from play.pokemonshowdown.com and may not know the Champions format), then the real recording (about 1 to 2 h: train kairi and kaiser on an eval seed, 40 battles each). `docs/findings.html` still has no Showdown section. Possible longer follow-ups, none approved: other MultiRoom room counts, a bigger budget, more DoorKey seeds, reopening Crafter. Showdown commits are not pushed; pushes need the user's yes.
 
 ## Last updated
 
-2026-10-29 evening (matchup run 2 PAUSED at 19 of 48 tuning jobs, by the user's request; see RESUME.md)
+2026-10-30 (tuning-grid caveats noted in `docs/WRITEUP.md` Limitations, commit fcddfc1, not pushed; matchup run 2 still PAUSED at 19 of 48 tuning jobs, see RESUME.md)
