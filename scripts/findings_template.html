@@ -81,12 +81,18 @@
   <div class="card"><h3>Plain PPO, achievements per episode (mean of the last 100 episodes)</h3><p class="note">Dashed line: the pass mark of 5. Both worlds were still climbing at 1M steps but ended below it.</p><div class="legend"><span><i class="sw" style="background:#d99a1e"></i>Small world (area 32), final 4.52</span><span><i class="sw" style="background:#2a9d8f"></i>Large world (area 64), final 4.37</span></div><div class="chart" id="crafter-chart" data-source="crafter"></div></div>
   <div class="verdict"><p><b>Neither world reached the pass mark:</b> 4.52 achievements in the small world and 4.37 in the large one. The agent learned wood, sapling, water, cow and zombie, but never placed a table, so the tools and iron stayed out of reach. The full study would have cost about 20 to 50 hours, so we closed Crafter as a documented spike. We may come back to it; it was set aside for time, and the question is still open. No exploration-bonus result was read.</p></div>
 
+  <h2>Chapter 7: Pokémon Showdown, a tie against one opponent</h2>
+  <p>Showdown is a two-on-two Pokémon battle simulator with a hidden opponent. Here there is no shift to sweep: a single familiar opponent (a scripted agent that picks the highest-damage move), 250,000 decisions per run, each agent tuned on three tuning seeds, frozen, then run on 10 fresh seeds. The opponent, the budget and the 30% win-rate target were fixed before any exploration-bonus result was read.</p>
+  <div class="grid" id="showdown-grid" data-source="showdown"></div>
+  <div class="verdict"><p><b>A tie.</b> Training AUC was 0.406 for Kairi and 0.403 for Kaiser, and the paired difference of −0.003 has an interval from −0.015 to +0.008. Kairi reached a 30% win rate about 5,000 decisions sooner, but that interval also includes zero, so it is a hint and not a finding. The bonus neither helped nor cost anything here. With one opponent there is no shift, so this says nothing about where either agent breaks.</p></div>
+
   <h2>What this does and does not show</h2>
   <h3>What it shows</h3>
   <ul>
     <li><b>Bandit:</b> Kaiser beats Kairi at every jump rate tested, and still does when tuned at the other end or when reward noise changes. Kairi only wins at 50 arms and at fast drift, and both wins reverse when the two agents are retuned there. Those wins came from Kaiser's frozen settings, not from exploring hurting.</li>
     <li><b>DoorKey:</b> the exploration bonus gave no measurable benefit. The small Kairi lead at sizes 8 and 12 disappears at other equally good bonus strengths and when Kaiser uses Kairi's entropy.</li>
     <li><b>MultiRoom, 4 small rooms:</b> under the full protocol Kaiser reached 95% success faster on all 10 fresh seeds, in 0.70M steps on average against 2.23M, and solved 10 of 10 seeds against 5 of 10.</li>
+    <li><b>Showdown, one opponent:</b> tuned Kairi and tuned Kaiser tie on win rate (AUC 0.406 against 0.403, intervals overlap), so the bonus is neither a win nor a cost there.</li>
   </ul>
   <h3>What it does not show</h3>
   <ul>
@@ -96,9 +102,10 @@
     <li><b>A clean wall-clock win.</b> Results are in training steps. The logged run times in the 5-seed probe were about 1.85k s per 5M-step run with the bonus against 2.16k s for plain PPO, but three runs shared one laptop, so that is not a controlled timing. On DoorKey the bonus agent's jobs took about 2.5 times as long. A fair timing needs a dedicated run.</li>
     <li><b>Anything general about the bandit.</b> One bandit family and one horizon. The retuning that explains Kairi's wins uses information the real protocol does not allow, so it is an explanation after the fact.</li>
     <li><b>Small effects on DoorKey.</b> With 10 seeds, a small effect in either direction cannot be ruled out, and the training budget missed its calibration target.</li>
+    <li><b>How either agent breaks on Showdown.</b> There is one opponent and no shift knob, 10 seeds per agent, and a fixed budget, so a larger budget or a different opponent could separate them. Kaiser's tuning scores were nearly flat, so its chosen bonus is a noisy pick.</li>
     <li><b>Anything about Crafter's exploration bonus.</b> That chapter is a spike: one seed per world size, plain PPO only. It shows the world is hard for plain PPO at 1M steps, nothing more.</li>
   </ul>
-  <p class="note">Sources: results tables in the project repository (<code>docs/FINDINGS.md</code>, <code>docs/MULTIROOM_EVALUATION.md</code>, <code>docs/spikes/</code>, <code>figs/</code>). The bandit, retune, DoorKey, probe, MultiRoom and Crafter tables are copies of those files; the MultiRoom curves are sampled every 4th logged point.</p>
+  <p class="note">Sources: results tables in the project repository (<code>docs/FINDINGS.md</code>, <code>docs/MULTIROOM_EVALUATION.md</code>, <code>docs/spikes/</code>, <code>figs/</code>). The bandit, retune, DoorKey, probe, MultiRoom, Crafter and Showdown tables are copies of those files; the MultiRoom curves are sampled every 4th logged point.</p>
 </div>
 
 <script>
@@ -395,6 +402,41 @@
     });
   }
 
+  // ---- Showdown: mean and 95% interval per agent, one panel per metric
+  function drawShowdown() {
+    var host = document.getElementById('showdown-grid');
+    var rows = rowsOf('showdown');
+    if (!rows) { host.innerHTML = ''; return; }
+    host.innerHTML = '';
+    var specs = [
+      { m: 'auc', t: 'Training AUC of win rate', n: 'Higher is better.', f: d3.format('.3f') },
+      { m: 'win_eval', t: 'Win rate of the frozen policy', n: '200 fresh battles per seed. Higher is better.', f: d3.format('.3f') },
+      { m: 'steps_to_30', t: 'Decisions to first reach a 30% win rate', n: 'Fewer is better.', f: d3.format(',.0f') }
+    ];
+    var later = [];
+    specs.forEach(function (sp) {
+      var rs = rows.filter(function (r) { return r.metric === sp.m; }).map(function (r) { return { agent: r.agent, v: num(r.mean), lo: num(r.lo), hi: num(r.hi) }; });
+      var card = document.createElement('div'); card.className = 'card';
+      var h = document.createElement('h3'); h.textContent = sp.t; card.appendChild(h);
+      var p = document.createElement('p'); p.className = 'note'; p.textContent = 'Dot is the mean of 10 seeds, line is the 95% interval. ' + sp.n; card.appendChild(p);
+      var el = document.createElement('div'); el.className = 'chart'; el.style.minHeight = '170px'; card.appendChild(el); host.appendChild(card);
+      later.push(function () {
+        var c = mk(el, 170, { l: 62, r: 18, t: 14, b: 58 });
+        var lo = d3.min(rs, function (r) { return r.lo; }), hi = d3.max(rs, function (r) { return r.hi; });
+        var pad = (hi - lo) * 0.15;
+        var x = d3.scaleLinear().domain([lo - pad, hi + pad]).range([0, c.w]);
+        var y = d3.scaleBand().domain(['kairi', 'kaiser']).range([0, c.h]).padding(0.5);
+        axes(c, x, y, { xt: 4, xf: sp.f, yf: function (v) { return v === 'kairi' ? 'Kairi' : 'Kaiser'; } });
+        rs.forEach(function (r) {
+          var yy = y(r.agent) + y.bandwidth() / 2, col = r.agent === 'kairi' ? C1 : C2;
+          c.g.append('line').attr('x1', x(r.lo)).attr('x2', x(r.hi)).attr('y1', yy).attr('y2', yy).attr('stroke', col).attr('stroke-width', 2).attr('stroke-linecap', 'round');
+          dot(c.g, x(r.v), yy, 5, col, [r.agent === 'kairi' ? 'Kairi' : 'Kaiser', 'mean ' + sp.f(r.v), '95% interval ' + sp.f(r.lo) + ' to ' + sp.f(r.hi)]);
+        });
+      });
+    });
+    later.forEach(function (f) { f(); });
+  }
+
   // ---- Paired table (words only) and mark filling
   function drawTable() {
     var t = document.getElementById('paired-table'), rows = rowsOf('mr_paired');
@@ -420,7 +462,7 @@
   }
 
   dash.onData(function () {
-    drawBandit(); drawRetune(); drawDoorkey(); drawProbe(); drawTuning(); drawCurves(); drawCrafter(); drawPairs(); drawTable(); fillMarks();
+    drawBandit(); drawRetune(); drawDoorkey(); drawProbe(); drawTuning(); drawCurves(); drawCrafter(); drawShowdown(); drawPairs(); drawTable(); fillMarks();
   });
 })();
 </script>

@@ -71,6 +71,10 @@ def datasets(run):
                        "diff": f"{diff.mean():.4g}", "lo": f"{lo:.4g}", "hi": f"{hi:.4g}", "better_seeds": f"{better}/{len(diff)}"})
     d["mr_paired"] = paired
     d["crafter"] = read("docs/spikes/crafter_spike_curves.csv")
+    d["showdown"] = [
+        {"metric": m, "agent": r["agent"], "mean": r["mean"], "lo": r["lo"], "hi": r["hi"]}
+        for m, f in (("auc", "curves"), ("win_eval", "curves__win_eval"), ("steps_to_30", "curves__steps_to_30"))
+        for r in read(f"docs/spikes/showdown_results/{f}.csv") if r["agent"] in ("kairi", "kaiser")]
     return d
 
 
