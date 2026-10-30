@@ -86,13 +86,20 @@
   <div class="grid" id="showdown-grid" data-source="showdown"></div>
   <div class="verdict"><p><b>A tie.</b> Training AUC was 0.406 for Kairi and 0.403 for Kaiser, and the paired difference of −0.003 has an interval from −0.015 to +0.008. Kairi reached a 30% win rate about 5,000 decisions sooner, but that interval also includes zero, so it is a hint and not a finding. The bonus neither helped nor cost anything here. With one opponent there is no shift, so this says nothing about where either agent breaks.</p></div>
 
+  <h3 style="margin-top:2rem">Adding type-matchup inputs</h3>
+  <p>We then asked whether the agents were missing the type chart. A second run adds a block to the observation: for each of my moves, an ability-aware type multiplier and an estimated share of the target's HP it would remove, plus the threat from the opponent's revealed moves. The first attempt stopped at the grid edge, so both tuning grids were widened to 8 values and the run was restarted. Tuned values: Kairi entropy 0.006, Kaiser bonus 1.0.</p>
+  <div class="grid" id="showdown-matchup-grid" data-source="showdown_matchup"></div>
+  <div class="card tbl" style="margin-top:var(--cds-gap-md)"><h3>Matchup run minus original run, paired by evaluation seed</h3><p class="note">Mean over 10 seeds; interval is a 95% bootstrap that resamples seeds. Bold rows exclude zero.</p>
+  <table id="cross-table"><thead><tr><th>Agent</th><th>Metric</th><th>Original</th><th>Matchup</th><th>Change</th><th>Low</th><th>High</th><th>Seeds improved</th></tr></thead><tbody></tbody></table></div>
+  <div class="verdict"><p><b>Still a tie between the agents</b> (training AUC 0.416 for Kairi against 0.424 for Kaiser, intervals overlap). Against the original run only Kaiser's training AUC rose clearly, by 0.022 with an interval from 0.012 to 0.031, and it improved on 9 of 10 seeds. Everything else moved the right way but its interval includes zero, and the gain is not reliably larger for Kaiser than for Kairi. The new inputs, the wider grids and the retuned values changed together, so the inputs are not isolated.</p></div>
+
   <h2>What this does and does not show</h2>
   <h3>What it shows</h3>
   <ul>
     <li><b>Bandit:</b> Kaiser beats Kairi at every jump rate tested, and still does when tuned at the other end or when reward noise changes. Kairi only wins at 50 arms and at fast drift, and both wins reverse when the two agents are retuned there. Those wins came from Kaiser's frozen settings, not from exploring hurting.</li>
     <li><b>DoorKey:</b> the exploration bonus gave no measurable benefit. The small Kairi lead at sizes 8 and 12 disappears at other equally good bonus strengths and when Kaiser uses Kairi's entropy.</li>
     <li><b>MultiRoom, 4 small rooms:</b> under the full protocol Kaiser reached 95% success faster on all 10 fresh seeds, in 0.70M steps on average against 2.23M, and solved 10 of 10 seeds against 5 of 10.</li>
-    <li><b>Showdown, one opponent:</b> tuned Kairi and tuned Kaiser tie on win rate (AUC 0.406 against 0.403, intervals overlap), so the bonus is neither a win nor a cost there.</li>
+    <li><b>Showdown, one opponent:</b> tuned Kairi and tuned Kaiser tie on win rate (AUC 0.406 against 0.403, intervals overlap), so the bonus is neither a win nor a cost there. With type-matchup inputs added they still tie (0.416 against 0.424); only Kaiser's AUC rose clearly against the original run.</li>
   </ul>
   <h3>What it does not show</h3>
   <ul>
@@ -102,10 +109,10 @@
     <li><b>A clean wall-clock win.</b> Results are in training steps. The logged run times in the 5-seed probe were about 1.85k s per 5M-step run with the bonus against 2.16k s for plain PPO, but three runs shared one laptop, so that is not a controlled timing. On DoorKey the bonus agent's jobs took about 2.5 times as long. A fair timing needs a dedicated run.</li>
     <li><b>Anything general about the bandit.</b> One bandit family and one horizon. The retuning that explains Kairi's wins uses information the real protocol does not allow, so it is an explanation after the fact.</li>
     <li><b>Small effects on DoorKey.</b> With 10 seeds, a small effect in either direction cannot be ruled out, and the training budget missed its calibration target.</li>
-    <li><b>How either agent breaks on Showdown.</b> There is one opponent and no shift knob, 10 seeds per agent, and a fixed budget, so a larger budget or a different opponent could separate them. Kaiser's tuning scores were nearly flat, so its chosen bonus is a noisy pick.</li>
+    <li><b>How either agent breaks on Showdown.</b> There is one opponent and no shift knob, 10 seeds per agent, and a fixed budget, so a larger budget or a different opponent could separate them. Kaiser's tuning scores were nearly flat, so its chosen bonus is a noisy pick. The matchup comparison is confounded with the wider grids and retuning, and it uses six comparisons with no multiplicity correction.</li>
     <li><b>Anything about Crafter's exploration bonus.</b> That chapter is a spike: one seed per world size, plain PPO only. It shows the world is hard for plain PPO at 1M steps, nothing more.</li>
   </ul>
-  <p class="note">Sources: results tables in the project repository (<code>docs/FINDINGS.md</code>, <code>docs/MULTIROOM_EVALUATION.md</code>, <code>docs/spikes/</code>, <code>figs/</code>). The bandit, retune, DoorKey, probe, MultiRoom, Crafter and Showdown tables are copies of those files; the MultiRoom curves are sampled every 4th logged point.</p>
+  <p class="note">Sources: results tables in the project repository (<code>docs/FINDINGS.md</code>, <code>docs/MULTIROOM_EVALUATION.md</code>, <code>docs/spikes/</code>, <code>figs/</code>). The bandit, retune, DoorKey, probe, MultiRoom, Crafter and Showdown (both runs) tables are copies of those files; the MultiRoom curves are sampled every 4th logged point.</p>
 </div>
 
 <script>
@@ -403,9 +410,9 @@
   }
 
   // ---- Showdown: mean and 95% interval per agent, one panel per metric
-  function drawShowdown() {
-    var host = document.getElementById('showdown-grid');
-    var rows = rowsOf('showdown');
+  function drawShowdownGrid(hostId, dataId) {
+    var host = document.getElementById(hostId);
+    var rows = rowsOf(dataId);
     if (!rows) { host.innerHTML = ''; return; }
     host.innerHTML = '';
     var specs = [
@@ -437,6 +444,24 @@
     later.forEach(function (f) { f(); });
   }
 
+  function drawShowdown() { drawShowdownGrid('showdown-grid', 'showdown'); drawShowdownGrid('showdown-matchup-grid', 'showdown_matchup'); }
+  function drawCross() {
+    var tb = document.querySelector('#cross-table tbody'), rows = rowsOf('showdown_cross');
+    tb.innerHTML = '';
+    if (!rows) return;
+    var names = { kairi: 'Kairi', kaiser: 'Kaiser', kaiser_minus_kairi: 'Kaiser gain minus Kairi gain' };
+    var labels = { auc: 'Training AUC', win_eval: 'Win rate', steps_to_30: 'Decisions to 30%' };
+    rows.forEach(function (r) {
+      var f = r.metric === 'steps_to_30' ? function (v) { return d3.format(',.0f')(Number(v)); } : function (v) { return Number(v).toFixed(3); };
+      var sg = function (v) { return (Number(v) > 0 ? '+' : '') + f(v); };
+      var sig = Number(r.lo) > 0 || Number(r.hi) < 0;
+      var cells = [names[r.agent], labels[r.metric], r.orig === '' ? '' : f(r.orig), r.matchup === '' ? '' : f(r.matchup), sg(r.diff), sg(r.lo), sg(r.hi), r.seeds_improved];
+      var tr = document.createElement('tr'); if (sig) tr.style.fontWeight = '600';
+      cells.forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+  }
+
   // ---- Paired table (words only) and mark filling
   function drawTable() {
     var t = document.getElementById('paired-table'), rows = rowsOf('mr_paired');
@@ -462,7 +487,7 @@
   }
 
   dash.onData(function () {
-    drawBandit(); drawRetune(); drawDoorkey(); drawProbe(); drawTuning(); drawCurves(); drawCrafter(); drawShowdown(); drawPairs(); drawTable(); fillMarks();
+    drawBandit(); drawRetune(); drawDoorkey(); drawProbe(); drawTuning(); drawCurves(); drawCrafter(); drawShowdown(); drawCross(); drawPairs(); drawTable(); fillMarks();
   });
 })();
 </script>
