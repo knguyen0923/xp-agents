@@ -1,6 +1,10 @@
 # XP — Resume
 
-## Matchup run 2 PAUSED (2026-10-29 evening; fresh folder `results/showdown-matchup2`)
+## Matchup run 2 RESUMED 2026-10-30 09:36 (1 worker; fresh folder `results/showdown-matchup2`)
+
+**Update 2026-10-30:** the user approved resuming. A 2-worker try at 09:23 pushed swap from 0.4 GB to 3.6 GB in 7 minutes (6.1 GB total by 09:36), so it was killed by PID (server left up) and restarted at about 09:36 on 1 worker with the command below. 19 of 48 tuning jobs were cached at restart; the older "PAUSED" text below is history. If the process is gone, check `results/showdown-matchup2/run.log`, `sysctl vm.swapusage` and `pgrep -fl "xp.run|multiprocessing.spawn"`, then use the same command (ask the user first). Command: `ALLOW_CODE_CHANGE=1 caffeinate -i scripts/run_showdown.sh configs/showdown-matchup.yaml results/showdown-matchup2 1`.
+
+### Earlier state: PAUSED (2026-10-29 evening)
 
 **Current state:** 19 of 48 tuning jobs are cached (all Kairi: `ent_coef` 0.001, 0.002, 0.003, 0.006, 0.01, 0.02 on seeds 0 to 2, plus 0.05 seed 0). No Kaiser or eval seed jobs have started. All worker lines read `matchup estimator errors=0`. The run was found dead at 18:59 (no processes; the log's last line was at 18:55 and showed no crash; cause unknown, possibly killed when the earlier session closed). With the user's yes it was restarted at 18:59:39 on 1 worker, then stopped on purpose a few minutes later at the user's request ("pause"), by PID (no `pkill` patterns). Nothing new finished in that window; in-flight jobs restart from zero (about 10 minutes each). No process of the run is left; the Showdown server was left up (swap was 0.6 GB of 2 GB at 18:59). The session-only hourly cron swap check mentioned below is gone.
 - **Resume (ask the user first):** the command below, 1 worker; about 20 hours remain (29 tuning jobs plus 20 eval seed jobs). Before starting: `sysctl vm.swapusage` and `pgrep -fl "xp.run|multiprocessing.spawn|room-battle"` (only the server's `room-battle` should show).
