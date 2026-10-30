@@ -1,6 +1,13 @@
 # XP — Resume
 
-## Matchup run 2 IN PROGRESS (started 2026-10-29 ~15:55, fresh folder `results/showdown-matchup2`)
+## Matchup run 2 PAUSED (2026-10-29 evening; fresh folder `results/showdown-matchup2`)
+
+**Current state:** 19 of 48 tuning jobs are cached (all Kairi: `ent_coef` 0.001, 0.002, 0.003, 0.006, 0.01, 0.02 on seeds 0 to 2, plus 0.05 seed 0). No Kaiser or eval seed jobs have started. All worker lines read `matchup estimator errors=0`. The run was found dead at 18:59 (no processes; the log's last line was at 18:55 and showed no crash; cause unknown, possibly killed when the earlier session closed). With the user's yes it was restarted at 18:59:39 on 1 worker, then stopped on purpose a few minutes later at the user's request ("pause"), by PID (no `pkill` patterns). Nothing new finished in that window; in-flight jobs restart from zero (about 10 minutes each). No process of the run is left; the Showdown server was left up (swap was 0.6 GB of 2 GB at 18:59). The session-only hourly cron swap check mentioned below is gone.
+- **Resume (ask the user first):** the command below, 1 worker; about 20 hours remain (29 tuning jobs plus 20 eval seed jobs). Before starting: `sysctl vm.swapusage` and `pgrep -fl "xp.run|multiprocessing.spawn|room-battle"` (only the server's `room-battle` should show).
+
+Details of the original start follow (header said "in progress"; read it as history):
+
+### Matchup run 2 start notes (started 2026-10-29 ~15:55)
 
 The resumed run (below) finished all 18 Kairi tuning jobs, then stopped by design: Kairi's best `ent_coef` was 0.003, the grid's lowest edge (score 0.603; 0.003 to 0.01 all scored about 0.60 to 0.62, so the edge optimum may be noise), and the protocol guard (`matched_entropy`, `ProtocolError`) refused to tune Kaiser. The user approved widening both grids and a fresh folder (option 1; the config hash covers the grids, so the 18 cached jobs cannot be reused in place and the hash was NOT rewritten by hand). Config commit `5e14970`: Kairi `ent_coef` [0.001, 0.002, 0.003, 0.006, 0.01, 0.02, 0.05, 0.1]; Kaiser `rnd_coef` [0.01, 0.03, 0.1, 0.3, 0.6, 1.0, 2.0, 3.0] (8 vs 8). Old folder `results/showdown-matchup` is kept untouched as a record (18 Kairi jobs, hash `3c160660966b`); do not mix it with the new one.
 - **Run:** 48 tuning jobs plus 20 eval seed jobs, now **1 worker** (about 20 hours or more; it started with 2 workers at about 15:55, about 14 to 17 hours); log `results/showdown-matchup2/run.log`.
