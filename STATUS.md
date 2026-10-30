@@ -42,6 +42,8 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 **Run resumed (2026-10-30 09:36):** matchup run 2 restarted on 1 worker after a 2-worker try pushed swap past 5 GB within 7 minutes (killed by PID, server left up); 15-minute checks while the session is open. Command: `ALLOW_CODE_CHANGE=1 caffeinate -i scripts/run_showdown.sh configs/showdown-matchup.yaml results/showdown-matchup2 1`.
 
+**What is left (2026-10-30):** brainstorm in `docs/REMAINING_WORK.md` (loose ends, the matchup control run, the finer Kairi `alpha` sweep, optional extensions, suggested order). Nothing is approved; three decisions are listed at the end of that file.
+
 **Tuning-grid review (2026-10-30):** read the bandit tuning tables in `results/*/bandit/tuning/`. No boundary flags; neighbors of the best point are within 1 to 10% except `bandit-drift` Kaiser (`gamma=1.0` natural limit, neighbor 40% worse). In the familiar condition Kairi's `epsilon` is flat, so its grid is effectively 1-D (`alpha`) while Kaiser's is 2-D, which may favor Kaiser. Caveats are in `docs/WRITEUP.md` Limitations only (not yet in FINDINGS). A finer Kairi `alpha` sweep on tune seeds was proposed, not run, not approved.
 
 **Future work noted (2026-10-29):** `docs/FUTURE_WORK.md` has a new section on Showdown tempo and format-specific features (speed order, priority brackets, Trick Room and Tailwind durations, IV/EV, foe sheet fill, an opponent that uses field moves). Nothing built for it.
