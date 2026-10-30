@@ -45,12 +45,31 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 - Keep the scratch environment `~/xp-showdown-spike/` (Python venv with patched `poke-env`, local Node, Showdown checkout) until the user says to delete it; the Showdown server is currently stopped.
 - Keep `STATUS.md` and `RESUME.md` current after each step (the Stop hook checks the `STATUS_COMMIT` marker).
 
+## 6. Polish (read-only audit, 2026-10-30; nothing changed yet)
+
+What I checked: repo layout and ignores, README figure links, markdown links, stale phrases, CI, doc sizes. All relative links and README images resolve (0 broken), the fast suite passes, and CI is green. What I found, ordered by value for effort:
+
+| Item | Effort | Why |
+|---|---|---|
+| **Add a `LICENSE` (and optionally `CITATION.cff`)** | minutes; needs the user's choice of licence | The repo is public on GitHub with no licence, so by default nobody may reuse it. |
+| **Trim `STATUS.md` to the current state** | 30 minutes | It is 11 KB of dated paragraphs, including superseded "PAUSED" and "RESUMED" notes. Its job is a snapshot; history belongs in git or an archive section. |
+| **Trim `RESUME.md`** | 15 minutes | 16 KB, and it now says "nothing in progress" above a long pile of history. Keep the settled facts (server start, gotchas, scratch environment) and drop the finished runs. |
+| **Remove duplication in the write-ups** | 30 minutes | The matchup paragraph is pasted verbatim into both `README.md` and `docs/FINDINGS.md` (and the FINDINGS heading repeats its bold title). Keep the full text in FINDINGS and give the README a short summary plus a link. |
+| **One list of open work** | 15 minutes | Open items now sit in `STATUS.md`, `docs/FINDINGS.md` "Next", `docs/FUTURE_WORK.md` and this file. Make this file the index and link to it from the others. |
+| **Tidy the repo root** | 15 minutes | `calibration.json` and `calibration-multiroom.json` sit at the top level; moving them under `configs/` needs the commands in `CLAUDE.md` and the configs updated. Low value; skip unless the root bothers you. |
+| **Add a linter to CI** (for example `ruff`) | 20 minutes | None is installed or run today, so unused imports and similar slips are not caught. Start with a minimal rule set so it does not flood. |
+| **Look at the rendered pages** | 5 minutes of the user's time | `docs/findings.html` Chapter 7 and `degradation.png` have never been viewed. Same item as section 1. |
+| **Note that CI skips the Showdown server tests** | 5 minutes | Tests marked `showdown` need a live server and are excluded by design. Say so in the README so it is not mistaken for full coverage. |
+
+Not worth doing now: reformatting the code, renaming packages, or moving the `docs/superpowers/` plans and specs (they are the project's process record).
+
 ## Suggested order
 
 1. Browser check of the page and figure (user).
 2. Control run overnight on 1 worker, then the paired comparison and a short write-up update.
 3. Optional: finer Kairi `alpha` sweep.
-4. Tag a release and stop; leave section 4 as listed future work.
+4. Polish pass (section 6) while the control run is going; it is doc-only and light on the CPU: licence, trim STATUS and RESUME, deduplicate README and FINDINGS, one list of open work.
+5. Tag a release and stop; leave section 4 as listed future work.
 
 ## Decisions needed from the user
 
