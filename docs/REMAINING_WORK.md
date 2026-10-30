@@ -45,21 +45,21 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 - Keep the scratch environment `~/xp-showdown-spike/` (Python venv with patched `poke-env`, local Node, Showdown checkout) until the user says to delete it; the Showdown server is currently stopped.
 - Keep `STATUS.md` and `RESUME.md` current after each step (the Stop hook checks the `STATUS_COMMIT` marker).
 
-## 6. Polish (read-only audit, 2026-10-30; nothing changed yet)
+## 6. Polish (audit 2026-10-30; the doc-only items are done, the rest wait on the user)
 
 What I checked: repo layout and ignores, README figure links, markdown links, stale phrases, CI, doc sizes. All relative links and README images resolve (0 broken), the fast suite passes, and CI is green. What I found, ordered by value for effort:
 
 | Item | Effort | Why |
 |---|---|---|
 | **Add a `LICENSE` (and optionally `CITATION.cff`)** | minutes; needs the user's choice of licence | The repo is public on GitHub with no licence, so by default nobody may reuse it. |
-| **Trim `STATUS.md` to the current state** | 30 minutes | It is 11 KB of dated paragraphs, including superseded "PAUSED" and "RESUMED" notes. Its job is a snapshot; history belongs in git or an archive section. |
-| **Trim `RESUME.md`** | 15 minutes | 16 KB, and it now says "nothing in progress" above a long pile of history. Keep the settled facts (server start, gotchas, scratch environment) and drop the finished runs. |
-| **Remove duplication in the write-ups** | 30 minutes | The matchup paragraph is pasted verbatim into both `README.md` and `docs/FINDINGS.md` (and the FINDINGS heading repeats its bold title). Keep the full text in FINDINGS and give the README a short summary plus a link. |
-| **One list of open work** | 15 minutes | Open items now sit in `STATUS.md`, `docs/FINDINGS.md` "Next", `docs/FUTURE_WORK.md` and this file. Make this file the index and link to it from the others. |
+| ~~**Trim `STATUS.md` to the current state**~~ **done 2026-10-30** | 30 minutes | It is 11 KB of dated paragraphs, including superseded "PAUSED" and "RESUMED" notes. Its job is a snapshot; history belongs in git or an archive section. |
+| ~~**Trim `RESUME.md`**~~ **done 2026-10-30** | 15 minutes | 16 KB, and it now says "nothing in progress" above a long pile of history. Keep the settled facts (server start, gotchas, scratch environment) and drop the finished runs. |
+| ~~**Remove duplication in the write-ups**~~ **done 2026-10-30** | 30 minutes | The matchup paragraph is pasted verbatim into both `README.md` and `docs/FINDINGS.md` (and the FINDINGS heading repeats its bold title). Keep the full text in FINDINGS and give the README a short summary plus a link. |
+| ~~**One list of open work**~~ **done 2026-10-30** (this file is the index; STATUS, FINDINGS "Next", FUTURE_WORK and README point here) | 15 minutes | Open items now sit in `STATUS.md`, `docs/FINDINGS.md` "Next", `docs/FUTURE_WORK.md` and this file. Make this file the index and link to it from the others. |
 | **Tidy the repo root** | 15 minutes | `calibration.json` and `calibration-multiroom.json` sit at the top level; moving them under `configs/` needs the commands in `CLAUDE.md` and the configs updated. Low value; skip unless the root bothers you. |
 | **Add a linter to CI** (for example `ruff`) | 20 minutes | None is installed or run today, so unused imports and similar slips are not caught. Start with a minimal rule set so it does not flood. |
 | **Look at the rendered pages** | 5 minutes of the user's time | `docs/findings.html` Chapter 7 and `degradation.png` have never been viewed. Same item as section 1. |
-| **Note that CI skips the Showdown server tests** | 5 minutes | Tests marked `showdown` need a live server and are excluded by design. Say so in the README so it is not mistaken for full coverage. |
+| ~~**Note that CI skips the Showdown server tests**~~ **done 2026-10-30** (README, Reproducing) | 5 minutes | Tests marked `showdown` need a live server and are excluded by design. Say so in the README so it is not mistaken for full coverage. |
 
 Not worth doing now: reformatting the code, renaming packages, or moving the `docs/superpowers/` plans and specs (they are the project's process record).
 

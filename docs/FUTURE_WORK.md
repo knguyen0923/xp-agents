@@ -80,7 +80,6 @@ Context: the Showdown run ended in a tie, and a look at the observation (`xp/sho
 Learning aids for the network (pretraining on the type table, auxiliary losses) were left out of scope of the matchup spec; revisit only if the feature result is interesting.
 
 ## Also still open (smaller)
-- **Matchup control run (added 2026-10-30; the one scientific loose end):** run the original no-matchup agents on the matchup run's widened 8-value grids (Kairi `ent_coef` 0.001 to 0.1, Kaiser `rnd_coef` 0.01 to 3.0) in a fresh folder, about 8 to 10 hours on 1 worker, config only. With the matchup run it gives a 2 by 2 that separates the type inputs from the grids and retuning. Then rerun `scripts/showdown_matchup_compare.py` against it. Not approved.
-- **Finer Kairi `alpha` sweep (added 2026-10-30):** tune seeds only, to test whether Kairi's effectively one-dimensional bandit grid favours Kaiser (`docs/WRITEUP.md` Limitations). Changes the config hash, so it needs a fresh results folder. Not approved.
+- **Matchup control run and a finer Kairi `alpha` sweep (added 2026-10-30; not approved):** specified, with costs, in `docs/REMAINING_WORK.md` sections 2 and 3, which is the index of open work.
 - The protocol-legal confirmation of the 5M-step MultiRoom probe: see the section above (options and costs written down, scope undecided).
 - A deep-RL retune-at-the-shift check (size 8 DoorKey); judged low value, config-only if wanted.
