@@ -1,6 +1,10 @@
 # XP — Resume
 
-## Matchup run 2 RESUMED 2026-10-30 09:36 (1 worker; fresh folder `results/showdown-matchup2`)
+## Nothing in progress (2026-10-30 evening): matchup run 2 FINISHED and written up
+
+Matchup run 2 finished at 17:16 (48 tuning + 20 eval jobs, no errors). The report ran into `figs/showdown-matchup` and the write-up is edited in `README.md`, `docs/FINDINGS.md`, `docs/WRITEUP.md` and `docs/findings.html` (tables in `docs/spikes/showdown_matchup_results/`). **Uncommitted and unpushed until the user says so.** No process of the run is left; a Showdown server is still up. The older sections below are history.
+
+## (History) Matchup run 2 RESUMED 2026-10-30 09:36 (1 worker; fresh folder `results/showdown-matchup2`)
 
 **Update 2026-10-30:** the user approved resuming. A 2-worker try at 09:23 pushed swap from 0.4 GB to 3.6 GB in 7 minutes (6.1 GB total by 09:36), so it was killed by PID (server left up) and restarted at about 09:36 on 1 worker with the command below. 19 of 48 tuning jobs were cached at restart; the older "PAUSED" text below is history. If the process is gone, check `results/showdown-matchup2/run.log`, `sysctl vm.swapusage` and `pgrep -fl "xp.run|multiprocessing.spawn"`, then use the same command (ask the user first). Command: `ALLOW_CODE_CHANGE=1 caffeinate -i scripts/run_showdown.sh configs/showdown-matchup.yaml results/showdown-matchup2 1`.
 
