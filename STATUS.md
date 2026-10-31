@@ -4,11 +4,11 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 5ea1739 -->
+<!-- STATUS_COMMIT: 954747a -->
 
 ## Current state
 
-The project is essentially finished: every phase has a result and a write-up. The fast suite passes and CI is green on Python 3.9 and 3.12. Nothing is running; the local Showdown server is stopped.
+The project is essentially finished: every phase has a result and a write-up. The fast suite passes (246 tests). **In flight: the matchup control run** (started 2026-10-31 morning, 1 worker, about 9 to 10 hours; see `RESUME.md`). Added 2026-10-31: MIT `LICENSE`, `CITATION.cff`, `ruff` in CI (not yet confirmed green on GitHub), the finer Kairi `alpha` sweep (Kairi 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; no change to the conclusion).
 Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments). Plans: `docs/superpowers/plans/`.
 
 - **Phase 1 (bandit)**: done, including extra shifts (reversed tuning, sigma, k, drift) and ablations.
@@ -30,8 +30,8 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-Nothing is required or approved. **`docs/REMAINING_WORK.md` is the index of open work**: the matchup control run (the one scientific loose end, about 9 to 10 hours on 1 worker), a finer Kairi `alpha` sweep, a polish audit, optional extensions, a suggested order and three decisions for the user. Deferred by the user: battle-replay recording. Longer follow-ups with costs: `docs/FUTURE_WORK.md`.
+When the control run finishes: report it (`python -m xp.report --phase showdown --config configs/showdown-control.yaml --out results/showdown-control --figs figs/showdown-control`, then `scripts/showdown_matchup_compare.py`), update the write-ups, then tag `v1.0` (approved; pushing the tag needs the user's yes). The user still has to view `docs/findings.html` Chapter 7 and `figs/showdown-matchup/degradation.png`. **`docs/REMAINING_WORK.md` is the index of open work.** Deferred by the user: battle-replay recording. Longer follow-ups with costs: `docs/FUTURE_WORK.md`.
 
 ## Last updated
 
-2026-10-30 evening (polish pass: STATUS and RESUME trimmed to the current state, one index of open work; nothing running)
+2026-10-31 (control run started; licence, ruff, alpha sweep done)
