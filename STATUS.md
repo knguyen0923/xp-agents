@@ -4,11 +4,11 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 2579a7d -->
+<!-- STATUS_COMMIT: b9dca38 -->
 
 ## Current state
 
-The project is essentially finished: every phase has a result and a write-up. The fast suite passes (246 tests). **In flight: the matchup control run** (started 2026-10-31 morning, 1 worker, about 9 to 10 hours; see `RESUME.md`). Added 2026-10-31: MIT `LICENSE`, `CITATION.cff`, `ruff` in CI (not yet confirmed green on GitHub), the finer Kairi `alpha` sweep (Kairi 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; no change to the conclusion).
+The project is essentially finished: every phase has a result and a write-up. The fast suite passes (246 tests). **Matchup control run finished 2026-10-31** (see below). Added 2026-10-31: MIT `LICENSE`, `CITATION.cff`, `ruff` in CI (not yet confirmed green on GitHub), the finer Kairi `alpha` sweep (Kairi 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; no change to the conclusion).
 Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments). Plans: `docs/superpowers/plans/`.
 
 - **Phase 1 (bandit)**: done, including extra shifts (reversed tuning, sigma, k, drift) and ablations.
@@ -24,14 +24,15 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 - **Showdown** (opponent DamageHeuristic, S = 250k decisions, threshold 0.30: user decisions), two runs, both a tie:
   - *Original run* (finished 2026-10-28): training AUC Kairi 0.406 vs Kaiser 0.403, CIs overlap; Kairi reaches a 30% win rate about 5k decisions sooner but the interval includes 0. Tuned `ent_coef` 0.01, `rnd_coef` 0.03. Tables: `docs/spikes/showdown_results/`.
   - *Matchup-features run* (type-effectiveness inputs added; finished 2026-10-30): AUC Kairi 0.416 vs Kaiser 0.424, CIs overlap. Against the original run (paired by eval seed) only Kaiser's AUC rises clearly (+0.022 [+0.012, +0.031], 9 of 10 seeds), but the inputs are confounded with wider grids and retuning (Kairi `ent_coef` 0.006, Kaiser `rnd_coef` 1.0). Tables and `cross_run_paired.csv`: `docs/spikes/showdown_matchup_results/` (script `scripts/showdown_matchup_compare.py`).
+  - *Control run* (original inputs on the matchup run's 8-value grids; finished 2026-10-31): AUC Kairi 0.409 vs Kaiser 0.410, a tie (tuned Kairi `ent_coef` 0.002, Kaiser `rnd_coef` 0.03). Kaiser's gain over the original run splits into grids and retuning +0.008 [−0.004, +0.018] and inputs +0.014 [+0.008, +0.020], 9 of 10 seeds; Kairi's steps both include 0. Tables: `docs/spikes/showdown_control_results/`.
 - Write-ups: `README.md`, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`
   (built by `scripts/build_findings_html.py`; Chapter 7 covers both Showdown runs; built and syntax-checked but never viewed in a browser), `docs/FUTURE_WORK.md`.
 - GitHub: `origin` = https://github.com/knguyen0923/xp-agents (public), branch `main`. Pushes need the user's yes each time.
 
 ## Next
 
-When the control run finishes: report it (`python -m xp.report --phase showdown --config configs/showdown-control.yaml --out results/showdown-control --figs figs/showdown-control`, then `scripts/showdown_matchup_compare.py`), update the write-ups, then tag `v1.0` (approved; pushing the tag needs the user's yes). The user still has to view `docs/findings.html` Chapter 7 and `figs/showdown-matchup/degradation.png`. **`docs/REMAINING_WORK.md` is the index of open work.** Deferred by the user: battle-replay recording. Longer follow-ups with costs: `docs/FUTURE_WORK.md`.
+Nothing is in progress. Remaining: the user views `docs/findings.html` Chapter 7 (now with the control-run tables) and `figs/showdown-matchup/degradation.png` in a browser; tag `v1.0` (approved; pushing the tag needs the user's yes); pushes need the user's yes. Open optional work is indexed in `docs/REMAINING_WORK.md`. Deferred by the user: battle-replay recording.
 
 ## Last updated
 
-2026-10-31 (control run started; licence, ruff, alpha sweep done)
+2026-10-31 evening (control run finished and written up; nothing running)
