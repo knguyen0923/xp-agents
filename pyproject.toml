@@ -10,7 +10,7 @@ requires-python = ">=3.9"
 dependencies = ["numpy", "pandas", "pyyaml", "matplotlib"]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "ruff"]
 minigrid = ["torch>=2.0", "minigrid>=3.0"]
 showdown = ["poke-env==0.10.0"]
 
@@ -24,3 +24,10 @@ include = ["xp*"]
 testpaths = ["tests"]
 addopts = "-q -m 'not showdown'"
 markers = ["showdown: needs a running local Pokemon Showdown server (excluded from the default run)"]
+
+[tool.ruff]
+line-length = 200
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E9", "F"]

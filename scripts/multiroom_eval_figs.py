@@ -136,7 +136,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", default="results/multiroom")
     ap.add_argument("--out", default="figs/multiroom")
-    ap.add_argument("--calibration", default="calibration-multiroom.json")
+    ap.add_argument("--calibration", default="configs/calibration-multiroom.json")
     ap.add_argument("--probe", default="docs/spikes/multiroom_probe.csv")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)

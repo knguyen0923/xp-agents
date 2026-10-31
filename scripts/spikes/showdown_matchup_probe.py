@@ -3,13 +3,11 @@ from __future__ import annotations
 
 import time
 
-import numpy as np
 from poke_env import AccountConfiguration
 from poke_env.calc.damage_calc_gen9 import calculate_damage
 from poke_env.environment import SingleAgentWrapper
 
 from xp.showdown.env import XPDoublesEnv
-from xp.showdown.masks import action_masks
 from xp.showdown.opponents import make_opponent
 from xp.showdown.teams import PoolTeambuilder, load_pool
 

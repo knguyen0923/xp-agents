@@ -4,7 +4,6 @@ import copy
 from pathlib import Path
 
 import pytest
-import yaml
 
 pytest.importorskip("torch")
 pytest.importorskip("poke_env")

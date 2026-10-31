@@ -6,7 +6,6 @@ import pytest
 pytest.importorskip("torch")
 pytest.importorskip("minigrid")
 
-import torch  # noqa: E402
 
 from xp.minigrid.ppo import Learner  # noqa: E402
 from xp.minigrid.rnd import IntrinsicScaler  # noqa: E402

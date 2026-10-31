@@ -16,7 +16,7 @@ seeds:
   chunk: 1
   agent_seed: 0
 budget:
-  steps: 2938880  # frozen S from calibration-multiroom.json (default-entropy Kairi, tune seeds, 95% reached; cap 5M not hit)
+  steps: 2938880  # frozen S from configs/calibration-multiroom.json (default-entropy Kairi, tune seeds, 95% reached; cap 5M not hit)
   target_success: 0.95
   cap: 5000000
 eval:

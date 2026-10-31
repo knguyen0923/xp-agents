@@ -10,7 +10,7 @@ import torch
 from xp.errors import ProtocolError
 from xp.minigrid.env import FEWSHOT_EPISODE_OFFSET, TRAIN_STRIDE, VALIDATION_LAYOUT_BASE
 from xp.minigrid.ppo import Learner
-from xp.protocol.jobs import break_ties, curve_points, grid_size as _grid_size, matched_entropy, rows as _rows, run_jobs as _run_jobs, training_auc
+from xp.protocol.jobs import break_ties, curve_points, grid_size as _grid_size, matched_entropy, rows as _rows, run_jobs as _run_jobs, training_auc  # noqa: F401 (break_ties re-exported)
 from xp.protocol.jobs import tune_agent as _generic_tune_agent
 from xp.protocol.manifest import write_manifest
 from xp.protocol.phase import Phase

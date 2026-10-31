@@ -1,7 +1,7 @@
 """THROWAWAY Showdown spike ladder runner: python showdown_ladder.py <format> <battles> [team_file]. Needs a local server and poke-env (see the plan)."""
 from __future__ import annotations
 
-import asyncio, sys, time, itertools
+import asyncio, sys, time
 from poke_env import AccountConfiguration, LocalhostServerConfiguration
 from poke_env.player import RandomPlayer, MaxBasePowerPlayer
 from showdown_opponents import DamageHeuristicPlayer

@@ -1,6 +1,6 @@
 # XP — what is left (brainstorm, 2026-10-30)
 
-Every phase has a result and a write-up (bandit, MiniGrid DoorKey, MultiRoom, Showdown original and matchup runs; Crafter closed as a spike). Nothing below is required to call the project finished. Nothing here is approved; each item needs the user's yes before it starts. Longer follow-ups with fuller costs live in `docs/FUTURE_WORK.md`.
+Every phase has a result and a write-up (bandit, MiniGrid DoorKey, MultiRoom, Showdown original and matchup runs; Crafter closed as a spike). Nothing below is required to call the project finished. Approved by the user on 2026-10-31: the matchup control run (1 worker, running), the finer Kairi `alpha` sweep (done), the polish items (done), a `v1.0` tag after the control run is written up, and the browser check (the user's). Not approved: battle replays and the section 4 extensions. Each item still needs the user's yes before it starts. Longer follow-ups with fuller costs live in `docs/FUTURE_WORK.md`.
 
 Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a sprawling one.
 
@@ -26,7 +26,7 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 
 ## 3. Cheap checks on the bandit phase
 
-- **Finer Kairi `alpha` sweep, tune seeds only.** In the familiar bandit condition Kairi's `epsilon` barely changes the score, so its 49-point grid is effectively one-dimensional while Kaiser's is a genuine two-dimensional valley. A finer `alpha` sweep would show whether that favours Kaiser. Changes the config hash, so it needs a fresh results folder. Quick; no eval seeds are touched.
+- **DONE 2026-10-31: finer Kairi `alpha` sweep, tune seeds only** (best 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; result in `docs/WRITEUP.md`, script `scripts/bandit_alpha_sweep.py`, table `docs/bandit_alpha_sweep/`). Original note: In the familiar bandit condition Kairi's `epsilon` barely changes the score, so its 49-point grid is effectively one-dimensional while Kaiser's is a genuine two-dimensional valley. A finer `alpha` sweep would show whether that favours Kaiser. Changes the config hash, so it needs a fresh results folder. Quick; no eval seeds are touched.
 - **Drift condition:** Kaiser's optimum sits at the natural limit `gamma=1.0` with its nearest neighbour 40% worse. Worth confirming it holds on the eval seeds (the existing results already contain this).
 
 ## 4. Optional extensions (not recommended now)
@@ -51,13 +51,13 @@ What I checked: repo layout and ignores, README figure links, markdown links, st
 
 | Item | Effort | Why |
 |---|---|---|
-| **Add a `LICENSE` (and optionally `CITATION.cff`)** | minutes; needs the user's choice of licence | The repo is public on GitHub with no licence, so by default nobody may reuse it. |
+| ~~**Add a `LICENSE` (and optionally `CITATION.cff`)**~~ **done 2026-10-31 (MIT, Ken Nguyen)** | minutes; needs the user's choice of licence | The repo is public on GitHub with no licence, so by default nobody may reuse it. |
 | ~~**Trim `STATUS.md` to the current state**~~ **done 2026-10-30** | 30 minutes | It is 11 KB of dated paragraphs, including superseded "PAUSED" and "RESUMED" notes. Its job is a snapshot; history belongs in git or an archive section. |
 | ~~**Trim `RESUME.md`**~~ **done 2026-10-30** | 15 minutes | 16 KB, and it now says "nothing in progress" above a long pile of history. Keep the settled facts (server start, gotchas, scratch environment) and drop the finished runs. |
 | ~~**Remove duplication in the write-ups**~~ **done 2026-10-30** | 30 minutes | The matchup paragraph is pasted verbatim into both `README.md` and `docs/FINDINGS.md` (and the FINDINGS heading repeats its bold title). Keep the full text in FINDINGS and give the README a short summary plus a link. |
 | ~~**One list of open work**~~ **done 2026-10-30** (this file is the index; STATUS, FINDINGS "Next", FUTURE_WORK and README point here) | 15 minutes | Open items now sit in `STATUS.md`, `docs/FINDINGS.md` "Next", `docs/FUTURE_WORK.md` and this file. Make this file the index and link to it from the others. |
-| **Tidy the repo root** | 15 minutes | `calibration.json` and `calibration-multiroom.json` sit at the top level; moving them under `configs/` needs the commands in `CLAUDE.md` and the configs updated. Low value; skip unless the root bothers you. |
-| **Add a linter to CI** (for example `ruff`) | 20 minutes | None is installed or run today, so unused imports and similar slips are not caught. Start with a minimal rule set so it does not flood. |
+| ~~**Tidy the repo root**~~ **done 2026-10-31** (calibration JSONs now in `configs/`) | 15 minutes | `calibration.json` and `calibration-multiroom.json` sit at the top level; moving them under `configs/` needs the commands in `CLAUDE.md` and the configs updated. Low value; skip unless the root bothers you. |
+| ~~**Add a linter to CI** (for example `ruff`)~~ **done 2026-10-31** (rules E9 and F only; 8 unused imports fixed) | 20 minutes | None is installed or run today, so unused imports and similar slips are not caught. Start with a minimal rule set so it does not flood. |
 | **Look at the rendered pages** | 5 minutes of the user's time | `docs/findings.html` Chapter 7 and `degradation.png` have never been viewed. Same item as section 1. |
 | ~~**Note that CI skips the Showdown server tests**~~ **done 2026-10-30** (README, Reproducing) | 5 minutes | Tests marked `showdown` need a live server and are excluded by design. Say so in the README so it is not mistaken for full coverage. |
 

@@ -46,7 +46,7 @@ pytest                                   # fast suite, seconds; fine to run loca
 python -m xp.run --phase bandit --config configs/bandit.yaml --out results   # full run: use Colab
 python -m xp.report --phase bandit --config configs/bandit.yaml --out results --figs figs
 pip install -r requirements-minigrid.txt -e .   # Phase 2 only: adds torch + minigrid
-python -m xp.minigrid.calibrate --config configs/minigrid.yaml --out calibration.json --workers 3
+python -m xp.minigrid.calibrate --config configs/minigrid.yaml --out configs/calibration.json --workers 3
 python -m xp.run --phase minigrid --config configs/minigrid.yaml --out results --workers 3
 python -m xp.report --phase minigrid --config configs/minigrid.yaml --out results --figs figs
 ```

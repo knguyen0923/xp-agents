@@ -1,8 +1,12 @@
 # XP — Resume
 
-## Nothing in progress (2026-10-30 evening)
+## In progress (2026-10-31): matchup control run
 
-No run, build or review is in flight. The matchup run finished 2026-10-30 17:16 and is written up, committed and pushed. No process of ours is running, and the local Showdown server is stopped. Open work is indexed in `docs/REMAINING_WORK.md`; the project snapshot is `STATUS.md`. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
+Started 2026-10-31 about 9:40 AM: `ALLOW_CODE_CHANGE=1 nohup caffeinate -i scripts/run_showdown.sh configs/showdown-control.yaml results/showdown-control 1` (original no-matchup inputs, the matchup run's 8-value grids; 68 jobs, about 9 to 10 hours). Resumable: rerun the same command (same config, so the hash matches). Check progress with `ls results/showdown-control/showdown`; check swap with `sysctl vm.swapusage` (it sat at 2.5 GB of 4 GB before the start). The user approved this run on 1 worker, and said not to use 2.
+
+**Next when it finishes:** `python -m xp.report --phase showdown --config configs/showdown-control.yaml --out results/showdown-control --figs figs/showdown-control`; compare with `scripts/showdown_matchup_compare.py` (original vs control isolates the grids, control vs matchup isolates the inputs); update README, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`; then tag `v1.0` (approved; ask before pushing). If a tuned optimum lands on a grid edge the run stops with `ProtocolError`: ask the user first.
+
+Uncommitted or unpushed work: see `git status`; nothing has been pushed this session.
 
 ## Settled facts
 

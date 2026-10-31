@@ -4,7 +4,7 @@ import multiprocessing
 import sys
 import random
 from collections import deque
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 

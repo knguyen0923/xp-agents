@@ -14,4 +14,6 @@ jobs:
       - run: pip install -r requirements-minigrid.txt -e . --extra-index-url https://download.pytorch.org/whl/cpu
       - run: pip install -r requirements-showdown.txt
       - run: python -m xp.showdown.patch
+      - run: pip install ruff
+      - run: ruff check .
       - run: pytest

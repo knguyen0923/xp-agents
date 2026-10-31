@@ -149,4 +149,4 @@ python scripts/multiroom_eval_figs.py --run results/multiroom --out figs/multiro
 python scripts/multiroom_paired.py --run results/multiroom --csv docs/spikes/multiroom_confirmation.csv
 ```
 
-Files: `configs/minigrid-multiroom.yaml` (frozen S), `calibration-multiroom.json`, `results/multiroom/minigrid/` (git-ignored: tuning jobs, per-seed curves), `docs/spikes/multiroom_probe.csv`, `docs/spikes/multiroom_confirmation.csv`.
+Files: `configs/minigrid-multiroom.yaml` (frozen S), `configs/calibration-multiroom.json`, `results/multiroom/minigrid/` (git-ignored: tuning jobs, per-seed curves), `docs/spikes/multiroom_probe.csv`, `docs/spikes/multiroom_confirmation.csv`.

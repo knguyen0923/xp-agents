@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "XP: explore-vs-exploit study of Kairi (reward-driven) vs Kaiser (uncertainty-driven)"
+type: software
+authors:
+  - family-names: Nguyen
+    given-names: Ken
+license: MIT
+repository-code: "https://github.com/knguyen0923/xp-agents"

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import List
 
 import numpy as np
 from poke_env.environment import DoublesEnv
