@@ -37,7 +37,7 @@ def show(cfg: dict, out: str) -> None:
         print(f"\n{agent}: tuning {knob} ({n_tune} seeds per value)")
         a_done = 0
         for v in values:
-            d = len(glob.glob(os.path.join(jobs_dir, f"{agent}__{knob}-{v:g}__seed-*.json")))
+            d = len(glob.glob(os.path.join(jobs_dir, f"{agent}__*{knob}-{v:g}__seed-*.json")))
             a_done += d
             print(f"  {knob}={v:<6g} {bar(d, n_tune)}")
         total += len(values) * n_tune

@@ -80,6 +80,6 @@ Context: the Showdown run ended in a tie, and a look at the observation (`xp/sho
 Learning aids for the network (pretraining on the type table, auxiliary losses) were left out of scope of the matchup spec; revisit only if the feature result is interesting.
 
 ## Also still open (smaller)
-- **Matchup control run and a finer Kairi `alpha` sweep (added 2026-10-30; not approved):** specified, with costs, in `docs/REMAINING_WORK.md` sections 2 and 3, which is the index of open work.
+- **Matchup control run and a finer Kairi `alpha` sweep:** both done 2026-10-31; see `docs/REMAINING_WORK.md` sections 2 and 3.
 - The protocol-legal confirmation of the 5M-step MultiRoom probe: see the section above (options and costs written down, scope undecided).
 - A deep-RL retune-at-the-shift check (size 8 DoorKey); judged low value, config-only if wanted.

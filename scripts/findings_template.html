@@ -91,7 +91,15 @@
   <div class="grid" id="showdown-matchup-grid" data-source="showdown_matchup"></div>
   <div class="card tbl" style="margin-top:var(--cds-gap-md)"><h3>Matchup run minus original run, paired by evaluation seed</h3><p class="note">Mean over 10 seeds; interval is a 95% bootstrap that resamples seeds. Bold rows exclude zero.</p>
   <table id="cross-table"><thead><tr><th>Agent</th><th>Metric</th><th>Original</th><th>Matchup</th><th>Change</th><th>Low</th><th>High</th><th>Seeds improved</th></tr></thead><tbody></tbody></table></div>
-  <div class="verdict"><p><b>Still a tie between the agents</b> (training AUC 0.416 for Kairi against 0.424 for Kaiser, intervals overlap). Against the original run only Kaiser's training AUC rose clearly, by 0.022 with an interval from 0.012 to 0.031, and it improved on 9 of 10 seeds. Everything else moved the right way but its interval includes zero, and the gain is not reliably larger for Kaiser than for Kairi. The new inputs, the wider grids and the retuned values changed together, so the inputs are not isolated.</p></div>
+  <div class="verdict"><p><b>Still a tie between the agents</b> (training AUC 0.416 for Kairi against 0.424 for Kaiser, intervals overlap). Against the original run only Kaiser's training AUC rose clearly, by 0.022 with an interval from 0.012 to 0.031, and it improved on 9 of 10 seeds. Everything else moved the right way but its interval includes zero, and the gain is not reliably larger for Kaiser than for Kairi. The new inputs, the wider grids and the retuned values changed together, which the control run below separates.</p></div>
+
+  <h3 style="margin-top:2rem">Control run: separating the inputs from the retuning</h3>
+  <p>The original observation (no matchup inputs) was run again on the same 8-value grids, in a fresh folder. Tuned values: Kairi entropy 0.002, Kaiser bonus 0.03, both interior. Chaining the three runs gives two steps, paired by evaluation seed: wider grids and retuning alone, then adding the inputs. The agents still tie in the control run (training AUC 0.409 for Kairi against 0.410 for Kaiser).</p>
+  <div class="card tbl" style="margin-top:var(--cds-gap-md)"><h3>Step 1, grids and retuning only: original run to control run</h3><p class="note">Mean over 10 seeds; 95% bootstrap over seeds. Bold rows exclude zero.</p>
+  <table id="grids-table"><thead><tr><th>Agent</th><th>Metric</th><th>Before</th><th>After</th><th>Change</th><th>Low</th><th>High</th><th>Seeds improved</th></tr></thead><tbody></tbody></table></div>
+  <div class="card tbl" style="margin-top:var(--cds-gap-md)"><h3>Step 2, adding the inputs: control run to matchup run</h3><p class="note">Same grids in both runs. Bold rows exclude zero.</p>
+  <table id="inputs-table"><thead><tr><th>Agent</th><th>Metric</th><th>Before</th><th>After</th><th>Change</th><th>Low</th><th>High</th><th>Seeds improved</th></tr></thead><tbody></tbody></table></div>
+  <div class="verdict"><p><b>About two thirds of Kaiser's gain goes with the inputs.</b> Kaiser's training AUC rose by 0.008 from grids and retuning alone (interval −0.004 to +0.018, which includes zero), then by 0.014 when the inputs were added (0.008 to 0.020, better on 9 of 10 seeds). Kairi's AUC moved by +0.004 and then +0.007, both intervals including zero. Decisions to 30% do not follow the same pattern for Kaiser, so treat that metric as noise. Caveats: 10 seeds, nine more uncorrected cross-run comparisons, flat tuning scores (Kaiser's bonus fell from 1.0 to 0.03 on the same grid once the inputs were removed), and the pairing assumes the same seed number means the same battles.</p></div>
 
   <h2>What this does and does not show</h2>
   <h3>What it shows</h3>
@@ -99,7 +107,7 @@
     <li><b>Bandit:</b> Kaiser beats Kairi at every jump rate tested, and still does when tuned at the other end or when reward noise changes. Kairi only wins at 50 arms and at fast drift, and both wins reverse when the two agents are retuned there. Those wins came from Kaiser's frozen settings, not from exploring hurting.</li>
     <li><b>DoorKey:</b> the exploration bonus gave no measurable benefit. The small Kairi lead at sizes 8 and 12 disappears at other equally good bonus strengths and when Kaiser uses Kairi's entropy.</li>
     <li><b>MultiRoom, 4 small rooms:</b> under the full protocol Kaiser reached 95% success faster on all 10 fresh seeds, in 0.70M steps on average against 2.23M, and solved 10 of 10 seeds against 5 of 10.</li>
-    <li><b>Showdown, one opponent:</b> tuned Kairi and tuned Kaiser tie on win rate (AUC 0.406 against 0.403, intervals overlap), so the bonus is neither a win nor a cost there. With type-matchup inputs added they still tie (0.416 against 0.424); only Kaiser's AUC rose clearly against the original run.</li>
+    <li><b>Showdown, one opponent:</b> tuned Kairi and tuned Kaiser tie on win rate (AUC 0.406 against 0.403, intervals overlap), so the bonus is neither a win nor a cost there. With type-matchup inputs added they still tie (0.416 against 0.424); only Kaiser's AUC rose clearly against the original run, and a control run attributes about two thirds of that to the inputs and the rest to retuning (not distinguishable from zero).</li>
   </ul>
   <h3>What it does not show</h3>
   <ul>
@@ -445,8 +453,9 @@
   }
 
   function drawShowdown() { drawShowdownGrid('showdown-grid', 'showdown'); drawShowdownGrid('showdown-matchup-grid', 'showdown_matchup'); }
-  function drawCross() {
-    var tb = document.querySelector('#cross-table tbody'), rows = rowsOf('showdown_cross');
+  function drawCross() { drawPaired('cross-table', 'showdown_cross'); drawPaired('grids-table', 'showdown_grids'); drawPaired('inputs-table', 'showdown_inputs'); }
+  function drawPaired(tableId, source) {
+    var tb = document.querySelector('#' + tableId + ' tbody'), rows = rowsOf(source);
     tb.innerHTML = '';
     if (!rows) return;
     var names = { kairi: 'Kairi', kaiser: 'Kaiser', kaiser_minus_kairi: 'Kaiser gain minus Kairi gain' };

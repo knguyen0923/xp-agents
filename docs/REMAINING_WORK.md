@@ -12,7 +12,9 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 | Confirm CI is green on the latest push | a minute | The previous pushes passed on Python 3.9 and 3.12. |
 | Optional: tag a release (for example `v1.0`) | a minute | Only if the user wants a fixed reference point. |
 
-## 2. The one scientific gap: the matchup control run
+## 2. DONE 2026-10-31: the matchup control run
+
+**Result:** still a tie (AUC Kairi 0.409, Kaiser 0.410; tuned Kairi `ent_coef` 0.002, Kaiser `rnd_coef` 0.03). Kaiser's AUC: grids and retuning alone +0.008 [−0.004, +0.018], then the inputs +0.014 [+0.008, +0.020] (9 of 10 seeds). Written up in README, `docs/FINDINGS.md`, `docs/WRITEUP.md` and `docs/findings.html`; tables in `docs/spikes/showdown_control_results/`. The original plan follows.
 
 **Problem.** The matchup run changed three things at once: the observation (type-matchup inputs), the tuning grids (6 to 8 values each) and the tuned values (Kairi `ent_coef` 0.01 to 0.006, Kaiser `rnd_coef` 0.03 to 1.0). Against the original run, only Kaiser's training AUC rose clearly (+0.022 [+0.012, +0.031], 9 of 10 seeds). We cannot say whether the inputs or the retuning did it.
 

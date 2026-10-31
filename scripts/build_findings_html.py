@@ -80,6 +80,8 @@ def datasets(run):
         for m, f in (("auc", "curves"), ("win_eval", "curves__win_eval"), ("steps_to_30", "curves__steps_to_30"))
         for r in read(f"docs/spikes/showdown_matchup_results/{f}.csv") if r["agent"] in ("kairi", "kaiser")]
     d["showdown_cross"] = read("docs/spikes/showdown_matchup_results/cross_run_paired.csv")
+    d["showdown_grids"] = read("docs/spikes/showdown_control_results/paired_grids_orig_to_control.csv")
+    d["showdown_inputs"] = read("docs/spikes/showdown_control_results/paired_inputs_control_to_matchup.csv")
     return d
 
 
