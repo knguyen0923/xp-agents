@@ -92,3 +92,11 @@ def test_select_top_keeps_best_within_the_turn_cap():
     assert [r["file"] for r in select_top(rows, 2)] == ["long", "mid"]
     assert [r["file"] for r in select_top(rows, 2, max_turns=15)] == ["mid", "short"]
     assert select_top(rows, 2, max_turns=1) == []
+
+
+def test_select_top_wins_only_within_a_turn_range():
+    rows = [{"file": "loss", "turns": 8.0, "won": 0.0}, {"file": "draw", "turns": 8.0, "won": 0.5}, {"file": "long", "turns": 14.0, "won": 1.0},
+            {"file": "ok1", "turns": 9.0, "won": 1.0}, {"file": "short", "turns": 3.0, "won": 1.0}, {"file": "ok2", "turns": 5.0, "won": 1.0}]
+    assert [r["file"] for r in select_top(rows, 5, min_turns=5, max_turns=12, wins_only=True)] == ["ok1", "ok2"]
+    assert [r["file"] for r in select_top(rows, 1, min_turns=5, max_turns=12, wins_only=True)] == ["ok1"]
+    assert [r["file"] for r in select_top(rows, 9, min_turns=5)] == ["loss", "draw", "long", "ok1", "ok2"]

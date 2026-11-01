@@ -5,7 +5,7 @@ python scripts/record_showdown_replays.py --agent kairi --seed 100 --battles 40 
 Reads the tuned hyperparameter from the finished run (results/showdown/showdown/tuning/<agent>.json); never writes into results/.
 Needs the local Showdown server (see RESUME.md) and the torch + poke-env installs. Plan: docs/superpowers/plans/2026-10-27-showdown-battle-replays.md
 Output in <out>/<agent>_seed<S>/: policy.pt (frozen weights), all/ (every replay page of the agent's own account),
-top/ (the `--keep` best by interest score, at most `--max-turns` long if given, rank-prefixed), ranking.csv (all scored battles, best first).
+top/ (the `--keep` best by interest score, within `--min-turns` and `--max-turns` if given, wins only with `--wins-only`, rank-prefixed), ranking.csv (all scored battles, best first).
 Replay pages load the viewer from play.pokemonshowdown.com, so opening them needs internet.
 """
 from __future__ import annotations
@@ -34,6 +34,8 @@ def main(argv=None) -> None:
     ap.add_argument("--battles", type=int, default=40, help="battles to play with the frozen policy")
     ap.add_argument("--keep", type=int, default=5, help="how many of the highest-scoring replays to keep in top/")
     ap.add_argument("--max-turns", type=int, default=None, help="only keep battles of at most this many turns in top/ (ranking.csv still lists all)")
+    ap.add_argument("--min-turns", type=int, default=None, help="only keep battles of at least this many turns in top/")
+    ap.add_argument("--wins-only", action="store_true", help="only keep battles the agent won in top/")
     ap.add_argument("--config", default="configs/showdown.yaml")
     ap.add_argument("--tuned", default="results/showdown/showdown/tuning", help="folder holding <agent>.json from the finished run")
     ap.add_argument("--out", default="replays")
@@ -75,7 +77,7 @@ def main(argv=None) -> None:
         raise RuntimeError("the frozen agent changed while recording")
 
     ranking = rank_replays(all_dir, agent_prefix=agent_label)
-    kept = select_top(ranking, args.keep, args.max_turns)
+    kept = select_top(ranking, args.keep, args.max_turns, args.min_turns, args.wins_only)
     for i, row in enumerate(kept, 1):
         shutil.copy(all_dir / row["file"], top_dir / f"{i:02d}_{row['file']}")
     if ranking:

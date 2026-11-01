@@ -104,6 +104,8 @@ def rank_replays(folder, agent_suffix: str = "a", agent_prefix: Optional[str] = 
     return rows
 
 
-def select_top(rows: List[dict], keep: int, max_turns: Optional[float] = None) -> List[dict]:
-    """The first `keep` rows of a ranking (best first), skipping battles longer than `max_turns` when it is given."""
-    return [r for r in rows if max_turns is None or r["turns"] <= max_turns][:keep]
+def select_top(rows: List[dict], keep: int, max_turns: Optional[float] = None, min_turns: Optional[float] = None, wins_only: bool = False) -> List[dict]:
+    """The first `keep` rows of a ranking (best first) that last between `min_turns` and `max_turns` turns (either bound optional) and, with `wins_only`, were won."""
+    rows = [r for r in rows if (max_turns is None or r["turns"] <= max_turns) and (min_turns is None or r["turns"] >= min_turns)
+            and (not wins_only or r["won"] == 1.0)]
+    return rows[:keep]
