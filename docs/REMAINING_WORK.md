@@ -39,6 +39,7 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 | More Showdown follow-ups: tempo features, an opponent that uses Trick Room and Tailwind, ~~probing saved policies for type-chart sensitivity~~ (done 2026-11-01, see `docs/FINDINGS.md`) | 12 to 15 hours each | Each is a spec amendment plus a full run. See `docs/FUTURE_WORK.md`. |
 | Other MultiRoom room counts, more DoorKey seeds, a bigger budget | hours each | MultiRoom already confirmed Kaiser on the level it was tested on; DoorKey is closed. |
 | ~~A deep-RL retune-at-the-shift check (size 8 DoorKey)~~ **closed by decision 2026-11-01** | not config only: needs a size-8 calibration, then about 56 runs | See section 7. |
+| A deep-RL tag-team agent | Never built. The tag-team variants (`tt_fixed`, `tt_triggered`, `tt_meta`) were studied only in the bandit, where `tt_fixed` beat Kaiser only at lambda >= 0.01. A deep-RL version needs a new agent design (switching between a PPO and a PPO+RND policy) and a full phase with tuning, and the deep-RL phases found no exploration benefit to hand off between. |
 | Reopen Crafter | days, GPU | Failed its pre-set gate; reopening needs a spec amendment raising the budget S first. |
 
 ## 5. Closing out

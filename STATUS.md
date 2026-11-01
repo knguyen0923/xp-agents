@@ -33,7 +33,7 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Nothing is required. The user opened `docs/findings.html` Chapter 7 and `figs/showdown-matchup/degradation.png` in a browser on 2026-11-01 and reported no problems. Pushes need the user's yes. Optional work was closed by decision on 2026-11-01 (`docs/REMAINING_WORK.md` section 7). Battle replays: recorded 2026-11-01, four wins kept in `docs/replays/` (index `docs/replays/INDEX.md`; full output in the gitignored `replays/`).
 
-**Close-out brainstorm (2026-11-01, plan "close by decision") finished:** doc cleanup, bandit drift check (optimum confirmed) and the Showdown type-chart probe (no usable preference) are done; the size-8 DoorKey retune was timed once (543 s, training success stayed at the floor) and closed. Showdown follow-ups 1 to 3, MultiRoom other room counts, more DoorKey seeds and Crafter are closed with written reasons in `docs/REMAINING_WORK.md` section 7. `~/xp-showdown-spike/` is kept. No open work remains.
+**Close-out brainstorm (2026-11-01, plan "close by decision") finished:** doc cleanup, bandit drift check (optimum confirmed) and the Showdown type-chart probe (no usable preference) are done; the size-8 DoorKey retune was timed once (543 s, training success stayed at the floor) and closed. Showdown follow-ups 1 to 3, MultiRoom other room counts, more DoorKey seeds, a deep-RL tag-team agent and Crafter are closed with written reasons in `docs/REMAINING_WORK.md` section 7. `~/xp-showdown-spike/` is kept. No open work remains.
 
 ## Last updated
 
