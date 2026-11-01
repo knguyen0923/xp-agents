@@ -131,6 +131,10 @@ body { margin:0; background: var(--color-bg); color: var(--color-fg); font-famil
   <table id="inputs-table"><thead><tr><th>Agent</th><th>Metric</th><th>Before</th><th>After</th><th>Change</th><th>Low</th><th>High</th><th>Seeds improved</th></tr></thead><tbody></tbody></table></div>
   <div class="verdict"><p><b>About two thirds of Kaiser's gain goes with the inputs.</b> Kaiser's training AUC rose by 0.008 from grids and retuning alone (interval −0.004 to +0.018, which includes zero), then by 0.014 when the inputs were added (0.008 to 0.020, better on 9 of 10 seeds). Kairi's AUC moved by +0.004 and then +0.007, both intervals including zero. Decisions to 30% do not follow the same pattern for Kaiser, so treat that metric as noise. Caveats: 10 seeds, nine more uncorrected cross-run comparisons, flat tuning scores (Kaiser's bonus fell from 1.0 to 0.03 on the same grid once the inputs were removed), and the pairing assumes the same seed number means the same battles.</p></div>
 
+  <h3 style="margin-top:2rem">Did the original agents learn the type chart anyway?</h3>
+  <p>A post-hoc probe of the two saved original-run policies (no matchup inputs, seed 100, one each). We recorded about 1,500 real decisions per policy, then for every damaging move aimed at a foe we overwrote only that foe's type and read the policy's preference for the move. Correlation with the real type multiplier, where 1.0 would be a perfect type-chart reader: Kairi +0.042 (0.035 to 0.049), Kaiser +0.026 (0.019 to 0.032). The top-ranked foe type was super-effective in 16.6% of Kairi's decisions and 10.9% of Kaiser's, against about 13% by chance.</p>
+  <div class="verdict"><p><b>Neither original-run policy reads the type chart.</b> That fits the matchup run, where the type inputs moved Kaiser's training AUC. Caveats: one seed per agent, so this is not a Kairi against Kaiser comparison, and the intervals treat decisions as independent although decisions within a battle are correlated, so they are too narrow.</p></div>
+
   <h2>What this does and does not show</h2>
   <h3>What it shows</h3>
   <ul>
