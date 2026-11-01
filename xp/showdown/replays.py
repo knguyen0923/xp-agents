@@ -102,3 +102,8 @@ def rank_replays(folder, agent_suffix: str = "a", agent_prefix: Optional[str] = 
             rows.append({"file": path.name, **parts})
     rows.sort(key=lambda r: (-r["score"], -r["turns"], r["file"]))
     return rows
+
+
+def select_top(rows: List[dict], keep: int, max_turns: Optional[float] = None) -> List[dict]:
+    """The first `keep` rows of a ranking (best first), skipping battles longer than `max_turns` when it is given."""
+    return [r for r in rows if max_turns is None or r["turns"] <= max_turns][:keep]

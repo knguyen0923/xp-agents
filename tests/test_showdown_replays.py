@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from xp.showdown.replays import rank_replays, read_log, score_battle
+from xp.showdown.replays import rank_replays, read_log, score_battle, select_top
 
 PAGE = """<html><script type="text/plain" class="battle-log-data">
     {log}
@@ -85,3 +85,10 @@ def test_rank_by_agent_name_prefix(tmp_path):
         (tmp_path / name).write_text(page(lines), encoding="utf-8")
     rows = rank_replays(tmp_path, agent_prefix="Kaiser")
     assert sorted(r["file"] for r in rows) == ["Kaiser3x472 - battle-g-1.html", "Kaiser4x472 - battle-g-2.html"]
+
+
+def test_select_top_keeps_best_within_the_turn_cap():
+    rows = [{"file": "long", "turns": 30.0}, {"file": "mid", "turns": 9.0}, {"file": "short", "turns": 2.0}]
+    assert [r["file"] for r in select_top(rows, 2)] == ["long", "mid"]
+    assert [r["file"] for r in select_top(rows, 2, max_turns=15)] == ["mid", "short"]
+    assert select_top(rows, 2, max_turns=1) == []
