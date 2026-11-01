@@ -2,7 +2,7 @@
 
 ## Nothing in progress (2026-11-01)
 
-The matchup control run finished 2026-10-31 at 18:40 and is written up (README, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`, tables in `docs/spikes/showdown_control_results/`). No process of ours is running and the launcher stopped the Showdown server. Tag `v1.0` is done: annotated, at `27dd4af`, and already on `origin` (verified 2026-11-01). Left: the user's browser check of `docs/findings.html` Chapter 7, and confirming the `ruff` CI job is green on GitHub. Open work is indexed in `docs/REMAINING_WORK.md`; the snapshot is `STATUS.md`.
+The matchup control run finished 2026-10-31 at 18:40 and is written up (README, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`, tables in `docs/spikes/showdown_control_results/`). No process of ours is running and the launcher stopped the Showdown server. Tag `v1.0` is done: annotated, at `27dd4af`, and already on `origin` (verified 2026-11-01). The `ruff` CI job is green on GitHub. Left: the user's browser check of `docs/findings.html` Chapter 7. Open work is indexed in `docs/REMAINING_WORK.md`; the snapshot is `STATUS.md`.
 
 ## Settled facts
 

@@ -8,7 +8,7 @@ progress," read it first. Older dated notes were removed in the 2026-10-30 polis
 
 ## Current state
 
-The project is essentially finished: every phase has a result and a write-up. The fast suite passes (246 tests). **Matchup control run finished 2026-10-31** (see below). Added 2026-10-31: MIT `LICENSE`, `CITATION.cff`, `ruff` in CI (not yet confirmed green on GitHub), the finer Kairi `alpha` sweep (Kairi 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; no change to the conclusion).
+The project is essentially finished: every phase has a result and a write-up. The fast suite passes (246 tests). **Matchup control run finished 2026-10-31** (see below). Added 2026-10-31: MIT `LICENSE`, `CITATION.cff`, `ruff` in CI (green on GitHub), the finer Kairi `alpha` sweep (Kairi 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; no change to the conclusion).
 Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments). Plans: `docs/superpowers/plans/`.
 
 - **Phase 1 (bandit)**: done, including extra shifts (reversed tuning, sigma, k, drift) and ablations.
@@ -31,7 +31,7 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Remaining: the user views `docs/findings.html` Chapter 7 (now with the control-run tables) and `figs/showdown-matchup/degradation.png` in a browser; confirm the `ruff` CI job is green on GitHub; pushes need the user's yes. Open optional work is indexed in `docs/REMAINING_WORK.md`. Deferred by the user: battle-replay recording.
+Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Remaining: the user views `docs/findings.html` Chapter 7 (now with the control-run tables) and `figs/showdown-matchup/degradation.png` in a browser; pushes need the user's yes. Open optional work is indexed in `docs/REMAINING_WORK.md`. Deferred by the user: battle-replay recording.
 
 ## Last updated
 
