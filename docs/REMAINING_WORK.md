@@ -38,7 +38,7 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 | ~~Battle-replay recording~~ **done 2026-11-01** (four wins kept in `docs/replays/`, index `docs/replays/INDEX.md`) | about 1 hour | Recorded at seed 100 with retrained agents; policies are in the gitignored `replays/`. |
 | More Showdown follow-ups: tempo features, an opponent that uses Trick Room and Tailwind, ~~probing saved policies for type-chart sensitivity~~ (done 2026-11-01, see `docs/FINDINGS.md`) | 12 to 15 hours each | Each is a spec amendment plus a full run. See `docs/FUTURE_WORK.md`. |
 | Other MultiRoom room counts, more DoorKey seeds, a bigger budget | hours each | MultiRoom already confirmed Kaiser on the level it was tested on; DoorKey is closed. |
-| A deep-RL retune-at-the-shift check (size 8 DoorKey) | config only | Judged low value. |
+| ~~A deep-RL retune-at-the-shift check (size 8 DoorKey)~~ **closed by decision 2026-11-01** | not config only: needs a size-8 calibration, then about 56 runs | See section 7. |
 | Reopen Crafter | days, GPU | Failed its pre-set gate; reopening needs a spec amendment raising the budget S first. |
 
 ## 5. Closing out
@@ -64,6 +64,20 @@ What I checked: repo layout and ignores, README figure links, markdown links, st
 | ~~**Note that CI skips the Showdown server tests**~~ **done 2026-10-30** (README, Reproducing) | 5 minutes | Tests marked `showdown` need a live server and are excluded by design. Say so in the README so it is not mistaken for full coverage. |
 
 Not worth doing now: reformatting the code, renaming packages, or moving the `docs/superpowers/` plans and specs (they are the project's process record).
+
+## 7. Closed items (close-out decision, 2026-11-01)
+
+The user chose "close by decision": do the cheap checks, and close every other optional item with a written reason. Nothing below is planned. Reopening any of it needs the user's yes, and the spec-amendment items need the amendment first.
+
+**Done in the close-out:** stale notes fixed; bandit drift check (Kaiser's `gamma=1.0` optimum holds on the eval seeds, `docs/bandit_drift_check/`); Showdown type-chart probe (neither original-run policy shows a usable preference, `docs/FINDINGS.md` Phase 4).
+
+| Item | Why it is closed |
+|---|---|
+| Size-8 DoorKey retune-at-the-shift | Timed one run on 2026-11-01: Kairi at its size-6 `ent_coef` 0.03, tune seed 0, 2M steps, 543 s on one laptop process; training success never left the floor (0.00 to 0.13, ending 0.13, no steps-to-80%). A full retune (size-8 calibration, then 36 tuning and 20 eval runs, about 8.5 h on one process) would tie at the floor and let the tie-break choose. One seed and one setting, so not conclusive; the matched-entropy check already put Kairi minus Kaiser at size 8 at 0.043 [-0.053, 0.142]. |
+| Showdown tempo features, foe ability and item fill, a Trick Room and Tailwind opponent (follow-ups 1 to 3) | Each is a spec amendment plus a 12 to 15 hour run. Showdown tied in all three runs (original, matchup, control), and the probe shows the original policies do not read the type chart, so these are new questions and not gaps in the result. Described in `docs/FUTURE_WORK.md`. |
+| MultiRoom other room counts, more DoorKey seeds, a bigger budget | MultiRoom was confirmed protocol-legally on the level it was tested on (`docs/MULTIROOM_EVALUATION.md`). DoorKey is closed, and more seeds would tighten a tie without changing the story. |
+| Reopen Crafter | It failed its pre-set gate (4.52 / 4.37 against 5). Reopening needs a spec amendment raising the budget S first, plus days of GPU time. |
+| Delete `~/xp-showdown-spike/` | Kept on purpose: replays, probes and any Showdown rerun need it. Outside the repo; the user deletes it when they want. |
 
 ## Suggested order
 
