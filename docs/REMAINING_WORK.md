@@ -1,6 +1,6 @@
 # XP — what is left (brainstorm, 2026-10-30)
 
-Every phase has a result and a write-up (bandit, MiniGrid DoorKey, MultiRoom, Showdown original and matchup runs; Crafter closed as a spike). Nothing below is required to call the project finished. Approved by the user on 2026-10-31: the matchup control run (1 worker, running), the finer Kairi `alpha` sweep (done), the polish items (done), a `v1.0` tag after the control run is written up, and the browser check (the user's). Not approved: battle replays and the section 4 extensions. Each item still needs the user's yes before it starts. Longer follow-ups with fuller costs live in `docs/FUTURE_WORK.md`.
+Every phase has a result and a write-up (bandit, MiniGrid DoorKey, MultiRoom, Showdown original and matchup runs; Crafter closed as a spike). Nothing below is required to call the project finished. Approved by the user on 2026-10-31: the matchup control run (1 worker, running), the finer Kairi `alpha` sweep (done), the polish items (done), a `v1.0` tag after the control run is written up, and the browser check (the user's). Not approved: the section 4 extensions. Battle replays were approved and done on 2026-11-01. Each item still needs the user's yes before it starts. Longer follow-ups with fuller costs live in `docs/FUTURE_WORK.md`.
 
 Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a sprawling one.
 
@@ -35,7 +35,7 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 
 | Item | Cost | Why not now |
 |---|---|---|
-| Battle-replay recording (40 battles per agent, keep the top 5) | about 1 to 2 hours | The user deferred it. Retrains the agents because policies are not saved. |
+| ~~Battle-replay recording~~ **done 2026-11-01** (four wins kept in `docs/replays/`, index `docs/replays/INDEX.md`) | about 1 hour | Recorded at seed 100 with retrained agents; policies are in the gitignored `replays/`. |
 | More Showdown follow-ups: tempo features, an opponent that uses Trick Room and Tailwind, probing saved policies for type-chart sensitivity | 12 to 15 hours each | Each is a spec amendment plus a full run. See `docs/FUTURE_WORK.md`. |
 | Other MultiRoom room counts, more DoorKey seeds, a bigger budget | hours each | MultiRoom already confirmed Kaiser on the level it was tested on; DoorKey is closed. |
 | A deep-RL retune-at-the-shift check (size 8 DoorKey) | config only | Judged low value. |

@@ -31,7 +31,7 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Remaining: the user views `docs/findings.html` Chapter 7 (now with the control-run tables) and `figs/showdown-matchup/degradation.png` in a browser; pushes need the user's yes. Open optional work is indexed in `docs/REMAINING_WORK.md`. Deferred by the user: battle-replay recording.
+Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Remaining: the user views `docs/findings.html` Chapter 7 (now with the control-run tables) and `figs/showdown-matchup/degradation.png` in a browser; pushes need the user's yes. Open optional work is indexed in `docs/REMAINING_WORK.md`. Battle replays: recorded 2026-11-01, four wins kept in `docs/replays/` (index `docs/replays/INDEX.md`; full output in the gitignored `replays/`).
 
 ## Last updated
 
