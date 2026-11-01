@@ -8,9 +8,9 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 
 | Item | Cost | Notes |
 |---|---|---|
-| Look at `docs/findings.html` (Chapter 7) and `figs/showdown-matchup/degradation.png` in a browser | 5 minutes of the user's time | The page was built and its script syntax-checked, but never rendered by us (Chrome extension was not connected). The figure has a zoomed y-axis, so read the tables first. |
-| Confirm CI is green on the latest push | a minute | The previous pushes passed on Python 3.9 and 3.12. |
-| Optional: tag a release (for example `v1.0`) | a minute | Only if the user wants a fixed reference point. |
+| ~~Look at `docs/findings.html` (Chapter 7) and `figs/showdown-matchup/degradation.png` in a browser~~ **done 2026-11-01 (user, no problems)** | 5 minutes of the user's time | The figure has a zoomed y-axis, so read the tables first. |
+| ~~Confirm CI is green on the latest push~~ **done 2026-11-01** | a minute | Passed on Python 3.9 and 3.12. |
+| ~~Optional: tag a release (for example `v1.0`)~~ **done, `v1.0` pushed** | a minute | |
 
 ## 2. DONE 2026-10-31: the matchup control run
 
@@ -29,14 +29,14 @@ Guiding rule from `CLAUDE.md`: a small, finished, well-measured result beats a s
 ## 3. Cheap checks on the bandit phase
 
 - **DONE 2026-10-31: finer Kairi `alpha` sweep, tune seeds only** (best 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; result in `docs/WRITEUP.md`, script `scripts/bandit_alpha_sweep.py`, table `docs/bandit_alpha_sweep/`). Original note: In the familiar bandit condition Kairi's `epsilon` barely changes the score, so its 49-point grid is effectively one-dimensional while Kaiser's is a genuine two-dimensional valley. A finer `alpha` sweep would show whether that favours Kaiser. Changes the config hash, so it needs a fresh results folder. Quick; no eval seeds are touched.
-- **Drift condition:** Kaiser's optimum sits at the natural limit `gamma=1.0` with its nearest neighbour 40% worse. Worth confirming it holds on the eval seeds (the existing results already contain this).
+- **DONE 2026-11-01: drift condition check** (optimum confirmed on the eval seeds; neighbours worse by +0.0075 to +0.0238; `scripts/bandit_drift_check.py`, `docs/bandit_drift_check/`). Original note: Kaiser's optimum sits at the natural limit `gamma=1.0` with its nearest neighbour 40% worse. Worth confirming it holds on the eval seeds (the existing results already contain this).
 
 ## 4. Optional extensions (not recommended now)
 
 | Item | Cost | Why not now |
 |---|---|---|
 | ~~Battle-replay recording~~ **done 2026-11-01** (four wins kept in `docs/replays/`, index `docs/replays/INDEX.md`) | about 1 hour | Recorded at seed 100 with retrained agents; policies are in the gitignored `replays/`. |
-| More Showdown follow-ups: tempo features, an opponent that uses Trick Room and Tailwind, probing saved policies for type-chart sensitivity | 12 to 15 hours each | Each is a spec amendment plus a full run. See `docs/FUTURE_WORK.md`. |
+| More Showdown follow-ups: tempo features, an opponent that uses Trick Room and Tailwind, ~~probing saved policies for type-chart sensitivity~~ (done 2026-11-01, see `docs/FINDINGS.md`) | 12 to 15 hours each | Each is a spec amendment plus a full run. See `docs/FUTURE_WORK.md`. |
 | Other MultiRoom room counts, more DoorKey seeds, a bigger budget | hours each | MultiRoom already confirmed Kaiser on the level it was tested on; DoorKey is closed. |
 | A deep-RL retune-at-the-shift check (size 8 DoorKey) | config only | Judged low value. |
 | Reopen Crafter | days, GPU | Failed its pre-set gate; reopening needs a spec amendment raising the budget S first. |
@@ -60,7 +60,7 @@ What I checked: repo layout and ignores, README figure links, markdown links, st
 | ~~**One list of open work**~~ **done 2026-10-30** (this file is the index; STATUS, FINDINGS "Next", FUTURE_WORK and README point here) | 15 minutes | Open items now sit in `STATUS.md`, `docs/FINDINGS.md` "Next", `docs/FUTURE_WORK.md` and this file. Make this file the index and link to it from the others. |
 | ~~**Tidy the repo root**~~ **done 2026-10-31** (calibration JSONs now in `configs/`) | 15 minutes | `calibration.json` and `calibration-multiroom.json` sit at the top level; moving them under `configs/` needs the commands in `CLAUDE.md` and the configs updated. Low value; skip unless the root bothers you. |
 | ~~**Add a linter to CI** (for example `ruff`)~~ **done 2026-10-31** (rules E9 and F only; 8 unused imports fixed) | 20 minutes | None is installed or run today, so unused imports and similar slips are not caught. Start with a minimal rule set so it does not flood. |
-| **Look at the rendered pages** | 5 minutes of the user's time | `docs/findings.html` Chapter 7 and `degradation.png` have never been viewed. Same item as section 1. |
+| ~~**Look at the rendered pages**~~ **done 2026-11-01 (user)** | 5 minutes of the user's time | Same item as section 1. |
 | ~~**Note that CI skips the Showdown server tests**~~ **done 2026-10-30** (README, Reproducing) | 5 minutes | Tests marked `showdown` need a live server and are excluded by design. Say so in the README so it is not mistaken for full coverage. |
 
 Not worth doing now: reformatting the code, renaming packages, or moving the `docs/superpowers/` plans and specs (they are the project's process record).
@@ -73,8 +73,9 @@ Not worth doing now: reformatting the code, renaming packages, or moving the `do
 4. Polish pass (section 6) while the control run is going; it is doc-only and light on the CPU: licence, trim STATUS and RESUME, deduplicate README and FINDINGS, one list of open work.
 5. Tag a release and stop; leave section 4 as listed future work.
 
-## Decisions needed from the user
+## Decisions (all resolved)
 
-1. Run the matchup control (section 2), or keep the confound as a limitation?
-2. Do the finer Kairi `alpha` sweep (section 3), or leave it as a noted limitation?
-3. Tag a release when done?
+1. Matchup control (section 2): run, done 2026-10-31.
+2. Finer Kairi `alpha` sweep (section 3): run, done 2026-10-31.
+3. Release tag: `v1.0` done.
+4. Close-out brainstorm (2026-11-01, "close by decision"): do the bandit drift check, the policy probe (Showdown follow-up 4) and the size-8 DoorKey retune; close the other section 4 items with a written reason; keep `~/xp-showdown-spike/`. Progress is tracked in STATUS.md.

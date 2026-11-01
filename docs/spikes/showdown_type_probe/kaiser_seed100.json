@@ -1,0 +1,18 @@
+{
+  "agent": "kaiser",
+  "seed": 100,
+  "recorded_decisions": 1504,
+  "decisions_probed": 990,
+  "decisions_with_variation": 990,
+  "spearman": [
+    0.02557935847887974,
+    0.019377418330743735,
+    0.03179083693087182
+  ],
+  "top_is_super_effective": [
+    0.109503367003367,
+    0.10123466810966811,
+    0.11836829605579607
+  ],
+  "chance_super_effective": 0.1340071348404682
+}

@@ -33,6 +33,8 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Nothing is required. The user opened `docs/findings.html` Chapter 7 and `figs/showdown-matchup/degradation.png` in a browser on 2026-11-01 and reported no problems. Pushes need the user's yes. Open optional work is indexed in `docs/REMAINING_WORK.md`. Battle replays: recorded 2026-11-01, four wins kept in `docs/replays/` (index `docs/replays/INDEX.md`; full output in the gitignored `replays/`).
 
+**Close-out brainstorm (2026-11-01, approved plan "close by decision"):** (1) doc cleanup, done; (2) bandit drift check on the eval seeds, done (optimum confirmed); (3) Showdown policy probe for type-chart sensitivity, done (no usable type-chart preference in either original-run policy); (4) size-8 DoorKey retune-at-the-shift, pending (ask before launching, Colab). Closed with a written reason, not run: Showdown follow-ups 1 to 3, MultiRoom room counts and more DoorKey seeds, Crafter. `~/xp-showdown-spike/` is kept. A "Closed items" section in `docs/REMAINING_WORK.md` is still to be written.
+
 ## Last updated
 
 2026-11-01 (project done; replays recorded and pushed; CI green; nothing running)

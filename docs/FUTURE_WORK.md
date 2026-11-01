@@ -39,7 +39,7 @@ Environment facts below come from general knowledge, not from the project; items
 ## Recommendation if only one is ever built
 Crafter, with the world-area knob, because it tests the open question in the cleanest way (same agents, exploration-heavy) and reuses the protocol and agent definitions, at the cost of GPU time and a network upgrade. Showdown is the more novel test of opponent-driven nonstationarity but needs a new agent design and a heavy integration; do it only if the bandit-style "frozen tuning breaks under shift" finding is the question of interest. Either way: run the spike first, write the spec, and update `CLAUDE.md` and the design spec's non-goals before any code.
 
-## Protocol-legal confirmation of the MultiRoom RND result (discussed 2026-10-24; scope NOT yet decided, nothing built)
+## Protocol-legal confirmation of the MultiRoom RND result (discussed 2026-10-24; HISTORY: this was done 2026-10-25, see `docs/MULTIROOM_EVALUATION.md`)
 Context: the 5M-step probe (`docs/FINDINGS.md`, `docs/spikes/multiroom_probe.csv`) found RND at `rnd_coef` 0.1 reaching 95% training success in about half the steps of plain PPO at 4 MultiRoom rooms (max room size 4), faster on 5/5 seeds, mean 1.17M fewer steps [0.53M, 1.75M]. It is post-hoc.
 
 **What a protocol-legal version must fix**
@@ -76,10 +76,10 @@ Context: the Showdown run ended in a tie, and a look at the observation (`xp/sho
 1. A switchable "tempo" block: speed-order comparison per pair of actives (including Trick Room, Tailwind and priority), effect durations, move-identity flags (sets Trick Room, sets Tailwind, and similar).
 2. Fill each foe's ability and item from the team pool the env itself draws (exact, and what an Open Team Sheet would show); keep foe moves hidden until revealed.
 3. A scripted opponent that uses Trick Room and Tailwind, so field management is tested and not just available.
-4. Probe the saved policies for type-chart sensitivity (vary only the target's type and compare the policy's preference with the real multiplier); the replay recorder saves one `policy.pt` per agent.
+4. ~~Probe the saved policies for type-chart sensitivity~~ **done 2026-11-01** (no usable preference in either original-run policy; `docs/FINDINGS.md`, Phase 4). Original text: probe the saved policies for type-chart sensitivity (vary only the target's type and compare the policy's preference with the real multiplier); the replay recorder saves one `policy.pt` per agent.
 Learning aids for the network (pretraining on the type table, auxiliary losses) were left out of scope of the matchup spec; revisit only if the feature result is interesting.
 
 ## Also still open (smaller)
 - **Matchup control run and a finer Kairi `alpha` sweep:** both done 2026-10-31; see `docs/REMAINING_WORK.md` sections 2 and 3.
-- The protocol-legal confirmation of the 5M-step MultiRoom probe: see the section above (options and costs written down, scope undecided).
+- ~~The protocol-legal confirmation of the 5M-step MultiRoom probe~~ **done 2026-10-25** (spec 5.4; Kaiser reached 95% success in 0.70M vs 2.23M steps for Kairi, faster on 10/10 seeds; `docs/MULTIROOM_EVALUATION.md`). The section above is history.
 - A deep-RL retune-at-the-shift check (size 8 DoorKey); judged low value, config-only if wanted.

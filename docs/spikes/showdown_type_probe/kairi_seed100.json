@@ -1,0 +1,18 @@
+{
+  "agent": "kairi",
+  "seed": 100,
+  "recorded_decisions": 1504,
+  "decisions_probed": 991,
+  "decisions_with_variation": 991,
+  "spearman": [
+    0.04197539687574253,
+    0.03509691605850368,
+    0.048648156713044656
+  ],
+  "top_is_super_effective": [
+    0.16614170390658783,
+    0.15621294027197158,
+    0.17632862428523377
+  ],
+  "chance_super_effective": 0.1315021703265901
+}
