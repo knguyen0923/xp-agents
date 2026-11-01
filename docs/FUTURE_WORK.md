@@ -6,7 +6,7 @@
 
 **Update 2026-10-25:** both worlds are now specified as generality tests (single familiar level, no shift knob) in spec sections 5.5 (Crafter, in scope, spike first) and 5.6 (Showdown, not approved for building). The sketch below is the earlier thinking.
 
-Status: a design sketch, **not a plan and not approved for building**. `CLAUDE.md` and the design spec list both worlds as non-goals; building either needs the user to lift that rule first.
+Status (history; see the "Update" notes above and `docs/REMAINING_WORK.md` section 7 for where things ended): a design sketch, **not a plan and not approved for building** at the time of writing. `CLAUDE.md` and the design spec list both worlds as non-goals; building either needs the user to lift that rule first.
 Environment facts below come from general knowledge, not from the project; items marked (verify) must be checked against the current package docs before any spec is written.
 
 ## What lessons from the finished phases carry over

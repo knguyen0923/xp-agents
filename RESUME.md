@@ -2,7 +2,7 @@
 
 ## Nothing in progress (2026-11-01)
 
-The matchup control run finished 2026-10-31 at 18:40 and is written up (README, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`, tables in `docs/spikes/showdown_control_results/`). No process of ours is running and the launcher stopped the Showdown server. Tag `v1.0` is done: annotated, at `27dd4af`, and already on `origin` (verified 2026-11-01). The `ruff` CI job is green on GitHub. The user's browser check of `docs/findings.html` Chapter 7 is done. The project is finished; only optional work remains (`docs/REMAINING_WORK.md`). Open work is indexed in `docs/REMAINING_WORK.md`; the snapshot is `STATUS.md`.
+The matchup control run finished 2026-10-31 at 18:40 and is written up (README, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`, tables in `docs/spikes/showdown_control_results/`). No process of ours is running and the launcher stopped the Showdown server. Tag `v1.0` is done: annotated, at `27dd4af`, and already on `origin` (verified 2026-11-01). The `ruff` CI job is green on GitHub. The user's browser check of `docs/findings.html` Chapter 7 is done. The project is finished. A close-out on 2026-11-01 did the bandit drift check and the Showdown type-chart probe and closed every other optional item with a written reason (`docs/REMAINING_WORK.md` section 7); no open work remains. The snapshot is `STATUS.md`.
 
 ## Settled facts
 

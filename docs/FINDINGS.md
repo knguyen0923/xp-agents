@@ -1,6 +1,6 @@
 # XP — Findings and analysis
 
-Last updated 2026-10-24. This is the running record of what we concluded and why; the README holds the tables, `STATUS.md` the project state.
+Last updated 2026-11-01. This is the running record of what we concluded and why; the README holds the tables, `STATUS.md` the project state.
 Numbers below come from the README results sections and `results/`; every claim carries its evidence and its caveat.
 
 ## Question
@@ -144,7 +144,7 @@ Follow-up on the borderline level (4 rooms, max room size 4): 5M steps instead o
   - The metric is steps to 95% on the training curve (a recent-episodes window); wall-clock was not compared fairly (runs shared the CPU with other jobs).
   - The 0.01 failure on seed 4 shows seed-level failures matter.
 - **Update 2026-10-25: this confirmation was run (see "Protocol-legal MultiRoom confirmation" below); the line that follows is the original plan.**
-- **What a confirmation would need:** a full protocol phase on this level (familiar 4 small rooms or the nearest solvable level, a widened RND grid including values above 0.1, tune seeds disjoint from eval seeds, 10+ eval seeds, matched entropy by construction). Not run; user decision pending.
+- **What a confirmation would need:** a full protocol phase on this level (familiar 4 small rooms or the nearest solvable level, a widened RND grid including values above 0.1, tune seeds disjoint from eval seeds, 10+ eval seeds, matched entropy by construction). Done 2026-10-25 (see the confirmation below and `docs/MULTIROOM_EVALUATION.md`).
 
 
 ### Protocol-legal MultiRoom confirmation (2026-10-25; full write-up `docs/MULTIROOM_EVALUATION.md`, data `docs/spikes/multiroom_confirmation.csv`)
@@ -207,4 +207,4 @@ Question: did the original-run agents (no matchup inputs) learn the type chart a
 Plain PPO, one seed per area, 1M steps: final mean achievements per episode 4.52 (area 32) and 4.37 (area 64), below the pre-set G1 gate of 5; curves still rising. No gate passed; the user closed Crafter as a documented spike (2026-10-26), no full phase. We may reconsider Crafter in the future; the user decided against building it for now because of time, not because the question is answered. No RND result was read. See `docs/spikes/crafter_spike.md`.
 
 ## Next
-Nothing required; every phase has a result and a write-up. Crafter is closed as a documented spike (reopening needs a spec amendment raising S). What is open (optional extensions), with costs and a suggested order, is indexed in `docs/REMAINING_WORK.md`; none of it is approved. Deferred by the user: recording battles to watch in the Showdown replay viewer. Longer follow-ups: `docs/FUTURE_WORK.md`.
+Nothing required; every phase has a result and a write-up. Crafter is closed as a documented spike (reopening needs a spec amendment raising S). The optional extensions were closed by decision on 2026-11-01, each with a written reason: see `docs/REMAINING_WORK.md` section 7. Battle replays were recorded (`docs/replays/INDEX.md`). Longer follow-up sketches: `docs/FUTURE_WORK.md`.
