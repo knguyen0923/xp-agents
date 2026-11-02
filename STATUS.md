@@ -4,11 +4,11 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 83e992f -->
+<!-- STATUS_COMMIT: 546b744 -->
 
 ## Current state
 
-**The project is done (2026-11-01).** Every phase has a result and a write-up, `v1.0` is tagged and pushed, and CI is green on the latest push. The fast suite passed on 2026-11-01 with no failures. **Matchup control run finished 2026-10-31** (see below). Added 2026-10-31: MIT `LICENSE`, `CITATION.cff`, `ruff` in CI (green on GitHub), the finer Kairi `alpha` sweep (Kairi 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; no change to the conclusion).
+**The project was done on 2026-11-01; on 2026-11-02 the user reopened two future-work items (see Next).** Every phase has a result and a write-up, `v1.0` is tagged and pushed, and CI is green on the latest push. The fast suite passed on 2026-11-01 with no failures. **Matchup control run finished 2026-10-31** (see below). Added 2026-10-31: MIT `LICENSE`, `CITATION.cff`, `ruff` in CI (green on GitHub), the finer Kairi `alpha` sweep (Kairi 0.2236 vs 0.2379 on the old grid, Kaiser 0.1724; no change to the conclusion).
 Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments). Plans: `docs/superpowers/plans/`.
 
 - **Phase 1 (bandit)**: done, including extra shifts (reversed tuning, sigma, k, drift) and ablations.
@@ -31,10 +31,12 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
+**Reopened 2026-11-02 (user decision; spec stage, nothing built or running):** (1) Showdown tempo opponent, tempo feature block and friendly-fire reward penalty, two runs (matchup+penalty, then +tempo): spec `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, awaiting the user's review, then a plan; the budget cap S needs the user's approval before any RND result is read. (2) Crafter spec amendment and a Colab-ready notebook: not started, brainstorm questions pending. Smaller items stay ignored. Details in `RESUME.md`.
+
 Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Nothing is required. The user opened `docs/findings.html` Chapter 7 and `figs/showdown-matchup/degradation.png` in a browser on 2026-11-01 and reported no problems. Pushes need the user's yes. Optional work was closed by decision on 2026-11-01 (`docs/REMAINING_WORK.md` section 7). Battle replays: recorded 2026-11-01, four wins kept in `docs/replays/` (index `docs/replays/INDEX.md`; full output in the gitignored `replays/`).
 
 **Close-out brainstorm (2026-11-01, plan "close by decision") finished:** doc cleanup, bandit drift check (optimum confirmed) and the Showdown type-chart probe (no usable preference) are done; the size-8 DoorKey retune was timed once (543 s, training success stayed at the floor) and closed. Showdown follow-ups 1 to 3, MultiRoom other room counts, more DoorKey seeds, a deep-RL tag-team agent and Crafter are closed with written reasons in `docs/REMAINING_WORK.md` section 7. `~/xp-showdown-spike/` is kept. No open work remains.
 
 ## Last updated
 
-2026-11-01 (project done; replays recorded and pushed; CI green; nothing running)
+2026-11-02 (future work reopened: Showdown tempo spec committed 254ad83, Crafter pending; nothing running)
