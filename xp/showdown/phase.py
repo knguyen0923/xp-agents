@@ -32,13 +32,14 @@ def make_env(cfg: dict, stage: str, seed: int):
 
     return ShowdownVecEnv(cfg["ppo"]["n_envs"], cfg["env"]["format"], load_pool(team_dir(cfg, stage)), cfg["env"]["opponent"], seed=seed,
                           matchup=bool(cfg["env"].get("matchup", False)),
-                          friendly_fire=float(cfg["env"].get("friendly_fire", 0.0)))
+                          friendly_fire=float(cfg["env"].get("friendly_fire", 0.0)),
+                          tempo=bool(cfg["env"].get("tempo", False)))
 
 
 def build_learner(cfg: dict, agent: str, params: dict, seed: int) -> Learner:
     """Kairi = PPO (tunes its entropy coefficient); Kaiser = the same PPO plus RND (tunes the RND coefficient)."""
     learner_seed = cfg["seeds"]["agent_seed"] + int(seed)
-    dim = obs_dim(bool(cfg["env"].get("matchup", False)))
+    dim = obs_dim(bool(cfg["env"].get("matchup", False)), bool(cfg["env"].get("tempo", False)))
     if agent == "kairi":
         return Learner(cfg["ppo"], params["ent_coef"], learner_seed, obs_dim=dim)
     if agent == "kaiser":
