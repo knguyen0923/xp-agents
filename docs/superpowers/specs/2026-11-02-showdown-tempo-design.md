@@ -11,7 +11,7 @@ Four Showdown runs ended in ties (original, matchup features, control; see `docs
 1. Scope: follow-up 3 (scripted tempo opponent) and follow-up 1 (tempo block) together, plus a friendly-fire penalty. Follow-up 2 (foe ability and item from the team pool) stays deferred.
 2. Friendly fire is a reward penalty, not an action mask. The agents learn the avoidance.
 3. The penalty is estimated at choice time (not measured from the battle log), fixed, and not tuned.
-4. Teams: revise the existing tune and eval pools (not a new pool). Git keeps the old pools.
+4. Teams: revise the existing teams so every team carries a setter (not hand-written new teams). Amended during planning (see Change 4): the revised copies live in a new directory, `configs/showdown_teams_tempo/`, because editing `configs/showdown_teams/` in place would invalidate the pinned digests of the four shipped Showdown configs and a test that checks them.
 5. Two runs (below). The old `damage` opponent runs stay as history.
 
 ## Change 1: friendly-fire penalty
@@ -35,7 +35,7 @@ Floats added with the flag on:
 - **Speed order:** for each of my 2 actives against each of the 2 opposing actives, one float: +1 if mine moves first, -1 if theirs does, 0 if tied or either is absent (2 x 2 = 4). It accounts for Speed stats and boosts, Tailwind on either side, Trick Room (which reverses the order), paralysis and Choice Scarf where known. Move priority is not folded in here; the per-move priority is already in the move features, and a per-move "moves first" number would add 2 x 4 x 2 more floats, which this spec leaves out (YAGNI).
 - **Foe Speed stats:** unknown (`None`) in poke-env, so they use the matchup spec's fallback (level 50, 0 EVs, 31 IVs, neutral nature, from current `base_stats`). Own stats are real. Bias as in the matchup spec: real foes invest, so foe speed is underestimated.
 - **Remaining turns:** Trick Room (1 field) and, for each side, Tailwind and each of Reflect, Light Screen, Aurora Veil: 1 + 2 x 4 = 9 floats, each `turns_left / full_duration`, 0 when not active. Turns left = start turn + duration - current turn, using the start turns poke-env records (`battle.fields[field]` and `side_conditions[condition]` hold the turn the condition started; verified against `AbstractBattle._side_start`). Durations: Trick Room 5, Tailwind 4, screens 5. Light Clay would make a screen 8 turns; the agent's own Light Clay is known and used, the foe's is not (the foe item is hidden), so a foe screen is assumed 5 turns. Counters never go below 0. A plan test checks the off-by-one against a real server log before any run.
-- **Move flags:** `sets_trick_room`, `sets_tailwind`, `sets_screen` (Reflect, Light Screen, Aurora Veil) and `hits_ally` (target class `allAdjacent`, or a damaging move whose target class can include an ally). Added per move slot, 4 x 4 = 16 floats for each of my 2 actives and each of the opposing 2, so 4 x 16 = 64 floats. Foe slots stay zero until revealed, as for the rest of the move features.
+- **Move flags:** `sets_trick_room`, `sets_tailwind`, `sets_screen` (Reflect, Light Screen, Aurora Veil) and `hits_ally` (a damaging move whose target class is `allAdjacent`, so it hits the partner whatever target is chosen; ordinary single-target attacks are not flagged, since the agent picks their target and the penalty teaches that choice). Added per move slot, 4 x 4 = 16 floats for each of my 2 actives and each of the opposing 2, so 4 x 16 = 64 floats. Foe slots stay zero until revealed, as for the rest of the move features.
 - Both agents use the identical block, frozen before tuning (spec 5.6).
 - Tests (no server): block shape; flag off gives a vector identical to the current encoder; a faster mon reads +1, Trick Room flips it, Tailwind flips a slower mon; paralysis changes the order; remaining turns for each condition at turn t and at expiry; move flags for known moves (Trick Room, Tailwind, Reflect, Earthquake, Heat Wave, Protect).
 
@@ -54,10 +54,10 @@ Tests (no server, constructed battles): each rule fires and does not fire in the
 
 ## Change 4: team pools
 
-- Revise `configs/showdown_teams/tune` and `eval` so most teams carry at least one Trick Room, Tailwind or screen setter (today: 2 Trick Room and 2 Tailwind move slots across 3 of the teams, no screens). Both sides draw from the same pools, so the agents get setters too.
-- Every team is checked with `node pokemon-showdown validate-team gen9championsvgc2026regmc < team.txt` (rejected teams make poke-env hang silently). Pool digests in the configs (`tune_teams_sha`, `eval_teams_sha`) are re-pinned. `assert_disjoint` still applies: no shared team or file name across tune and eval.
-- A guard test requires at least a stated minimum number of teams per pool (the plan sets it) to carry a setter, so a later edit cannot quietly remove them.
-- The old pools stay reproducible from git history; old results keep their old digests.
+- Today 4 of the 6 teams carry a setter (Trick Room on `tune1` and `tune2`, Tailwind on `tune3` and `eval3`, Reflect and Light Screen on `eval3`); `eval1` and `eval2` have none, and no eval Pokemon that is legal in the format can learn Trick Room except Indeedee-F, which is not on an eval team.
+- New directory `configs/showdown_teams_tempo/{tune,eval}`: copies of the six teams with small revisions so that every team carries at least one setter and each pool has Trick Room, Tailwind and a screen (the plan lists the exact edits; each was checked with Showdown's validator). `configs/showdown_teams/` is not touched, so the four shipped configs, their pinned digests and the finished runs stay valid. Both sides draw from the same pools, so the agents get setters too.
+- Every team is checked with `node pokemon-showdown validate-team gen9championsvgc2026regmc < team.txt` (rejected teams make poke-env hang silently). The new configs pin the new pools' digests (`tune_teams_sha`, `eval_teams_sha`). `assert_disjoint` still applies: no shared team or file name across tune and eval.
+- A guard test (no server) requires every team to carry at least one setter move and each pool to cover Trick Room, Tailwind and a screen, so a later edit cannot quietly remove them.
 
 ## Experiment
 
@@ -88,4 +88,4 @@ Follow-up 2 (foe ability and item from the team pool); learning aids (pretrainin
 
 ## Files touched (expected)
 
-`xp/showdown/encode.py` (tempo block, `obs_dim`), a new `xp/showdown/tempo.py` (speed order, durations, move flags), `xp/showdown/opponents.py` (`TempoPlayer`), `xp/showdown/friendly_fire.py` (penalty) wired from `xp/showdown/vec_env.py` and `env.py`, `xp/showdown/phase.py` and configs (new keys, hashing), `configs/showdown_teams/**`, new configs, tests under `tests/`, and the write-ups after the runs.
+`xp/showdown/encode.py` (tempo block, `obs_dim`), a new `xp/showdown/tempo.py` (speed order, durations, move flags), `xp/showdown/opponents.py` (`TempoPlayer`), `xp/showdown/friendly_fire.py` (penalty) wired from `xp/showdown/vec_env.py` and `env.py`, `xp/showdown/phase.py` and configs (new keys, hashing), `configs/showdown_teams_tempo/**` (new), new configs, `xp/showdown/gate.py` (opponent and pool options), tests under `tests/`, and the write-ups after the runs.

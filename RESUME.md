@@ -2,7 +2,7 @@
 
 ## In progress (2026-11-02): reopened future work, spec stage
 
-The user reopened two items (smaller items ignored): (1) Showdown tempo opponent + tempo features + friendly-fire penalty, spec written and committed (`docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, commit 254ad83), **awaiting the user's review**; next step after approval is the implementation plan (writing-plans skill), then the gate for budget S (user approval needed before any RND result is read), then two 12 to 15 hour runs. (2) Crafter spec amendment (raise budget S) plus a Colab-ready notebook: **not started**; brainstorm questions (shift knob, budget S, network) still to ask. Nothing is running; no code has changed. Decisions made with the user are listed in the spec's "Decisions" section. The paragraph below is the 2026-11-01 state, still true for everything else.
+The user reopened two items (smaller items ignored): (1) Showdown tempo opponent + tempo features + friendly-fire penalty, spec approved (user said ok) and committed (`docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`), implementation plan written (`docs/superpowers/plans/2026-11-02-showdown-tempo.md`, 9 tasks), **awaiting the user's choice of execution mode** (subagent-driven or inline); then the gate for budget S (user approval needed before any RND result is read), then two 12 to 15 hour runs. (2) Crafter spec amendment (raise budget S) plus a Colab-ready notebook: **not started**; brainstorm questions (shift knob, budget S, network) still to ask. Nothing is running; no code has changed. Decisions made with the user are listed in the spec's "Decisions" section. The paragraph below is the 2026-11-01 state, still true for everything else.
 
 ## Nothing else in progress (2026-11-01)
 
