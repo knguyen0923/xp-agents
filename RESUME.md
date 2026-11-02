@@ -2,7 +2,7 @@
 
 ## Paused 2026-11-02: reopened future work (user paused to continue later)
 
-Nothing is running (Showdown server stopped by PID, no processes). All work is on branch `showdown-tempo` (not merged, not pushed; both need the user's yes). Smaller future-work items stay ignored.
+Nothing is running (Showdown server stopped by PID, no processes). All work is on branch `showdown-tempo`, pushed to `origin/showdown-tempo` on 2026-11-02 (up to commit 6d207f4) with the user's yes; not merged into `main` (merge or PR needs the user's yes; later pushes need it too). Smaller future-work items stay ignored.
 
 **1. Showdown tempo opponent + tempo block + friendly-fire penalty: built, reviewed, NOT yet run.**
 - Spec `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, plan `docs/superpowers/plans/2026-11-02-showdown-tempo.md`. Tasks 1-7 and 9 done and reviewed; the final whole-branch review (opus) said "ready after fixes" and its fix wave (per-battle `ff_100` in the curve, `ff_eval` result row, Struggle indexing, estimator error counts, offline order round-trip test, comment/doc fixes) is committed and re-reviewed clean (commits 711313c, 7bb89d3). Verified at the end: fast suite passes, server-marked vec and team tests pass, config hashes `showdown` fdac28308815, `showdown-tempo-base` 2083c9b9737b, `showdown-tempo` 435175fb4ec3.
