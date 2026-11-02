@@ -60,7 +60,7 @@ Context: the 5M-step probe (`docs/FINDINGS.md`, `docs/spikes/multiroom_probe.csv
 
 **Decisions still open if this is picked up:** which option; the tuning objective and tie-break (pre-declare); the RND grid values above 0.1 (for example up to 0.3 or 1.0, with equal-sized grids for both agents); number of tune seeds; the budget rule (spec's calibration vs a fixed S). Next step is the brainstorming process: scope decision, then a spec amendment, then a plan.
 
-## Showdown: tempo and format-specific features (raised 2026-10-29; nothing decided, nothing built)
+## Showdown: tempo and format-specific features (raised 2026-10-29; follow-ups 1 and 3 being built from 2026-11-02 under `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md` and `docs/superpowers/plans/2026-11-02-showdown-tempo.md`; follow-up 2 still open)
 Context: the Showdown run ended in a tie, and a look at the observation (`xp/showdown/encode.py`) showed what the agents are not told. The matchup-features build (spec `docs/superpowers/specs/2026-10-29-showdown-matchup-features-design.md`, plan `docs/superpowers/plans/2026-10-29-showdown-matchup-features.md`) covers type multipliers and damage estimates only. It does nothing for the items below.
 
 **What the agents do not see today**
@@ -77,11 +77,11 @@ Context: the Showdown run ended in a tie, and a look at the observation (`xp/sho
 2. Fill each foe's ability and item from the team pool the env itself draws (exact, and what an Open Team Sheet would show); keep foe moves hidden until revealed.
 3. **Being built (2026-11-02, same spec and plan; the `tempo` opponent).** A scripted opponent that uses Trick Room and Tailwind, so field management is tested and not just available.
 4. ~~Probe the saved policies for type-chart sensitivity~~ **done 2026-11-01** (no usable preference in either original-run policy; `docs/FINDINGS.md`, Phase 4). Original text: probe the saved policies for type-chart sensitivity (vary only the target's type and compare the policy's preference with the real multiplier); the replay recorder saves one `policy.pt` per agent.
+- **Tempo runs, launch instructions (not results):** each run needs the user's yes, and the budget cap S needs the user's approval first. Before launching, check `sysctl vm.swapusage` and `pgrep -fl "xp.run|multiprocessing.spawn|room-battle"`. Then `ALLOW_CODE_CHANGE=1 caffeinate -i scripts/run_showdown.sh configs/showdown-tempo-base.yaml results/showdown-tempo-base 1`, and the same with `configs/showdown-tempo.yaml` and `results/showdown-tempo`. Each is about 12 to 15 hours on 1 worker.
 Learning aids for the network (pretraining on the type table, auxiliary losses) were left out of scope of the matchup spec; revisit only if the feature result is interesting.
 
 ## Also still open (smaller)
-- **Crafter was reopened on 2026-11-02** (spec `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`).
-- **Tempo runs, launch instructions (not results):** each run needs the user's yes, and the budget cap S needs the user's approval first. Before launching, check `sysctl vm.swapusage` and `pgrep -fl "xp.run|multiprocessing.spawn|room-battle"`. Then `ALLOW_CODE_CHANGE=1 caffeinate -i scripts/run_showdown.sh configs/showdown-tempo-base.yaml results/showdown-tempo-base 1`, and the same with `configs/showdown-tempo.yaml` and `results/showdown-tempo`. Each is about 12 to 15 hours on 1 worker.
+- Crafter was reopened on 2026-11-02 (spec `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`).
 - **Matchup control run and a finer Kairi `alpha` sweep:** both done 2026-10-31; see `docs/REMAINING_WORK.md` sections 2 and 3.
 - ~~The protocol-legal confirmation of the 5M-step MultiRoom probe~~ **done 2026-10-25** (spec 5.4; Kaiser reached 95% success in 0.70M vs 2.23M steps for Kairi, faster on 10/10 seeds; `docs/MULTIROOM_EVALUATION.md`). The section above is history.
 - A deep-RL retune-at-the-shift check (size 8 DoorKey); judged low value, config-only if wanted.
