@@ -15,7 +15,7 @@
 - Every module starts with `from __future__ import annotations`; Python floor 3.9 (no `X | Y` types, no `match`).
 - `xp/protocol/` must never import from `xp.showdown`. Nothing in this plan touches `xp/protocol/`.
 - With `env.tempo` and `env.friendly_fire` absent, the observation, `OBS_DIM`, rewards, config hashes (`configs/showdown*.yaml` existing files, including `Phase.from_config(...).config_hash == "fdac28308815"` for `configs/showdown.yaml`) and existing tests are unchanged. Do not edit any existing config or anything under `configs/showdown_teams/`.
-- Friendly-fire constant `C = 1.0`, pinned in the config, identical for both agents, never tuned.
+- Friendly-fire constant `C = 1.0`, pinned in the config, identical for both agents, never tuned. The total penalty charged in one battle is capped at `-1.0` (`FF_BATTLE_CAP`), so a win always returns at least 0 and beats a clean loss (-1); a win through friendly fire counts as a win in every metric (user, 2026-11-02).
 - Tempo block size is 77 floats: speed order 4, remaining turns 9, move flags 64. Durations: Trick Room 5, Tailwind 4, screens 5 (8 when the agent's own team holds Light Clay; a foe screen is assumed 5).
 - Both agents get equal-sized tuning grids (8 values each: Kairi `ent_coef` [0.001, 0.002, 0.003, 0.006, 0.01, 0.02, 0.05, 0.1]; Kaiser `rnd_coef` [0.01, 0.03, 0.1, 0.3, 0.6, 1.0, 2.0, 3.0]). A tuned optimum on a grid edge stops the run (`ProtocolError`).
 - Budget cap S needs the user's approval before any RND result is read. Runs and pushes need the user's yes each time (project memory: approve each step).
@@ -49,7 +49,7 @@
 
 **Interfaces:**
 - Consumes: the move-action layout from `xp/showdown/masks.py` (action `7 + 5*k + (target + 2)` for move slot `k` 0..3 and showdown target -2..2; Mega variants add 20, covering actions 27..46); an estimator `(attacker, defender, move) -> Optional[(type multiplier, damage fraction)]` such as `xp.showdown.estimate.PokeEnvEstimator`.
-- Produces: `decode_move_action(action: int) -> Optional[Tuple[int, int]]` (move index, showdown target, or `None` for a non-move action); `hits_ally(move, target: int) -> bool`; `friendly_fire_penalty(battle, pos: int, action: int, estimator, scale: float) -> float` (zero or negative).
+- Produces: `decode_move_action(action: int) -> Optional[Tuple[int, int]]` (move index, showdown target, or `None` for a non-move action); `hits_ally(move, target: int) -> bool`; `friendly_fire_penalty(battle, pos: int, action: int, estimator, scale: float) -> float` (zero or negative); `FF_BATTLE_CAP = 1.0`; `capped_penalty(penalty: float, spent: float) -> float` (the part of `penalty` that fits under the cap, given the positive total `spent` already charged this battle).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -161,6 +161,22 @@ def test_the_scale_multiplies_and_non_move_actions_are_free():
 def test_an_estimator_that_returns_none_is_free():
     battle, _, _ = setup()
     assert FF.friendly_fire_penalty(battle, 0, act(0, -2), lambda a, d, m: None, 1.0) == 0.0
+
+
+def test_the_battle_cap_stops_the_running_total_at_minus_one():
+    assert FF.FF_BATTLE_CAP == 1.0
+    assert FF.capped_penalty(-0.4, 0.0) == pytest.approx(-0.4)
+    assert FF.capped_penalty(-0.4, 0.8) == pytest.approx(-0.2)     # only 0.2 of headroom left
+    assert FF.capped_penalty(-0.4, 1.0) == 0.0                     # already at the cap
+    assert FF.capped_penalty(-2.0, 0.0) == pytest.approx(-1.0)     # one huge decision still stops at the cap
+    assert FF.capped_penalty(0.0, 0.5) == 0.0
+
+
+def test_a_win_with_the_most_friendly_fire_still_returns_more_than_a_clean_loss():
+    spent = 0.0
+    for raw in (-2.0, -2.0, -2.0):                                 # three decisions of two full-HP hits on the partner
+        spent += -FF.capped_penalty(raw, spent)
+    assert spent == pytest.approx(1.0) and 1.0 - spent >= 0.0 > -1.0
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -188,6 +204,12 @@ FIRST_MOVE_ACTION = 7      # layout from xp/showdown/masks.py: 7 + 5 * k + (targ
 LAST_MOVE_ACTION = 46
 N_TARGETS = 5
 MEGA_OFFSET = 20
+FF_BATTLE_CAP = 1.0        # total penalty per battle never exceeds this, so a win (return >= 0) always beats a clean loss (-1)
+
+
+def capped_penalty(penalty: float, spent: float) -> float:
+    """The part of `penalty` (zero or negative) that fits under the per-battle cap, given the positive total `spent` so far."""
+    return max(penalty, -(FF_BATTLE_CAP - spent))
 
 
 def decode_move_action(action: int) -> Optional[Tuple[int, int]]:
@@ -306,12 +328,13 @@ In `xp/showdown/vec_env.py`, in `_worker`:
 1. After the existing imports inside `_worker`, add:
 ```python
     from xp.showdown.estimate import PokeEnvEstimator
-    from xp.showdown.friendly_fire import friendly_fire_penalty
+    from xp.showdown.friendly_fire import capped_penalty, friendly_fire_penalty
 ```
-2. Pass the flag to `XPDoublesEnv` is added in Task 4; for now, before the `try:` add counters:
+2. Pass the flag to `XPDoublesEnv` is added in Task 4; for now, before the `try:` add counters and the per-battle running total (also import `capped_penalty` with `friendly_fire_penalty`):
 ```python
     ff_scale = float(cfg.get("friendly_fire", 0.0))
     ff_actions, ff_total, decisions = 0, 0.0, 0
+    ff_spent = 0.0      # penalty charged so far in the current battle (positive number), for the per-battle cap
 ```
 3. In the step loop, replace
 ```python
@@ -331,11 +354,14 @@ with
                     if p < 0.0:
                         ff_actions += 1
                     penalty += p
+                penalty = capped_penalty(penalty, ff_spent)      # a win is a win: the battle total never passes -1.0
+                ff_spent += -penalty
                 ff_total += penalty
                 decisions += 1
             obs, reward, term, trunc, _ = wrapped.step(data)
             done = bool(term or trunc)
             if done:
+                ff_spent = 0.0                                   # the next battle starts from zero
                 obs, _ = wrapped.reset()
             conn.send((obs, float(reward), done, action_masks(env.battle1), float(penalty)))
 ```
@@ -380,7 +406,7 @@ def test_friendly_fire_rewards_stay_bounded_and_wins_are_tracked_separately(pool
             a0 = env.masks[:, 0].argmax(axis=1)
             a1 = np.array([restrict_second(env.masks[i, 1], a0[i]).argmax() for i in range(env.n)])
             rewards, dones = env.step(np.stack([a0, a1], axis=1))
-            assert (rewards >= -1.0 - 2.0).all() and (rewards <= 1.0).all()
+            assert (rewards >= -2.0).all() and (rewards <= 1.0).all()     # loss -1 plus at most the -1.0 battle cap
             assert (env.last_won <= dones).all()
     finally:
         env.close()

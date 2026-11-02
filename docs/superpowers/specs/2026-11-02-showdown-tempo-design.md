@@ -21,10 +21,11 @@ Four Showdown runs ended in ties (original, matchup features, control; see `docs
   - Hits the ally: the move targets an ally (showdown targets -1 or -2, taken from the action index as in `masks.py`), or its target class is `allAdjacent` (Earthquake, Surf) with the partner alive.
   - Not charged: `allAdjacentFoes` moves (Heat Wave, Rock Slide), `all`-target and status moves, zero-power moves, a fainted or absent partner. An immune partner (Flying or Levitate against Earthquake) has `f = 0` from the estimator, so it is not charged.
   - Both slots can hit the ally in one turn; the penalties add, so one decision's penalty is at least `-2 * C`.
+- A win is a win (user, 2026-11-02): winning through friendly fire still counts as a win in every metric (win rate, steps to target, AUC, held-out win rate), which come from the sparse win/loss signal and never from the penalized reward. To keep a win better than a loss in return too, the total penalty charged in one battle is capped at `-1.0` (`FF_BATTLE_CAP`, fixed, not tuned): a win with maximum friendly fire returns at least 0, a clean loss returns -1. The cap is applied per battle in the worker; the per-decision penalty is cut so the running total stops at the cap.
 - `C = 1.0` (the size of a win), pinned in the config, identical for both agents, never tuned, so it adds no tuning budget.
 - Where it lives: `calc_reward(battle)` does not see the chosen action, so the penalty is computed in the env worker (`xp/showdown/vec_env.py`), from `env.battle1` before `wrapped.step(action)`, and added to the returned reward. The sparse win/loss reward is otherwise unchanged. The penalty is added to the extrinsic reward, so Kaiser's RND bonus sits on top as before.
 - Counters: total penalty charged and number of friendly-fire actions per run are logged to stderr like the matchup estimator counters, so a run reports how often the agents hit their partner.
-- Tests (no server): ally target on a damaging move; `allAdjacent` with the partner alive; `allAdjacentFoes` is free; immune partner is free; fainted partner is free; status move is free; two charged slots sum; flag off gives zero.
+- Tests (no server): ally target on a damaging move; `allAdjacent` with the partner alive; `allAdjacentFoes` is free; immune partner is free; fainted partner is free; status move is free; two charged slots sum; the per-battle cap stops the running total at -1.0 and a later battle starts from zero; flag off gives zero; a win through friendly fire is counted as a win.
 
 ## Change 2: tempo block (switchable)
 
