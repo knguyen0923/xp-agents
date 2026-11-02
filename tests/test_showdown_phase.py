@@ -187,3 +187,17 @@ def test_build_learner_honors_the_tempo_flag():
     base = load_config(ROOT / "configs" / "showdown-tempo-base.yaml")
     assert sp.build_learner(tempo, "kairi", {"ent_coef": 0.01}, 0).obs_dim == obs_dim(True, True)
     assert sp.build_learner(base, "kairi", {"ent_coef": 0.01}, 0).obs_dim == obs_dim(True, False)
+
+
+def test_seed_job_writes_ff_eval_and_the_ff_curve_only_when_friendly_fire_is_on(tiny, monkeypatch):
+    from tests.test_showdown_ppo import FFVec
+    cfg, out, made = tiny
+    monkeypatch.setattr(sp, "make_env", lambda c, stage, seed: FFVec(c["ppo"]["n_envs"], seed))
+    cfg["env"]["friendly_fire"] = 1.0
+    sp.seed_job(cfg, out, "kairi", {"ent_coef": 0.01}, False, 100)
+    df = load_results(out, "showdown")
+    assert set(df["metric"]) == {"steps_to_30", "reached_30", "auc", "win_final", "win_eval", "ff_eval"}
+    assert df[df["metric"] == "ff_eval"]["value"].iloc[0] == pytest.approx(-0.5)
+    assert (out / "showdown" / "curves" / "kairi__seed-100__ff.json").exists()
+    sp.seed_job({**cfg, "env": {**cfg["env"], "friendly_fire": 0.0}}, out, "kaiser", {"rnd_coef": 0.1, "ent_coef": 0.01}, False, 100)
+    assert "ff_eval" not in set(load_results(out, "showdown").query("agent == 'kaiser'")["metric"])

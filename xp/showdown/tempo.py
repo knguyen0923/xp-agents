@@ -39,7 +39,7 @@ def effective_speed(mon: Pokemon, tailwind: bool, foe: bool) -> float:
     speed = base * _boost_multiplier(mon.boosts.get("spe", 0))
     if mon.status == Status.PAR:
         speed *= 0.5
-    if mon.item == "choicescarf":      # foe items are unknown, so this only ever fires for own Pokemon
+    if mon.item == "choicescarf":      # own items are known; a foe's Scarf counts once it has been revealed
         speed *= 1.5
     if tailwind:
         speed *= 2.0
@@ -72,6 +72,7 @@ def turns_block(battle) -> np.ndarray:
     turn = battle.turn
     if Field.TRICK_ROOM in battle.fields:
         out[0] = _left(battle.fields[Field.TRICK_ROOM], TRICK_ROOM_TURNS, turn)
+    # scans the whole team, so a Light Clay holder that was not brought still counts (accepted approximation)
     own_clay = any(m.item == "lightclay" for m in battle.team.values())
     for base, conditions, clay in ((1, battle.side_conditions, own_clay), (5, battle.opponent_side_conditions, False)):
         if SideCondition.TAILWIND in conditions:

@@ -128,3 +128,46 @@ def test_learner_takes_the_observation_size_and_defaults_to_obs_dim():
     big = Learner(PPO_N, 0.01, seed=0, rnd_coef=0.1, obs_dim=OBS_DIM + 72)
     assert big.obs_dim == OBS_DIM + 72
     assert big.net.body[0].in_features == OBS_DIM + 72 and big.rnd.obs_dim == OBS_DIM + 72
+
+
+class FFVec(ToyVec):
+    """A toy env that charges -0.5 on every battle and exposes the friendly-fire interface."""
+
+    def __init__(self, n, seed=0):
+        super().__init__(n, seed)
+        from xp.showdown.friendly_fire import PenaltyTally
+        self.tally = PenaltyTally(n)
+        self.tally.add(np.full(n, -9.0), np.ones(n))     # battles finished before the evaluation: must not count
+
+    def step(self, actions):
+        rewards, dones = super().step(actions)
+        self.tally.add(np.full(self.n, -0.5), dones)
+        return rewards, dones
+
+    def recent_ff(self):
+        return self.tally.recent()
+
+    def ff_totals(self):
+        return self.tally.totals()
+
+
+def test_evaluate_reports_the_friendly_fire_mean_over_only_the_evaluation_battles():
+    env = FFVec(4, seed=1)
+    learner = Learner(PPO, 0.01, 0, obs_dim=OBS_DIM)
+    res = learner.evaluate(env, 40)
+    assert res["ff_penalty"] == pytest.approx(-0.5) and res["battles"] == 40
+
+
+def test_evaluate_has_no_ff_penalty_without_the_interface():
+    assert "ff_penalty" not in Learner(PPO, 0.01, 0, obs_dim=OBS_DIM).evaluate(ToyVec(4, seed=1), 8)
+
+
+def test_train_curve_rows_carry_ff_100_only_when_the_env_supports_it():
+    ppo = {**PPO, "n_envs": 4, "n_steps": 4}
+    plain = Learner(ppo, 0.01, 0, obs_dim=OBS_DIM).train(ToyVec(4, seed=1), 64, log_every=1)["curve"]
+    assert all("ff_100" not in row for row in plain)
+    ff = Learner(ppo, 0.01, 0, obs_dim=OBS_DIM).train(FFVec(4, seed=1), 64, log_every=1)["curve"]
+    assert all("ff_100" in row for row in ff) and ff[-1]["ff_100"] == pytest.approx(-0.5 * 0 + ff[-1]["ff_100"])
+    inactive = FFVec(4, seed=1)
+    inactive.ff_active = False
+    assert all("ff_100" not in r for r in Learner(ppo, 0.01, 0, obs_dim=OBS_DIM).train(inactive, 64, log_every=1)["curve"])

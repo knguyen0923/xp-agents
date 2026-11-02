@@ -73,6 +73,7 @@ report:
   - kaiser
   extra_metrics:
     win_eval: false
+    ff_eval: false          # mean friendly-fire penalty per held-out battle (zero is best; closer to zero means less hitting the partner)
     steps_to_30: true
     reached_30: false
   xlabel: Showdown VGC doubles vs the tempo opponent (single familiar level)

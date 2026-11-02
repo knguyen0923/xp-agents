@@ -30,7 +30,7 @@ def setup(frac=0.4, mult=1.0):
         calls.append((attacker, defender, move.id))
         return (mult, frac)
 
-    return SimpleNamespace(active_pokemon=[a, b]), estimator, calls
+    return SimpleNamespace(active_pokemon=[a, b], available_moves=[list(a.moves.values()), list(b.moves.values())]), estimator, calls
 
 
 def test_decode_move_actions_and_mega_variants():
@@ -119,3 +119,33 @@ def test_a_win_with_the_most_friendly_fire_still_returns_more_than_a_clean_loss(
     for raw in (-2.0, -2.0, -2.0):                                 # three decisions of two full-HP hits on the partner
         spent += -FF.capped_penalty(raw, spent)
     assert spent == pytest.approx(1.0) and 1.0 - spent >= 0.0 > -1.0
+
+
+def test_tally_sums_per_battle_penalty_until_done_and_keeps_a_window():
+    import numpy as np
+    t = FF.PenaltyTally(2)
+    assert t.recent()[1] == 0 and t.recent()[0] != t.recent()[0]       # empty: NaN mean, zero count
+    t.add(np.array([-0.2, 0.0]), np.array([0.0, 0.0]))
+    t.add(np.array([-0.3, -0.1]), np.array([1.0, 0.0]))                # env 0 finishes with -0.5
+    t.add(np.array([-0.4, 0.0]), np.array([0.0, 1.0]))                 # env 1 finishes with -0.1; env 0 restarts at -0.4
+    assert t.recent() == (pytest.approx(-0.3), 2)
+    assert t.totals() == (pytest.approx(-0.6), 2)
+    t.add(np.array([0.0, 0.0]), np.array([1.0, 0.0]))                  # env 0: -0.4 carried over from the new battle
+    assert t.totals() == (pytest.approx(-1.0), 3)
+
+
+def test_tally_window_is_the_last_100_battles_but_totals_are_cumulative():
+    import numpy as np
+    t = FF.PenaltyTally(1)
+    for i in range(150):
+        t.add(np.array([-1.0 if i < 50 else 0.0]), np.array([1.0]))
+    assert t.recent() == (0.0, 100) and t.totals() == (pytest.approx(-50.0), 150)
+
+
+def test_struggle_or_recharge_turn_charges_the_available_move_not_the_known_one():
+    battle, est, calls = setup(frac=0.4)
+    battle.active_pokemon[0] = mon("garchomp", "earthquake", "closecombat")   # Earthquake (spreads to the partner) in slot 0
+    battle.available_moves = [[Move("struggle", gen=9)], []]
+    assert FF.friendly_fire_penalty(battle, 0, act(0, 0), est, 1.0) == 0.0 and not calls    # Struggle (untargeted) never hits the partner
+    battle.available_moves = [[Move("closecombat", gen=9), Move("earthquake", gen=9)], []]
+    assert FF.friendly_fire_penalty(battle, 0, act(0, 0), est, 1.0) == pytest.approx(-0.4)  # more than one move: the known list

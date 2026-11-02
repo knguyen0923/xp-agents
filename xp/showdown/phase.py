@@ -122,9 +122,15 @@ def seed_job(cfg: dict, out_dir, agent: str, params: dict, provisional: bool, se
         (phase.familiar, "win_final", float(run["curve"][-1]["win_rate_100"])),
         (phase.familiar, "win_eval", float(held_out["win_rate"])),
     ]
+    ff_on = cfg["env"].get("friendly_fire", 0) > 0
+    if ff_on:
+        entries.append((phase.familiar, "ff_eval", float(held_out["ff_penalty"])))
     curve_path = Path(out_dir) / phase.name / "curves" / f"{agent}__seed-{seed}.json"  # not *.csv: load_results ignores it
     curve_path.parent.mkdir(parents=True, exist_ok=True)
     atomic_write(curve_path, lambda tmp: tmp.write_text(json.dumps(curve_points(run["curve"], "win_rate_100"))))  # before the done-marker
+    if ff_on:   # the friendly-fire training curve, next to the win curve (xp/protocol's curve_points takes one key at a time)
+        ff_path = curve_path.with_name(f"{agent}__seed-{seed}__ff.json")
+        atomic_write(ff_path, lambda tmp: tmp.write_text(json.dumps(curve_points(run["curve"], "ff_100"))))
     write_seed_job(out_dir, phase, agent, seed, rows(phase, agent, seed, provisional, entries))
     print(f"[{phase.name}] seed job {agent} seed {seed} done (win_eval {held_out['win_rate']:.2f})", flush=True)
 

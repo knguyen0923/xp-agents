@@ -26,7 +26,7 @@ seeds:
 budget:
   steps: 250000                 # user decision 2026-10-26: the cap S; the learner runs 244 updates = 249,856 decisions
   target_win: 0.30              # user decision 2026-10-26: steps-to-target threshold, declared before any RND result
-  # budget S: confirm after the Task 7 gate and the user's approval before any RND result is read
+  # budget S: confirm after the Task 8 gate and the user's approval before any RND result is read
 eval:
   battles: 200                  # fresh battles with the frozen policy after training, teams from the eval pool
 ppo:
@@ -60,6 +60,7 @@ report:
   agents: [kairi, kaiser]
   extra_metrics:
     win_eval: false
+    ff_eval: false          # mean friendly-fire penalty per held-out battle (zero is best; closer to zero means less hitting the partner)
     steps_to_30: true
     reached_30: false
   xlabel: Showdown VGC doubles vs the tempo opponent (single familiar level)

@@ -37,6 +37,7 @@ def _worker(conn, cfg: dict) -> None:
     wrapped = SingleAgentWrapper(env, opponent)
     ff_scale = float(cfg.get("friendly_fire", 0.0))
     ff_actions, ff_total, decisions = 0, 0.0, 0
+    est_errors = est_calls = 0     # errors of the penalty's own estimator
     ff_spent = 0.0      # penalty charged so far in the current battle (positive number), for the per-battle cap
     try:
         obs, _ = wrapped.reset()
@@ -54,6 +55,8 @@ def _worker(conn, cfg: dict) -> None:
                     if p < 0.0:
                         ff_actions += 1
                     penalty += p
+                est_errors += est.errors
+                est_calls += est.calls
                 penalty = capped_penalty(penalty, ff_spent)      # a win is a win: the battle total never passes -1.0
                 ff_spent += -penalty
                 ff_total += penalty
@@ -70,7 +73,7 @@ def _worker(conn, cfg: dict) -> None:
         if cfg.get("matchup", False):
             print(f"matchup estimator errors={env.estimator_errors} of calls={env.estimator_calls} ({cfg['name']})", file=sys.stderr, flush=True)
         if ff_scale:
-            print(f"friendly fire actions={ff_actions} total_penalty={ff_total:.3f} decisions={decisions} ({cfg['name']})", file=sys.stderr, flush=True)
+            print(f"friendly fire actions={ff_actions} total_penalty={ff_total:.3f} decisions={decisions} estimator errors={est_errors} of calls={est_calls} ({cfg['name']})", file=sys.stderr, flush=True)
         if cfg["opponent"] == "tempo":
             print(f"tempo opponent battles={len(opponent.battles_seen)} with_setter={len(opponent.battles_with_setter)} "
                   f"setters={dict(opponent.setter_counts)} ({cfg['name']})", file=sys.stderr, flush=True)
@@ -102,6 +105,9 @@ class ShowdownVecEnv:
             self.conns.append(parent)
             self.procs.append(proc)
         self.results: deque = deque(maxlen=100)
+        from xp.showdown.friendly_fire import PenaltyTally    # lazy: it imports poke_env
+        self.ff_active = friendly_fire > 0
+        self._tally = PenaltyTally(n)
         self.last_won = np.zeros(n, dtype=np.float32)
         first = [self._recv(c) for c in self.conns]
         self.obs = np.stack([f[0] for f in first]).astype(np.float32)
@@ -118,21 +124,32 @@ class ShowdownVecEnv:
         for conn, a in zip(self.conns, actions):
             conn.send(("step", np.asarray(a, dtype=np.int64)))
         rewards, dones, obs, masks = np.zeros(self.n, np.float32), np.zeros(self.n, np.float32), [], []
-        won = np.zeros(self.n, np.float32)
+        won, penalties = np.zeros(self.n, np.float32), np.zeros(self.n, np.float32)
         for i, conn in enumerate(self.conns):
             o, r, d, m, penalty = self._recv(conn)
             rewards[i], dones[i] = r + penalty, float(d)
+            penalties[i] = penalty
             obs.append(o)
             masks.append(m)
             if d:
                 won[i] = 1.0 if r > 0 else 0.0      # from the sparse win/loss reward, before the penalty
                 self.results.append(won[i])
         self.last_won = won
+        if self.ff_active:
+            self._tally.add(penalties, dones)
         self.obs, self.masks = np.stack(obs).astype(np.float32), np.stack(masks)
         return rewards, dones
 
     def recent_stats(self) -> Tuple[float, int]:
         return (float(np.mean(self.results)) if self.results else float("nan")), len(self.results)
+
+    def recent_ff(self) -> Tuple[float, int]:
+        """(mean friendly-fire penalty per battle over the last 100 finished battles, how many); NaN and 0 when none."""
+        return self._tally.recent()
+
+    def ff_totals(self) -> Tuple[float, int]:
+        """Cumulative (sum of per-battle penalties, battles finished)."""
+        return self._tally.totals()
 
     def recent_window_full(self) -> bool:
         return len(self.results) == self.results.maxlen
