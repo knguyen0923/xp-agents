@@ -31,7 +31,8 @@ def make_env(cfg: dict, stage: str, seed: int):
     from xp.showdown.vec_env import ShowdownVecEnv
 
     return ShowdownVecEnv(cfg["ppo"]["n_envs"], cfg["env"]["format"], load_pool(team_dir(cfg, stage)), cfg["env"]["opponent"], seed=seed,
-                          matchup=bool(cfg["env"].get("matchup", False)))
+                          matchup=bool(cfg["env"].get("matchup", False)),
+                          friendly_fire=float(cfg["env"].get("friendly_fire", 0.0)))
 
 
 def build_learner(cfg: dict, agent: str, params: dict, seed: int) -> Learner:

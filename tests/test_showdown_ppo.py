@@ -5,11 +5,24 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from tests.toy_showdown import PPO, ToyVec  # noqa: E402
+from tests.toy_showdown import GOOD, PPO, ToyVec  # noqa: E402
 
 PPO_N = {**PPO, "n_envs": 16, "rnd_lr": 0.0001}
+from xp.showdown.encode import OBS_DIM  # noqa: E402
 from xp.showdown.masks import N_ACTIONS  # noqa: E402
 from xp.showdown.ppo import Learner, masked  # noqa: E402
+
+
+def test_evaluate_counts_wins_even_when_a_penalty_makes_the_reward_negative():
+    class Penalised(ToyVec):
+        def step(self, actions):
+            rewards, dones = super().step(actions)     # sets self.last_won from the sparse win/loss
+            return rewards - 3.0, dones                # a friendly-fire penalty on every decision
+
+    env = Penalised(4, seed=1)
+    learner = Learner(PPO, 0.01, 0, obs_dim=OBS_DIM)
+    learner.act = lambda obs, masks: (np.full((obs.shape[0], 2), GOOD), None, None, None)   # always the winning action
+    assert learner.evaluate(env, 40)["win_rate"] == 1.0
 
 
 def test_masked_categorical_gives_illegal_actions_zero_probability():

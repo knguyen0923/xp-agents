@@ -94,7 +94,7 @@ class Learner:
             actions, _, _, _ = self.act(env.obs, env.masks)
             rewards, dones = env.step(actions)
             finished += int(dones.sum())
-            wins += int(((rewards > 0) & (dones == 1)).sum())
+            wins += int(env.last_won.sum())     # not `rewards > 0`: a friendly-fire penalty can push a win's reward below 0
         return {"win_rate": wins / finished, "battles": finished}
 
     def act(self, obs: np.ndarray, masks: np.ndarray):

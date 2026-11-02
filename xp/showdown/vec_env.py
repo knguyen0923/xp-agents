@@ -21,6 +21,8 @@ def _worker(conn, cfg: dict) -> None:
     from poke_env.environment import DoublesEnv, SingleAgentWrapper
 
     from xp.showdown.env import XPDoublesEnv
+    from xp.showdown.estimate import PokeEnvEstimator
+    from xp.showdown.friendly_fire import capped_penalty, friendly_fire_penalty
     from xp.showdown.masks import action_masks
     from xp.showdown.opponents import make_opponent
     from xp.showdown.teams import PoolTeambuilder
@@ -32,6 +34,9 @@ def _worker(conn, cfg: dict) -> None:
         account_configuration2=AccountConfiguration(cfg.get("opp_account") or cfg["name"] + "b", None),
     )
     wrapped = SingleAgentWrapper(env, make_opponent(cfg["opponent"], cfg["battle_format"]))
+    ff_scale = float(cfg.get("friendly_fire", 0.0))
+    ff_actions, ff_total, decisions = 0, 0.0, 0
+    ff_spent = 0.0      # penalty charged so far in the current battle (positive number), for the per-battle cap
     try:
         obs, _ = wrapped.reset()
         conn.send((obs, action_masks(env.battle1)))
@@ -40,16 +45,31 @@ def _worker(conn, cfg: dict) -> None:
             if cmd == "close":
                 break
             DoublesEnv.action_to_order(np.asarray(data, dtype=np.int64), env.battle1, strict=True)  # fail loudly on a mask bug
+            penalty = 0.0
+            if ff_scale:     # from the battle state the agent saw, before the step moves the battle on
+                est = PokeEnvEstimator(env.battle1)
+                for pos in range(2):
+                    p = friendly_fire_penalty(env.battle1, pos, int(data[pos]), est, ff_scale)
+                    if p < 0.0:
+                        ff_actions += 1
+                    penalty += p
+                penalty = capped_penalty(penalty, ff_spent)      # a win is a win: the battle total never passes -1.0
+                ff_spent += -penalty
+                ff_total += penalty
+                decisions += 1
             obs, reward, term, trunc, _ = wrapped.step(data)
             done = bool(term or trunc)
             if done:
+                ff_spent = 0.0                                   # the next battle starts from zero
                 obs, _ = wrapped.reset()
-            conn.send((obs, float(reward), done, action_masks(env.battle1)))
+            conn.send((obs, float(reward), done, action_masks(env.battle1), float(penalty)))
     except BaseException as e:  # report instead of letting the parent wait forever
         conn.send(("error", repr(e)))
     finally:
         if cfg.get("matchup", False):
             print(f"matchup estimator errors={env.estimator_errors} of calls={env.estimator_calls} ({cfg['name']})", file=sys.stderr, flush=True)
+        if ff_scale:
+            print(f"friendly fire actions={ff_actions} total_penalty={ff_total:.3f} decisions={decisions} ({cfg['name']})", file=sys.stderr, flush=True)
         wrapped.close()
 
 
@@ -61,7 +81,8 @@ class ShowdownVecEnv:
     """
 
     def __init__(self, n: int, battle_format: str, teams: Dict[str, str], opponent: str, seed: int, name: str = "v",
-                 save_replays: Optional[str] = None, account_labels: Optional[Tuple[str, str]] = None, matchup: bool = False):
+                 save_replays: Optional[str] = None, account_labels: Optional[Tuple[str, str]] = None, matchup: bool = False,
+                 friendly_fire: float = 0.0):
         ctx = multiprocessing.get_context("spawn")
         self.n = n
         suffix = "%05d" % random.SystemRandom().randrange(10**5)  # fresh per run, NOT from the seed: stale accounts/battles from an old run block reused names
@@ -71,12 +92,13 @@ class ShowdownVecEnv:
             agent_account, opp_account = account_names(account_labels, i, suffix[:3]) if account_labels else (None, None)
             cfg = {"battle_format": battle_format, "teams": teams, "opponent": opponent, "team_seed": seed * 1000 + i,
                    "name": f"{name}{suffix}{i}"[:16], "save_replays": save_replays,
-                   "agent_account": agent_account, "opp_account": opp_account, "matchup": matchup}
+                   "agent_account": agent_account, "opp_account": opp_account, "matchup": matchup, "friendly_fire": friendly_fire}
             proc = ctx.Process(target=_worker, args=(child, cfg), daemon=True)
             proc.start()
             self.conns.append(parent)
             self.procs.append(proc)
         self.results: deque = deque(maxlen=100)
+        self.last_won = np.zeros(n, dtype=np.float32)
         first = [self._recv(c) for c in self.conns]
         self.obs = np.stack([f[0] for f in first]).astype(np.float32)
         self.masks = np.stack([f[1] for f in first])
@@ -92,13 +114,16 @@ class ShowdownVecEnv:
         for conn, a in zip(self.conns, actions):
             conn.send(("step", np.asarray(a, dtype=np.int64)))
         rewards, dones, obs, masks = np.zeros(self.n, np.float32), np.zeros(self.n, np.float32), [], []
+        won = np.zeros(self.n, np.float32)
         for i, conn in enumerate(self.conns):
-            o, r, d, m = self._recv(conn)
-            rewards[i], dones[i] = r, float(d)
+            o, r, d, m, penalty = self._recv(conn)
+            rewards[i], dones[i] = r + penalty, float(d)
             obs.append(o)
             masks.append(m)
             if d:
-                self.results.append(1.0 if r > 0 else 0.0)
+                won[i] = 1.0 if r > 0 else 0.0      # from the sparse win/loss reward, before the penalty
+                self.results.append(won[i])
+        self.last_won = won
         self.obs, self.masks = np.stack(obs).astype(np.float32), np.stack(masks)
         return rewards, dones
 
