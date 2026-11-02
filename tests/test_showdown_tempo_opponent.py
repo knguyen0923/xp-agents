@@ -135,3 +135,39 @@ def test_counters_record_what_was_set(player, monkeypatch):
     monkeypatch.setattr(O.DamageHeuristicPlayer, "choose_move", lambda self, battle: parent)
     player.choose_move(b)
     assert player.setter_counts["trickroom"] == 1 and player.battles_with_setter == {"b1"} and player.battles_seen == {"b1"}
+
+
+def real_battle(setter, mine=(80, 80), **kw):
+    """A real poke-env DoubleBattle (no server): our slot 0 holds `setter` and Close Combat, slot 1 only Close Combat."""
+    import logging
+    from poke_env.battle import DoubleBattle
+
+    b = DoubleBattle("battle-gen9vgc-1", "opp", logging.getLogger("t"), gen=9)
+    b.player_role = "p1"
+    a0, a1 = mon("garchomp", setter, "closecombat", spe=mine[0]), mon("rillaboom", "closecombat", spe=mine[1])
+    f0, f1 = mon("heatran", *kw.get("foe_moves", ("flamethrower",))), mon("heatran", *kw.get("foe_moves", ("flamethrower",)))
+    b._team = {"p1: a": a0, "p1: b": a1}
+    b._opponent_team = {"p2: a": f0, "p2: b": f1}
+    for m in (a0, a1, f0, f1):
+        m._active = True          # poke-env's active_pokemon ignores a Pokemon that is not flagged active
+    b._active_pokemon = {"p1a": a0, "p1b": a1}
+    b._opponent_active_pokemon = {"p2a": f0, "p2b": f1}
+    b._available_moves = [list(a0.moves.values()), list(a1.moves.values())]
+    b._available_switches = [[], []]
+    b._force_switch = [False, False]
+    b._trapped = [False, False]
+    return b
+
+
+@pytest.mark.parametrize("setter,kw", [("trickroom", {}), ("tailwind", {"mine": (200, 200)}),
+                                        ("reflect", {"foe_moves": ("closecombat",)})])
+def test_tempo_orders_survive_the_strict_poke_env_round_trip(player, setter, kw):
+    from poke_env.environment import DoublesEnv
+
+    b = real_battle(setter, **kw)
+    order = player.choose_move(b)                      # the real damage-heuristic parent runs too
+    assert order.first_order.order.id == setter
+    action = DoublesEnv.order_to_action(order, b, strict=True)
+    decoded = DoublesEnv.action_to_order(action, b, strict=True)      # a strict decode of an invalid order would raise
+    assert decoded.first_order.order.id == setter and decoded.first_order.move_target == 0
+    assert decoded.message == order.message and not decoded.message.startswith("/choose default")

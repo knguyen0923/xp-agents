@@ -117,5 +117,7 @@ def test_friendly_fire_rewards_stay_bounded_and_wins_are_tracked_separately(pool
             rewards, dones = env.step(np.stack([a0, a1], axis=1))
             assert (rewards >= -2.0).all() and (rewards <= 1.0).all()     # loss -1 plus at most the -1.0 battle cap
             assert (env.last_won <= dones).all()
+            assert (rewards[env.last_won == 1] >= 0.0).all()                          # the per-battle cap: a win never returns below 0
+            assert (rewards[(dones == 1) & (env.last_won == 0)] <= -1.0).all()        # a loss is -1 plus a penalty of at most 0
     finally:
         env.close()
