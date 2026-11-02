@@ -1,6 +1,10 @@
 # XP — Resume
 
-## Nothing in progress (2026-11-01)
+## In progress (2026-11-02): reopened future work, spec stage
+
+The user reopened two items (smaller items ignored): (1) Showdown tempo opponent + tempo features + friendly-fire penalty, spec written and committed (`docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, commit 254ad83), **awaiting the user's review**; next step after approval is the implementation plan (writing-plans skill), then the gate for budget S (user approval needed before any RND result is read), then two 12 to 15 hour runs. (2) Crafter spec amendment (raise budget S) plus a Colab-ready notebook: **not started**; brainstorm questions (shift knob, budget S, network) still to ask. Nothing is running; no code has changed. Decisions made with the user are listed in the spec's "Decisions" section. The paragraph below is the 2026-11-01 state, still true for everything else.
+
+## Nothing else in progress (2026-11-01)
 
 The matchup control run finished 2026-10-31 at 18:40 and is written up (README, `docs/FINDINGS.md`, `docs/WRITEUP.md`, `docs/findings.html`, tables in `docs/spikes/showdown_control_results/`). No process of ours is running and the launcher stopped the Showdown server. Tag `v1.0` is done: annotated, at `27dd4af`, and already on `origin` (verified 2026-11-01). The `ruff` CI job is green on GitHub. The user's browser check of `docs/findings.html` Chapter 7 is done. The project is finished. A close-out on 2026-11-01 did the bandit drift check and the Showdown type-chart probe and closed every other optional item with a written reason (`docs/REMAINING_WORK.md` section 7); no open work remains. The snapshot is `STATUS.md`.
 
