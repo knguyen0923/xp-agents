@@ -17,6 +17,7 @@ MON_DIM = 3 + len(STATUSES) + len(BOOSTS) + len(TYPES) + len(STATS) + 1 + N_MOVE
 FIELD_DIM = len(Weather) + len(Field) + 2 * len(SideCondition) + 1
 OBS_DIM = 2 * SLOTS * MON_DIM + FIELD_DIM
 MATCHUP_DIM = 2 * (2 * N_MOVES * 2) * 2 + 2 * N_MOVES   # outgoing 32 + incoming 32 + 8 revealed flags = 72
+TEMPO_DIM = 4 + 9 + 4 * N_MOVES * 4                # speed order 4 + remaining turns 9 + 16 move flags for each of 4 active Pokemon = 77
 
 
 def obs_dim(matchup: bool = False) -> int:
