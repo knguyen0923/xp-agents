@@ -32,7 +32,7 @@ def measure(learner: Learner, env, steps: int, target: float = 0.8, log_every: i
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description="Train plain PPO against one scripted rung and report throughput and win rate.")
-    parser.add_argument("--opponent", required=True, choices=["random", "maxbp", "damage"])
+    parser.add_argument("--opponent", required=True, choices=["random", "maxbp", "damage", "tempo"])
     parser.add_argument("--steps", type=int, default=100_000)
     parser.add_argument("--n-envs", type=int, default=DEFAULT_PPO["n_envs"])
     parser.add_argument("--ent-coef", type=float, default=0.01)

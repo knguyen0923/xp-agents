@@ -33,7 +33,8 @@ def _worker(conn, cfg: dict) -> None:
         account_configuration1=AccountConfiguration(cfg.get("agent_account") or cfg["name"] + "a", None),
         account_configuration2=AccountConfiguration(cfg.get("opp_account") or cfg["name"] + "b", None),
     )
-    wrapped = SingleAgentWrapper(env, make_opponent(cfg["opponent"], cfg["battle_format"]))
+    opponent = make_opponent(cfg["opponent"], cfg["battle_format"])
+    wrapped = SingleAgentWrapper(env, opponent)
     ff_scale = float(cfg.get("friendly_fire", 0.0))
     ff_actions, ff_total, decisions = 0, 0.0, 0
     ff_spent = 0.0      # penalty charged so far in the current battle (positive number), for the per-battle cap
@@ -70,6 +71,9 @@ def _worker(conn, cfg: dict) -> None:
             print(f"matchup estimator errors={env.estimator_errors} of calls={env.estimator_calls} ({cfg['name']})", file=sys.stderr, flush=True)
         if ff_scale:
             print(f"friendly fire actions={ff_actions} total_penalty={ff_total:.3f} decisions={decisions} ({cfg['name']})", file=sys.stderr, flush=True)
+        if cfg["opponent"] == "tempo":
+            print(f"tempo opponent battles={len(opponent.battles_seen)} with_setter={len(opponent.battles_with_setter)} "
+                  f"setters={dict(opponent.setter_counts)} ({cfg['name']})", file=sys.stderr, flush=True)
         wrapped.close()
 
 
