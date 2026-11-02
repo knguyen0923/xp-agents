@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 7973683 -->
+<!-- STATUS_COMMIT: 5b169c7 -->
 
 ## Current state
 
@@ -39,4 +39,4 @@ As of 2026-11-01 nothing was in progress (superseded by the 2026-11-02 reopening
 
 ## Last updated
 
-2026-11-02 (future work reopened: Showdown tempo plan executing on branch showdown-tempo (Tasks 1 to 7 done), Crafter reopened: spec written and committed, awaiting the user's review; nothing running)
+2026-11-02 evening (Showdown tempo built, smoke and gate passed, budget cap S=250,000 and threshold 0.30 approved by the user; run 1 `showdown-tempo-base` PAUSED at 10 of 68 seed jobs, resume steps in RESUME.md; Crafter spec awaits the user's review; nothing running)
