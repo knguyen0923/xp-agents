@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 5ca7e40 -->
+<!-- STATUS_COMMIT: 7bb89d3 -->
 
 ## Current state
 
@@ -31,7 +31,7 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-**Reopened 2026-11-02 (user decision; Showdown tempo built on branch `showdown-tempo`, local smoke passed, final-review fixes in progress, full runs not started; Crafter spec only):** (1) Showdown tempo opponent, tempo feature block and friendly-fire reward penalty, two runs (matchup+penalty, then +tempo): spec `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md` (approved), plan `docs/superpowers/plans/2026-11-02-showdown-tempo.md` written, executing via subagents on branch `showdown-tempo` (Tasks 1 to 7 of 9 reviewed and complete, Task 9 docs done, whole-branch final review running, Task 8 (server smoke, gate, approval of S) pending the user's yes; then a whole-branch review; ledger in the git-ignored `.superpowers/sdd/2026-11-02-showdown-tempo/progress.md`; Task 8, the server smoke and gate, waits for the user's yes); the budget cap S needs the user's approval before any RND result is read. (2) Crafter spec amendment written (`docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`; S by calibration, cap 3M, area 32, Colab notebook); awaiting the user's review, then a plan and build. Smaller items stay ignored. Details in `RESUME.md`.
+**Reopened 2026-11-02 (user decision; Showdown tempo built on branch `showdown-tempo`, local smoke passed, final-review fixes committed and in re-review, the smoke re-run and the gate are on hold until the user says go, full runs not started; Crafter spec only):** (1) Showdown tempo opponent, tempo feature block and friendly-fire reward penalty, two runs (matchup+penalty, then +tempo): spec `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md` (approved), plan `docs/superpowers/plans/2026-11-02-showdown-tempo.md` written, executing via subagents on branch `showdown-tempo` (Tasks 1 to 7 of 9 reviewed and complete, Task 9 docs done, whole-branch final review running, Task 8 (server smoke, gate, approval of S) pending the user's yes; then a whole-branch review; ledger in the git-ignored `.superpowers/sdd/2026-11-02-showdown-tempo/progress.md`; Task 8, the server smoke and gate, waits for the user's yes); the budget cap S needs the user's approval before any RND result is read. (2) Crafter spec amendment written (`docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`; S by calibration, cap 3M, area 32, Colab notebook); awaiting the user's review, then a plan and build. Smaller items stay ignored. Details in `RESUME.md`.
 
 As of 2026-11-01 nothing was in progress (superseded by the 2026-11-02 reopening above). Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Nothing was required for v1.0. The user opened `docs/findings.html` Chapter 7 and `figs/showdown-matchup/degradation.png` in a browser on 2026-11-01 and reported no problems. Pushes need the user's yes. Optional work was closed by decision on 2026-11-01 (`docs/REMAINING_WORK.md` section 7). Battle replays: recorded 2026-11-01, four wins kept in `docs/replays/` (index `docs/replays/INDEX.md`; full output in the gitignored `replays/`).
 
