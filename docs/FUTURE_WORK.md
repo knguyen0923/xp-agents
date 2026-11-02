@@ -73,13 +73,15 @@ Context: the Showdown run ended in a tie, and a look at the observation (`xp/sho
 **What the opponent does:** `DamageHeuristicPlayer` only picks damaging moves, so it never sets Trick Room or Tailwind. Training against it gives almost no signal for field and tempo management; a win rate here says little about it.
 
 **Candidate follow-ups (each a spec amendment plus a full run, about 12 to 15 hours)**
-1. A switchable "tempo" block: speed-order comparison per pair of actives (including Trick Room, Tailwind and priority), effect durations, move-identity flags (sets Trick Room, sets Tailwind, and similar).
+1. **Being built (2026-11-02; spec `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, plan `docs/superpowers/plans/2026-11-02-showdown-tempo.md`; built and unit-tested, smoke, gate and approval of the budget cap S pending).** A switchable "tempo" block: speed-order comparison per pair of actives (including Trick Room, Tailwind and priority), effect durations, move-identity flags (sets Trick Room, sets Tailwind, and similar).
 2. Fill each foe's ability and item from the team pool the env itself draws (exact, and what an Open Team Sheet would show); keep foe moves hidden until revealed.
-3. A scripted opponent that uses Trick Room and Tailwind, so field management is tested and not just available.
+3. **Being built (2026-11-02, same spec and plan; the `tempo` opponent).** A scripted opponent that uses Trick Room and Tailwind, so field management is tested and not just available.
 4. ~~Probe the saved policies for type-chart sensitivity~~ **done 2026-11-01** (no usable preference in either original-run policy; `docs/FINDINGS.md`, Phase 4). Original text: probe the saved policies for type-chart sensitivity (vary only the target's type and compare the policy's preference with the real multiplier); the replay recorder saves one `policy.pt` per agent.
 Learning aids for the network (pretraining on the type table, auxiliary losses) were left out of scope of the matchup spec; revisit only if the feature result is interesting.
 
 ## Also still open (smaller)
+- **Crafter was reopened on 2026-11-02** (spec `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`).
+- **Tempo runs, launch instructions (not results):** each run needs the user's yes, and the budget cap S needs the user's approval first. Before launching, check `sysctl vm.swapusage` and `pgrep -fl "xp.run|multiprocessing.spawn|room-battle"`. Then `ALLOW_CODE_CHANGE=1 caffeinate -i scripts/run_showdown.sh configs/showdown-tempo-base.yaml results/showdown-tempo-base 1`, and the same with `configs/showdown-tempo.yaml` and `results/showdown-tempo`. Each is about 12 to 15 hours on 1 worker.
 - **Matchup control run and a finer Kairi `alpha` sweep:** both done 2026-10-31; see `docs/REMAINING_WORK.md` sections 2 and 3.
 - ~~The protocol-legal confirmation of the 5M-step MultiRoom probe~~ **done 2026-10-25** (spec 5.4; Kaiser reached 95% success in 0.70M vs 2.23M steps for Kairi, faster on 10/10 seeds; `docs/MULTIROOM_EVALUATION.md`). The section above is history.
 - A deep-RL retune-at-the-shift check (size 8 DoorKey); judged low value, config-only if wanted.
