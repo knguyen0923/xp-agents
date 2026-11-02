@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 546b744 -->
+<!-- STATUS_COMMIT: 071d498 -->
 
 ## Current state
 
@@ -31,7 +31,7 @@ Design spec: `docs/superpowers/specs/2026-10-22-xp-design.md` (with amendments).
 
 ## Next
 
-**Reopened 2026-11-02 (user decision; spec stage, nothing built or running):** (1) Showdown tempo opponent, tempo feature block and friendly-fire reward penalty, two runs (matchup+penalty, then +tempo): spec `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, awaiting the user's review, then a plan; the budget cap S needs the user's approval before any RND result is read. (2) Crafter spec amendment and a Colab-ready notebook: not started, brainstorm questions pending. Smaller items stay ignored. Details in `RESUME.md`.
+**Reopened 2026-11-02 (user decision; spec stage, nothing built or running):** (1) Showdown tempo opponent, tempo feature block and friendly-fire reward penalty, two runs (matchup+penalty, then +tempo): spec `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md` (approved), plan `docs/superpowers/plans/2026-11-02-showdown-tempo.md` written, awaiting the user's choice of execution mode; the budget cap S needs the user's approval before any RND result is read. (2) Crafter spec amendment and a Colab-ready notebook: not started, brainstorm questions pending. Smaller items stay ignored. Details in `RESUME.md`.
 
 Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and is on `origin` (verified 2026-11-01). Nothing is required. The user opened `docs/findings.html` Chapter 7 and `figs/showdown-matchup/degradation.png` in a browser on 2026-11-01 and reported no problems. Pushes need the user's yes. Optional work was closed by decision on 2026-11-01 (`docs/REMAINING_WORK.md` section 7). Battle replays: recorded 2026-11-01, four wins kept in `docs/replays/` (index `docs/replays/INDEX.md`; full output in the gitignored `replays/`).
 
@@ -39,4 +39,4 @@ Nothing is in progress. Tag `v1.0` is done: annotated, points at `27dd4af`, and 
 
 ## Last updated
 
-2026-11-02 (future work reopened: Showdown tempo spec committed 254ad83, Crafter pending; nothing running)
+2026-11-02 (future work reopened: Showdown tempo spec and plan committed, Crafter pending; nothing running)
