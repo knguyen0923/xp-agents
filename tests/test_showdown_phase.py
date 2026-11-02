@@ -148,3 +148,42 @@ def test_matchup_flag_sets_the_learner_observation_size_and_the_hash(tiny):
     on = sp.build_learner(on_cfg, "kaiser", {"rnd_coef": 0.3, "ent_coef": 0.02}, 0)
     assert on.obs_dim == encode.obs_dim(True) and on.rnd.obs_dim == encode.obs_dim(True)
     assert config_hash(tiny_sd_cfg) != config_hash(on_cfg)
+
+
+TEMPO_CONFIGS = ("showdown-tempo-base", "showdown-tempo", "showdown-tempo-smoke")
+
+
+def test_tempo_config_team_hashes_match_the_files_in_the_repo():
+    for name in TEMPO_CONFIGS:
+        cfg = load_config(ROOT / "configs" / f"{name}.yaml")
+        for stage in ("tune", "eval"):
+            assert cfg["env"][f"{stage}_teams"] == f"configs/showdown_teams_tempo/{stage}"
+            assert cfg["env"][f"{stage}_teams_sha"] == pool_digest(load_pool(sp.team_dir(cfg, stage)))
+
+
+def test_tempo_run_configs_differ_only_in_the_tempo_flag_and_are_protocol_legal():
+    base = load_config(ROOT / "configs" / "showdown-tempo-base.yaml")
+    full = load_config(ROOT / "configs" / "showdown-tempo.yaml")
+    for cfg in (base, full):
+        assert cfg["env"]["opponent"] == "tempo" and cfg["env"]["matchup"] is True and cfg["env"]["friendly_fire"] == 1.0
+        assert grid_size(cfg["agents"]["kairi"]) == grid_size(cfg["agents"]["kaiser"]) == 8
+        phase = Phase.from_config(cfg)
+        assert not set(phase.tune_seeds) & set(phase.eval_seeds)
+    assert not base["env"].get("tempo", False) and full["env"]["tempo"] is True
+    strip = lambda c: {**c, "env": {k: v for k, v in c["env"].items() if k != "tempo"}, "report": None}   # noqa: E731
+    assert strip(base) == strip(full)
+    assert Phase.from_config(base).config_hash != Phase.from_config(full).config_hash
+
+
+def test_old_configs_still_hash_as_before_when_the_new_keys_are_absent():
+    cfg = load_config(ROOT / "configs" / "showdown.yaml")
+    assert "tempo" not in cfg["env"] and "friendly_fire" not in cfg["env"]
+
+
+def test_build_learner_honors_the_tempo_flag():
+    from xp.showdown.encode import obs_dim
+
+    tempo = load_config(ROOT / "configs" / "showdown-tempo.yaml")
+    base = load_config(ROOT / "configs" / "showdown-tempo-base.yaml")
+    assert sp.build_learner(tempo, "kairi", {"ent_coef": 0.01}, 0).obs_dim == obs_dim(True, True)
+    assert sp.build_learner(base, "kairi", {"ent_coef": 0.01}, 0).obs_dim == obs_dim(True, False)

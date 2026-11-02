@@ -1,0 +1,66 @@
+# TEMPO BASE condition (spec docs/superpowers/specs/2026-11-02-showdown-tempo-design.md): tempo opponent, matchup block, friendly-fire penalty, NO tempo block. Run 1 of 2.
+# Output folder: use `--out results/showdown-tempo-base`. Recorder: `scripts/record_showdown_replays.py --tuned results/showdown-tempo-base/showdown/tuning`.
+# Phase name "showdown"; the knob block is the protocol's minimum for one level (value 1 = the familiar opponent).
+phase: showdown
+knob:
+  name: opponent
+  familiar: 1
+  sweep: [1]
+env:
+  format: gen9championsvgc2026regmc
+  matchup: true
+  friendly_fire: 1.0            # C: penalty = -C * estimated damage fraction on the partner (spec 2026-11-02); fixed, not tuned
+  opponent: tempo               # new scripted opponent (spec 2026-11-02): damage heuristic plus Trick Room, Tailwind and screens
+  tune_teams: configs/showdown_teams_tempo/tune
+  eval_teams: configs/showdown_teams_tempo/eval
+  tune_teams_sha: a2f63ed22746  # pool_digest of the directory
+  eval_teams_sha: faa542d78abd
+tuning:
+  objective: auc
+seeds:
+  tune: [0, 3]
+  eval: [100, 110]
+  chunk: 1
+  agent_seed: 0
+budget:
+  steps: 250000                 # user decision 2026-10-26: the cap S; the learner runs 244 updates = 249,856 decisions
+  target_win: 0.30              # user decision 2026-10-26: steps-to-target threshold, declared before any RND result
+  # budget S: confirm after the Task 7 gate and the user's approval before any RND result is read
+eval:
+  battles: 200                  # fresh battles with the frozen policy after training, teams from the eval pool
+ppo:
+  n_envs: 8
+  n_steps: 128
+  epochs: 4
+  minibatches: 4
+  lr: 0.0003
+  gamma: 0.99
+  lam: 0.95
+  clip: 0.2
+  vf_coef: 0.5
+  rnd_lr: 0.0001
+agents:
+  kairi:
+    grid:
+      ent_coef: [0.001, 0.002, 0.003, 0.006, 0.01, 0.02, 0.05, 0.1]
+    natural_limits:
+      ent_coef: [0.0, null]
+  kaiser:
+    fixed:
+      ent_coef: 0.01            # default entropy: used only if a rnd_coef of 0 is tuned; tuning uses Kairi's tuned value
+      ent_coef_from: kairi
+    grid:
+      rnd_coef: [0.01, 0.03, 0.1, 0.3, 0.6, 1.0, 2.0, 3.0]
+    natural_limits:
+      rnd_coef: [0.0, null]
+report:
+  metric: auc
+  lower_is_better: false
+  agents: [kairi, kaiser]
+  extra_metrics:
+    win_eval: false
+    steps_to_30: true
+    reached_30: false
+  xlabel: Showdown VGC doubles vs the tempo opponent (single familiar level)
+  ylabel: training AUC of win rate (95% CI)
+  title: Tempo opponent, matchup block and friendly-fire penalty, tuned Kairi vs Kaiser
