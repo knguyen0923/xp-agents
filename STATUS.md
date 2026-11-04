@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 61f2fac -->
+<!-- STATUS_COMMIT: 0c180df -->
 
 ## Current state
 
@@ -39,4 +39,4 @@ As of 2026-11-01 nothing was in progress (superseded by the 2026-11-02 reopening
 
 ## Last updated
 
-2026-11-03 (Showdown tempo built, smoke and gate passed, budget cap S=250,000 and threshold 0.30 approved by the user; run 1 `showdown-tempo-base` RESUMED 2026-11-03 on the user's yes (1 worker, background; 41 of 68 job files at last check; stop and resume steps in RESUME.md); Crafter spec reviewed and amended with the user's choices (sustained budget rule, deep-set floor of 3, cost printout, committed f427ca4), Crafter implementation plan written 2026-11-03 at `docs/superpowers/plans/2026-11-03-crafter-reopen.md`, committed fa13158, executing 2026-11-03 via subagents in worktree `.worktrees/crafter` on branch `crafter-reopen` (the running Showdown job's tree is untouched): Tasks 1 to 6 reviewed clean (1c9e5ca stats, d70fb01 env, 02948ca learner, 89f045c phase/config/tie_key, 7ddc4eb calibrate, 7975910 smoke config), Task 7 (Colab notebook, 61f2fac) in review, of 8; the real smoke run is not done and needs the user's yes; ledger in the git-ignored `.superpowers/sdd/2026-11-03-crafter-reopen/progress.md`; no push, no run)
+2026-11-03 (Showdown tempo built, smoke and gate passed, budget cap S=250,000 and threshold 0.30 approved by the user; run 1 `showdown-tempo-base` RESUMED 2026-11-03 on the user's yes (1 worker, background; 41 of 68 job files at last check; stop and resume steps in RESUME.md); Crafter spec reviewed and amended with the user's choices (sustained budget rule, deep-set floor of 3, cost printout, committed f427ca4), Crafter implementation plan written 2026-11-03 at `docs/superpowers/plans/2026-11-03-crafter-reopen.md`, committed fa13158, executing 2026-11-03 via subagents in worktree `.worktrees/crafter` on branch `crafter-reopen` (the running Showdown job's tree is untouched): all 8 tasks built and reviewed (docs 0c180df); the final whole-branch review found that the policy had 8 actions but Crafter has 17 (spec, plan and spike all said 8), plus two Colab risks (Kaiser grid-edge did not stop the run; calibration not resumable); the user approved the fixes and spec amendments on 2026-11-03 and a fix wave is in progress, then a scoped re-review; no push, no merge, no run; the real smoke run is not done and needs the user's yes; ledger in the git-ignored `.superpowers/sdd/2026-11-03-crafter-reopen/progress.md`; no push, no run)
