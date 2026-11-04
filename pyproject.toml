@@ -13,6 +13,7 @@ dependencies = ["numpy", "pandas", "pyyaml", "matplotlib"]
 dev = ["pytest", "ruff"]
 minigrid = ["torch>=2.0", "minigrid>=3.0"]
 showdown = ["poke-env==0.10.0"]
+crafter = ["torch>=2.0", "crafter"]
 
 [tool.setuptools.packages.find]
 include = ["xp*"]
@@ -22,8 +23,11 @@ include = ["xp*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q -m 'not showdown'"
-markers = ["showdown: needs a running local Pokemon Showdown server (excluded from the default run)"]
+addopts = "-q -m 'not showdown and not crafter'"
+markers = [
+    "showdown: needs a running local Pokemon Showdown server (excluded from the default run)",
+    "crafter: steps a real crafter.Env (needs the crafter package; excluded from the default run)",
+]
 
 [tool.ruff]
 line-length = 200
