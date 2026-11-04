@@ -1,6 +1,8 @@
 # XP — Resume
 
-## Paused 2026-11-03: tempo run 1 is 34/68 job files in; Crafter spec awaits review
+## Paused 2026-11-03: tempo run 1 was 34/68 job files in (since resumed); Crafter code built, not run
+
+Update: Showdown tempo run 1 was RESUMED on 2026-11-03 (after 34 of 68 job files) and is running from the main work tree `/Users/knguyen/VSC/xp-agents`; check `results/showdown-tempo-base/showdown/tuning/jobs/` there for the current count; the "Nothing is running" statements in this section are out of date.
 
 Nothing is running (Showdown server stopped by PID, no processes). All work is on branch `showdown-tempo`, pushed to `origin/showdown-tempo` on 2026-11-02 (up to commit 6d207f4) with the user's yes; not merged into `main` (merge or PR needs the user's yes; later pushes need it too). Smaller future-work items stay ignored.
 
@@ -15,8 +17,10 @@ Nothing is running (Showdown server stopped by PID, no processes). All work is o
 - Write-up caveats from the reviews: Low Kick at the partner is not charged (zero base power, per spec); the "win returns >= 0" guarantee is for the undiscounted sum; a foe's Light Clay screen lasts 8 turns but the block assumes 5; setter counters count intents; per-battle friendly-fire action counts were skipped (only the penalty rate is recorded).
 - Deferred minors and the per-task ledger are in the git-ignored `.superpowers/sdd/2026-11-02-showdown-tempo/progress.md` (kept on purpose; delete the folder after the branch is finished).
 
-**2. Crafter reopened: spec written, nothing built.**
-- Spec `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md` (approved design 2026-11-02; budget S by calibration with a 3M-step cap at area 32; new `xp/crafter/` package; resumable Colab notebook `notebooks/run_crafter.ipynb`; S needs the user's approval before tuning). **Next:** the user reviews the written spec; then writing-plans for Crafter; then build via subagents (package, tests, `configs/crafter.yaml` and a smoke config, notebook); then the user pushes the branch (Colab clones from GitHub) and runs the notebook on a GPU runtime.
+**2. Crafter reopened: code built, nothing run.**
+- Spec `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`, reviewed and amended 2026-11-03 (sustained 3-point budget rule, deep-set floor of 3, cost printout); plan `docs/superpowers/plans/2026-11-03-crafter-reopen.md`. Code built and reviewed task by task on branch `crafter-reopen` (worktree `.worktrees/crafter`). Nothing has run on any real env or Colab; not pushed, not merged.
+- **Next, in order (each needs the user's yes):** (a) local real-env smoke (calibrate + run + report on `configs/crafter-smoke.yaml`, a few minutes) only after Showdown run 1 finishes or with the user's go (Task 6 step 3 of the plan; commands are in the plan); (b) push `crafter-reopen` so Colab can clone it; (c) in the Colab notebook run the benchmark, smoke and calibration cells, stop, and read S, the G1/G2/deep-set verdicts and the hours; (d) the user approves S (and the cost), then `budget.steps` and `budget.deep_set` are set in `configs/crafter.yaml`, pushed, and the run cell started; (e) report cell, write-ups; (f) merge decision.
+- Write-up caveats: `first_<achievement>` / `deep_first_unlock` are stamped at the END of the episode in which an achievement first appears (up to one episode late, same bias for both agents) and relative to the training call; throughput measured by calibration is plain PPO, RND runs are slower so the hours estimate is a floor.
 
 ## Nothing else in progress (2026-11-01)
 
