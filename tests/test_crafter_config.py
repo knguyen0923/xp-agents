@@ -33,7 +33,6 @@ def test_crafter_config_declares_the_protocol():
     assert "steps" not in b and "deep_set" not in b  # unset until the user sets them from the calibration
 
 
-@pytest.mark.skip(reason="smoke config arrives in Task 6")
 def test_smoke_config_is_small_and_valid():
     cfg = load_config("configs/crafter-smoke.yaml")
     Phase.from_config(cfg)

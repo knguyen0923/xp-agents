@@ -1,0 +1,31 @@
+# Crafter SMOKE: every path (calibration, tune, seed job, held-out eval, report) in a few minutes. The numbers mean nothing.
+# Grid ends are declared natural limits ONLY so a 2-value grid is not 'provisional' (every point of a 2-value grid is an edge).
+phase: crafter
+knob: {name: area, familiar: 32, sweep: [32]}
+env: {area: 32}
+seeds: {tune: [0, 1], eval: [100, 102], chunk: 1, agent_seed: 0}
+budget:
+  steps: 4096
+  cap: 4096
+  target_ach: 0.5       # tiny, so the calibration's rule code path runs; the verdict is meaningless at this size
+  sustain: 2
+  min_deep: 1
+  deep_set: [collect_wood, collect_drink, eat_cow]
+eval: {episodes: 4}
+ppo: {device: auto, log_every: 2, n_envs: 4, n_steps: 64, epochs: 2, minibatches: 4, lr: 0.00025, gamma: 0.99, lam: 0.95, clip: 0.2, vf_coef: 0.5, rnd_lr: 0.0001}
+agents:
+  kairi:
+    grid: {ent_coef: [0.01, 0.05]}
+    natural_limits: {ent_coef: [0.01, 0.05]}
+  kaiser:
+    fixed: {ent_coef: 0.01, ent_coef_from: kairi}
+    grid: {rnd_coef: [0.1, 0.3]}
+    natural_limits: {rnd_coef: [0.1, 0.3]}
+report:
+  metric: auc
+  lower_is_better: false
+  agents: [kairi, kaiser]
+  extra_metrics: {ach_final: false, crafter_score: false, heldout_ach: false, deep_first_unlock: true}
+  xlabel: Crafter smoke
+  ylabel: training AUC of ach_100 / 22 (95% CI)
+  title: Crafter smoke
