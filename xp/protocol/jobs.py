@@ -77,7 +77,8 @@ def rows(phase: Phase, agent: str, seed: int, provisional: bool, entries: list) 
     return df[COLUMNS]
 
 
-def tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int, tune_job: Callable, extra: Optional[dict] = None) -> TuneResult:
+def tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int, tune_job: Callable, extra: Optional[dict] = None,
+               tie_key: str = "auc") -> TuneResult:
     extra = extra or {}
     cached = read_tune(out_dir, phase, agent)
     if cached is not None:
@@ -101,8 +102,9 @@ def tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int, tune_
 
     result = tune(score, spec["grid"], spec.get("natural_limits"))
 
+    # tie_key: the extra field whose highest mean breaks exact score ties (AUC by default; Crafter uses final ach_100)
     def mean_auc(params: dict) -> float:
-        vals = [(read_tune_job_extra(out_dir, phase, agent, full(params), s) or {}).get("auc", -1.0) for s in phase.tune_seeds]
+        vals = [(read_tune_job_extra(out_dir, phase, agent, full(params), s) or {}).get(tie_key, -1.0) for s in phase.tune_seeds]
         return float(np.mean(vals))
 
     steps_by_point = None

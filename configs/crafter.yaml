@@ -1,0 +1,61 @@
+# Crafter phase (spec 5.5 and the 2026-11-02 reopen amendment): single familiar world (area 32), no shift knob.
+# `budget.steps` and `budget.deep_set` are UNSET on purpose: run `python -m xp.crafter.calibrate`, read S, the verdicts and the hours,
+# then (with the user's approval) add both keys here, push, and reclone. No tuning job starts while they are missing.
+phase: crafter
+knob:
+  name: area
+  familiar: 32
+  sweep: [32]
+env:
+  area: 32
+seeds:
+  tune: [0, 3]
+  eval: [100, 110]
+  chunk: 1
+  agent_seed: 0
+budget:
+  cap: 3000000          # calibration runs default-entropy Kairi this long on each tune seed, no early stopping
+  target_ach: 5         # S = first logged step from which the tune-seed mean ach_100 is >= 5 ...
+  sustain: 3            # ... at that step and the next 2 logged steps
+  min_deep: 3           # the deep achievement set (plain-PPO unlock rate 5% to 95% at S) needs at least this many
+eval:
+  episodes: 100         # frozen-policy episodes on the held-out world pool after training
+ppo:
+  device: auto          # cuda, then mps, then cpu (resolved at run time, so the config hash is the same on every machine)
+  log_every: 10         # updates between curve rows: 10 * 8 envs * 128 steps = 10,240 env steps
+  n_envs: 8
+  n_steps: 128
+  epochs: 4
+  minibatches: 4
+  lr: 0.00025
+  gamma: 0.99
+  lam: 0.95
+  clip: 0.2
+  vf_coef: 0.5
+  rnd_lr: 0.0001
+agents:
+  kairi:
+    grid:
+      ent_coef: [0.003, 0.006, 0.01, 0.02, 0.05, 0.1]
+    natural_limits:
+      ent_coef: [0.0, null]
+  kaiser:
+    fixed:
+      ent_coef: 0.01          # used only if a rnd_coef of 0 is tuned; tuning uses Kairi's tuned value
+      ent_coef_from: kairi
+    grid:
+      rnd_coef: [0.01, 0.03, 0.1, 0.3, 0.6, 1.0]
+    natural_limits:
+      rnd_coef: [0.0, null]
+report:
+  metric: auc
+  lower_is_better: false
+  agents: [kairi, kaiser]
+  extra_metrics:
+    ach_final: false
+    crafter_score: false
+    heldout_ach: false
+    deep_first_unlock: true
+  xlabel: Crafter, area 32 (single familiar world)
+  ylabel: training AUC of ach_100 / 22 (95% CI)
+  title: Crafter, tuned Kairi vs Kaiser
