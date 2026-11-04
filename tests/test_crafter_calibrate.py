@@ -100,3 +100,62 @@ def test_calibrate_cli_writes_the_json(tmp_path, monkeypatch):
     data = json.loads(out.read_text())
     assert set(data) >= {"suggestion", "gates", "throughput", "hours", "curves", "go"}
     assert len(data["curves"]) == 2 and data["throughput"]["steps_per_s"] > 0
+
+
+def _cli_setup(tmp_path, monkeypatch):
+    import yaml
+
+    from tests.test_crafter_phase import TINY
+    from tests.test_crafter_ppo import FakeVec
+    from xp.crafter import phase as cp
+
+    cfg = copy.deepcopy(TINY)
+    cfg["budget"].update({"cap": 64, "target_ach": 0.5, "sustain": 1})
+    del cfg["budget"]["steps"]
+    monkeypatch.setattr(cp, "make_env", lambda c, stage, seed: FakeVec(n=2, period=2, seed=seed))
+    cfg_path, out = tmp_path / "c.yaml", tmp_path / "cal.json"
+    cfg_path.write_text(yaml.safe_dump(cfg))
+    return cfg, cfg_path, out
+
+
+def test_calibration_resumes_from_per_seed_cache(tmp_path, monkeypatch):
+    from xp.crafter import calibrate as cal
+
+    cfg, cfg_path, out = _cli_setup(tmp_path, monkeypatch)
+    cal.main(["--config", str(cfg_path), "--out", str(out)])
+    first = json.loads(out.read_text())
+    assert sorted(p.name for p in tmp_path.glob("cal.seed-*.json")) == ["cal.seed-0.json", "cal.seed-1.json"]
+    out.unlink()
+
+    def boom(*a, **k):
+        raise AssertionError("calibration_run must not be called when every seed is cached")
+
+    monkeypatch.setattr(cal, "calibration_run", boom)
+    cal.main(["--config", str(cfg_path), "--out", str(out)])
+    again = json.loads(out.read_text())
+    assert again["curves"] == first["curves"] and again["suggestion"]["steps"] == first["suggestion"]["steps"]
+
+
+def test_calibration_cache_hash_mismatch_raises(tmp_path, monkeypatch):
+    import yaml
+
+    from xp.crafter import calibrate as cal
+    from xp.errors import ProtocolError
+
+    cfg, cfg_path, out = _cli_setup(tmp_path, monkeypatch)
+    cal.main(["--config", str(cfg_path), "--out", str(out)])
+    cfg["budget"]["cap"] = 128
+    cfg_path.write_text(yaml.safe_dump(cfg))
+    with pytest.raises(ProtocolError, match="cache"):
+        cal.main(["--config", str(cfg_path), "--out", str(out)])
+
+
+def test_calibration_hash_ignores_budget_steps_and_deep_set():
+    from xp.crafter.calibrate import calibration_hash
+    from tests.test_crafter_phase import TINY
+
+    a, b = copy.deepcopy(TINY), copy.deepcopy(TINY)
+    b["budget"]["steps"], b["budget"]["deep_set"] = 999, ["eat_cow"]
+    assert calibration_hash(a) == calibration_hash(b)
+    b["budget"]["cap"] = 1
+    assert calibration_hash(a) != calibration_hash(b)

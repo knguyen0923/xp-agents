@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
+import os
+from pathlib import Path
 from typing import List
 
 import numpy as np
@@ -9,8 +12,9 @@ import torch
 
 from xp.crafter import phase as cp
 from xp.crafter.stats import ACHIEVEMENTS, nan_to_zero
+from xp.errors import ProtocolError
 from xp.protocol.jobs import grid_size, run_jobs
-from xp.protocol.phase import Phase, load_config
+from xp.protocol.phase import Phase, config_hash, load_config
 
 RARE_BELOW = 0.05  # an achievement is "rare" (headroom for exploration) when plain PPO unlocks it in under 5% of episodes
 DEEP_RANGE = (0.05, 0.95)
@@ -98,6 +102,49 @@ def _json_safe(obj):
     return obj
 
 
+def _nan_back(obj):
+    """Inverse of `_json_safe` for the cached curve rows: None floats come back as NaN."""
+    if obj is None:
+        return float("nan")
+    if isinstance(obj, dict):
+        return {k: _nan_back(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_nan_back(v) for v in obj]
+    return obj
+
+
+def calibration_hash(cfg: dict) -> str:
+    """Config hash without `budget.steps` and `budget.deep_set` (the calibration's own outputs, set after it runs)."""
+    c = copy.deepcopy(cfg)
+    for k in ("steps", "deep_set"):
+        c.get("budget", {}).pop(k, None)
+    return config_hash(c)
+
+
+def seed_cache_path(out: str, seed: int) -> Path:
+    o = Path(out)
+    return o.with_name(f"{o.stem}.seed-{seed}.json")
+
+
+def _load_cached(path: Path, h: str):
+    if not path.exists():
+        return None
+    data = json.loads(path.read_text())
+    if data.get("config_hash") != h:
+        raise ProtocolError(f"{path} was written for a different config (hash {data.get('config_hash')}, now {h}); delete the calibration cache files (*.seed-*.json) or use a fresh --out")
+    return _nan_back(data["result"])
+
+
+def cached_calibration_run(cfg: dict, seed: int, path: str) -> dict:
+    """Run one seed and write its result atomically (tmp + os.replace) so a finished seed survives a disconnect."""
+    result = calibration_run(cfg, seed)
+    path = Path(path)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps({"config_hash": calibration_hash(cfg), "result": _json_safe(result)}, allow_nan=False))
+    os.replace(tmp, path)
+    return result
+
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description="Calibrate the Crafter budget S from tune-seed Kairi runs (spec 2026-11-02, Change 1).")
     parser.add_argument("--config", required=True)
@@ -106,7 +153,13 @@ def main(argv=None) -> None:
     args = parser.parse_args(argv)
     cfg = load_config(args.config)
     phase = Phase.from_config(cfg)
-    runs = run_jobs(calibration_run, [(cfg, s) for s in phase.tune_seeds], args.workers)
+    h = calibration_hash(cfg)
+    cached = {s: _load_cached(seed_cache_path(args.out, s), h) for s in phase.tune_seeds}
+    todo = [s for s in phase.tune_seeds if cached[s] is None]
+    print(f"calibration: {len(cached) - len(todo)} seed(s) cached, {len(todo)} to run", flush=True)
+    fresh = run_jobs(cached_calibration_run, [(cfg, s, str(seed_cache_path(args.out, s))) for s in todo], args.workers)
+    cached.update(dict(zip(todo, fresh)))
+    runs = [cached[s] for s in phase.tune_seeds]
     curves = [r["curve"] for r in runs]
     b = cfg["budget"]
     suggestion = suggest_budget(curves, b["target_ach"], b["cap"], b["sustain"])
