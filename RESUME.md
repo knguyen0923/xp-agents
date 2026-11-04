@@ -2,7 +2,7 @@
 
 ## Paused 2026-11-03: tempo run 1 was 34/68 job files in (since resumed); Crafter code built, not run
 
-Update: Showdown tempo run 1 was RESUMED on 2026-11-03 (after 34 of 68 job files) and is running from the main work tree `/Users/knguyen/VSC/xp-agents`; check `results/showdown-tempo-base/showdown/tuning/jobs/` there for the current count; the "Nothing is running" statements in this section are out of date.
+Update (2026-11-03 night): Showdown tempo run 1 FINISHED at 23:03 (68 of 68 job files, no errors; tuned Kairi `ent_coef` 0.006, Kaiser `rnd_coef` 1.0 with matched `ent_coef` 0.006; not yet reported or written up; run 2 not started). Results are in the main work tree `/Users/knguyen/VSC/xp-agents/results/showdown-tempo-base/`; its RESUME.md (branch `showdown-tempo`) has the numbers and next steps. Nothing is running. The Crafter real-env smoke is deliberately NOT run (the user said save it for later).
 
 Nothing is running (Showdown server stopped by PID, no processes). All work is on branch `showdown-tempo`, pushed to `origin/showdown-tempo` on 2026-11-02 (up to commit 6d207f4) with the user's yes; not merged into `main` (merge or PR needs the user's yes; later pushes need it too). Smaller future-work items stay ignored.
 
