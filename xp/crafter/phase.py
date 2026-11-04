@@ -134,6 +134,11 @@ def run_phase(cfg: dict, out_dir, workers: int = 1, allow_code_change: bool = Fa
     tuned = {"kairi": tune_agent(cfg, phase, out_dir, "kairi", workers, tune_job, tie_key="final")}
     extra = matched_entropy(cfg, tuned["kairi"])
     tuned["kaiser"] = tune_agent(cfg, phase, out_dir, "kaiser", workers, tune_job, extra, tie_key="final")
+    if tuned["kaiser"].provisional:
+        raise ProtocolError(
+            f"Kaiser's tuned optimum sits on a grid edge ({tuned['kaiser'].boundary_dims}); widen both grids equally and rerun "
+            "in a fresh output folder (the evaluation runs would all be provisional)"
+        )
     jobs = [(cfg, out_dir, a, tuned[a].best_params, tuned[a].provisional, s) for a in AGENTS for s in phase.eval_seeds]
     run_jobs(seed_job, jobs, workers)
     print(f"[{phase.name}] finished {len(jobs)} seed jobs", flush=True)

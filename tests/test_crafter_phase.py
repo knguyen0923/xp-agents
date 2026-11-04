@@ -114,3 +114,11 @@ def test_tie_break_uses_final_ach_when_asked(cfg, tmp_path):
     assert res.best_params == {"ent_coef": 0.05}
     res_default = tune_agent(cfg, phase, tmp_path / "b", "kairi", 1, fake_job)  # default tie key `auc` is equal: grid order wins
     assert res_default.best_params == {"ent_coef": 0.01}
+
+
+def test_kaiser_grid_edge_optimum_stops_the_run_before_any_seed_job(cfg, tmp_path):
+    bad = copy.deepcopy(cfg)
+    del bad["agents"]["kaiser"]["natural_limits"]  # a 2-value grid: the optimum is necessarily on an edge, with no exemption
+    with pytest.raises(ProtocolError, match="rnd_coef"):
+        cp.run_phase(bad, tmp_path)
+    assert not list((tmp_path / "crafter").glob("*__seed-*.csv"))  # no seed-job file was written
