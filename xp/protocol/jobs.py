@@ -103,7 +103,7 @@ def tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int, tune_
     result = tune(score, spec["grid"], spec.get("natural_limits"))
 
     # tie_key: the extra field whose highest mean breaks exact score ties (AUC by default; Crafter uses final ach_100)
-    def mean_auc(params: dict) -> float:
+    def mean_tie(params: dict) -> float:
         vals = [(read_tune_job_extra(out_dir, phase, agent, full(params), s) or {}).get(tie_key, -1.0) for s in phase.tune_seeds]
         return float(np.mean(vals))
 
@@ -120,11 +120,11 @@ def tune_agent(cfg: dict, phase: Phase, out_dir, agent: str, workers: int, tune_
 
         steps_by_point = [mean_steps(p) for p in grid_points(spec["grid"])]
 
-    broken = break_ties(result, spec["grid"], spec.get("natural_limits"), [mean_auc(p) for p in grid_points(spec["grid"])],
+    broken = break_ties(result, spec["grid"], spec.get("natural_limits"), [mean_tie(p) for p in grid_points(spec["grid"])],
                         steps_by_point=steps_by_point)
     if broken is not result:
         n_tied = int((abs(result.table["score"] - result.best_score) <= 1e-12).sum())
-        rule = "steps-to-target" if steps_by_point is not None else "AUC"
+        rule = "steps-to-target" if steps_by_point is not None else {"auc": "AUC", "final": "highest mean final"}.get(tie_key, f"highest mean {tie_key}")
         print(f"[{phase.name}] {agent}: tie of {n_tied} points broken by {rule} -> {broken.best_params}", flush=True)
     result = broken
     result.best_params.update(extra)

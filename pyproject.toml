@@ -13,7 +13,7 @@ dependencies = ["numpy", "pandas", "pyyaml", "matplotlib"]
 dev = ["pytest", "ruff"]
 minigrid = ["torch>=2.0", "minigrid>=3.0"]
 showdown = ["poke-env==0.10.0"]
-crafter = ["torch>=2.0", "crafter"]
+crafter = ["torch>=2.0", "crafter==1.8.3"]
 
 [tool.setuptools.packages.find]
 include = ["xp*"]
