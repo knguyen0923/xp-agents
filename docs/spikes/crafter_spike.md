@@ -2,6 +2,8 @@
 
 Status: DONE 2026-10-26; CLOSED as a documented spike by the user (2026-10-26), no full phase. We may reconsider Crafter in the future; the user decided against building it for now because of time, not because the question is answered. Plain PPO only; no RND result was read. Script: `scripts/spikes/crafter_spike.py`; plan: `docs/superpowers/plans/2026-10-25-crafter-spike.md`.
 
+**Correction (2026-11-03):** the spike ran with 8 of Crafter's 17 actions (`make_net(n_actions=8)` in `scripts/spikes/crafter_spike.py`), so the policy could not place a table or furnace or make any tool. Its G1 verdict and the throughput numbers below are therefore not representative of the 17-action game. The script is left unchanged as the closed record. See `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md` (Amendment 2026-11-03).
+
 ## Throughput (40,960-step runs, 8 envs, PPO with a small CNN, includes start-up)
 | area | CPU steps/s | MPS steps/s |
 |---|---|---|

@@ -12,7 +12,7 @@ from torch.distributions import Categorical
 from xp.crafter.rnd import RND, IntrinsicScaler
 from xp.crafter.stats import ACHIEVEMENTS, EpisodeStats, nan_to_zero  # noqa: F401 (nan_to_zero re-exported for callers)
 
-N_ACTIONS = 8
+N_ACTIONS = 17
 FRAME = (64, 64, 3)
 
 

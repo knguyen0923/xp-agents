@@ -65,3 +65,18 @@ def test_same_env_seed_gives_the_same_first_world():
     finally:
         a.close()
         b.close()
+
+
+@pytest.mark.crafter
+def test_n_actions_matches_the_real_env_and_the_last_action_steps():
+    import crafter
+
+    from xp.crafter.ppo import N_ACTIONS
+
+    assert N_ACTIONS == crafter.Env(area=(32, 32), seed=0).action_space.n
+    vec = CrafterVec(train_env_seeds(0, 2), area=32)
+    try:
+        obs, rew, done, eps = vec.step([16, 16])
+        assert obs.shape == (2, 64, 64, 3)
+    finally:
+        vec.close()

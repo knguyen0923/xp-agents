@@ -36,8 +36,17 @@ class FakeVec:
 def test_network_shapes_and_intrinsic_head_only_for_rnd():
     plain, rnd = ActorCritic(False), ActorCritic(True)
     logits, v, v_int = rnd.heads(torch.zeros(3, 3, 64, 64))
-    assert logits.shape == (3, 8) and v.shape == (3,) and v_int.shape == (3,)
+    assert logits.shape == (3, 17) and v.shape == (3,) and v_int.shape == (3,)
     assert plain.v_int is None and plain.heads(torch.zeros(1, 3, 64, 64))[2] is None
+
+
+def test_both_heads_output_n_actions_and_it_is_17():
+    from xp.crafter.ppo import N_ACTIONS
+
+    assert N_ACTIONS == 17
+    for intrinsic in (False, True):
+        logits = ActorCritic(intrinsic).heads(torch.zeros(2, 3, 64, 64))[0]
+        assert logits.shape == (2, N_ACTIONS)
 
 
 def test_rnd_target_is_frozen_and_error_shape():
