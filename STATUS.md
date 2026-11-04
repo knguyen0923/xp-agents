@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: f427ca4 -->
+<!-- STATUS_COMMIT: fa13158 -->
 
 ## Current state
 
@@ -39,4 +39,4 @@ As of 2026-11-01 nothing was in progress (superseded by the 2026-11-02 reopening
 
 ## Last updated
 
-2026-11-03 (Showdown tempo built, smoke and gate passed, budget cap S=250,000 and threshold 0.30 approved by the user; run 1 `showdown-tempo-base` RESUMED 2026-11-03 on the user's yes (1 worker, background; 41 of 68 job files at last check; stop and resume steps in RESUME.md); Crafter spec reviewed and amended with the user's choices (sustained budget rule, deep-set floor of 3, cost printout, committed f427ca4), next is writing-plans for Crafter on the user's yes)
+2026-11-03 (Showdown tempo built, smoke and gate passed, budget cap S=250,000 and threshold 0.30 approved by the user; run 1 `showdown-tempo-base` RESUMED 2026-11-03 on the user's yes (1 worker, background; 41 of 68 job files at last check; stop and resume steps in RESUME.md); Crafter spec reviewed and amended with the user's choices (sustained budget rule, deep-set floor of 3, cost printout, committed f427ca4), Crafter implementation plan written 2026-11-03 at `docs/superpowers/plans/2026-11-03-crafter-reopen.md`, committed fa13158, nothing built; next is the user's choice of subagent-driven or inline execution, in a worktree on branch `crafter-reopen` so the running Showdown job's tree is untouched)
