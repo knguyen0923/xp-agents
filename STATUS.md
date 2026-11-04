@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 270aeec -->
+<!-- STATUS_COMMIT: e5d776e -->
 
 ## Current state
 
@@ -39,4 +39,4 @@ As of 2026-11-01 nothing was in progress (superseded by the 2026-11-02 reopening
 
 ## Last updated
 
-2026-11-04 afternoon (Showdown tempo run 1 `showdown-tempo-base` reported: a tie, all CIs include 0; run 2 `showdown-tempo` started about 16:50 and running, 12-15 h expected; Crafter built on branch `crafter-reopen`, its real-env smoke not run; next steps in RESUME.md)
+2026-11-04 afternoon (Showdown tempo run 1 `showdown-tempo-base` reported: a tie, all CIs include 0; run 2 `showdown-tempo` started about 16:50 and running, 12-15 h expected; Crafter built on branch `crafter-reopen`, its real-env smoke passed 2026-11-04 (239 steps/s, nothing tuned yet); next steps in RESUME.md)
