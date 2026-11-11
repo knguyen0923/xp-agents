@@ -39,4 +39,4 @@ As of 2026-11-01 nothing was in progress (superseded by the 2026-11-02 reopening
 
 ## Last updated
 
-2026-11-09 (Showdown tempo run 1 `showdown-tempo-base` reported: a tie, all CIs include 0; run 2 `showdown-tempo` PAUSED 2026-11-09 at 61 of 68 jobs (tuning done, 13 of 20 eval jobs done, 7 Kaiser seeds left, about 1.1 h), resume command in RESUME.md; Crafter built on branch `crafter-reopen`, its real-env smoke passed 2026-11-04 (239 steps/s, nothing tuned yet); next steps in RESUME.md)
+2026-11-10 (Showdown tempo run 1 `showdown-tempo-base` reported: a tie, all CIs include 0; run 2 `showdown-tempo` FINISHED 2026-11-10 (68 of 68) and reported: also a tie (`auc` Kairi 0.353 vs Kaiser 0.356, diff -0.003 [-0.012, +0.007]; tuned Kairi `ent_coef` 0.02, Kaiser `rnd_coef` 0.03), and the paired comparison against run 1 has every CI including 0; write-ups and the merge/PR decision are next, see RESUME.md; Crafter built on branch `crafter-reopen`, its real-env smoke passed 2026-11-04 (239 steps/s, nothing tuned yet); next steps in RESUME.md)
