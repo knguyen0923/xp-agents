@@ -1,6 +1,5 @@
 # Crafter phase (spec 5.5 and the 2026-11-02 reopen amendment): single familiar world (area 32), no shift knob.
-# `budget.steps` and `budget.deep_set` are UNSET on purpose: run `python -m xp.crafter.calibrate`, read S, the verdicts and the hours,
-# then (with the user's approval) add both keys here, push, and reclone. No tuning job starts while they are missing.
+# `budget.steps` and `budget.deep_set` were set after calibration with the user's approval (2026-11-11); without them no tuning job starts.
 phase: crafter
 knob:
   name: area
@@ -18,6 +17,8 @@ budget:
   target_ach: 5         # S = first logged step from which the tune-seed mean ach_100 is >= 5 ...
   sustain: 3            # ... at that step and the next 2 logged steps
   min_deep: 3           # the deep achievement set (plain-PPO unlock rate 5% to 95% at S) needs at least this many
+  steps: 276480         # S, approved by the user 2026-11-11 (calibration: G1 12/22, G2 1.61 -> 5.06, sustained)
+  deep_set: ["collect_drink", "collect_wood", "defeat_zombie", "eat_cow", "make_wood_pickaxe", "make_wood_sword", "place_table", "wake_up"]
 eval:
   episodes: 100         # frozen-policy episodes on the held-out world pool after training
 ppo:
