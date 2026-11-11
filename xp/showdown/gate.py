@@ -32,24 +32,31 @@ def measure(learner: Learner, env, steps: int, target: float = 0.8, log_every: i
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description="Train plain PPO against one scripted rung and report throughput and win rate.")
-    parser.add_argument("--opponent", required=True, choices=["random", "maxbp", "damage"])
+    parser.add_argument("--opponent", required=True, choices=["random", "maxbp", "damage", "tempo"])
     parser.add_argument("--steps", type=int, default=100_000)
     parser.add_argument("--n-envs", type=int, default=DEFAULT_PPO["n_envs"])
     parser.add_argument("--ent-coef", type=float, default=0.01)
     parser.add_argument("--seed", type=int, default=0, help="a tune seed")
+    parser.add_argument("--teams-dir", default=str(TEAMS_DIR), help="directory holding tune/ and eval/ pools (use configs/showdown_teams_tempo for the tempo runs)")
+    parser.add_argument("--matchup", action="store_true", help="matchup block on")
+    parser.add_argument("--tempo", action="store_true", help="tempo block on")
+    parser.add_argument("--friendly-fire", type=float, default=0.0, help="friendly-fire penalty constant C")
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
 
+    from xp.showdown.encode import obs_dim
     from xp.showdown.teams import load_pool
     from xp.showdown.vec_env import ShowdownVecEnv
 
     ppo = {**DEFAULT_PPO, "n_envs": args.n_envs}
-    env = ShowdownVecEnv(args.n_envs, FORMAT, load_pool(TEAMS_DIR / "tune"), args.opponent, seed=args.seed)
+    env = ShowdownVecEnv(args.n_envs, FORMAT, load_pool(Path(args.teams_dir) / "tune"), args.opponent, seed=args.seed,
+                         matchup=args.matchup, tempo=args.tempo, friendly_fire=args.friendly_fire)
     try:
-        result = measure(Learner(ppo, args.ent_coef, args.seed), env, args.steps)
+        result = measure(Learner(ppo, args.ent_coef, args.seed, obs_dim=obs_dim(args.matchup, args.tempo)), env, args.steps)
     finally:
         env.close()
-    result.update({"opponent": args.opponent, "ppo": ppo, "ent_coef": args.ent_coef, "seed": args.seed})
+    result.update({"opponent": args.opponent, "ppo": ppo, "ent_coef": args.ent_coef, "seed": args.seed,
+                   "teams_dir": args.teams_dir, "matchup": args.matchup, "tempo": args.tempo, "friendly_fire": args.friendly_fire})
     Path(args.out).write_text(json.dumps(result, indent=1))
     target_pct = f"{result['target']:.0%}"
     print(f"{args.opponent}: {result['steps']} decisions in {result['wall_s']:.0f}s = {result['decisions_per_s']:.0f}/s, "

@@ -82,6 +82,13 @@ def datasets(run):
     d["showdown_cross"] = read("docs/spikes/showdown_matchup_results/cross_run_paired.csv")
     d["showdown_grids"] = read("docs/spikes/showdown_control_results/paired_grids_orig_to_control.csv")
     d["showdown_inputs"] = read("docs/spikes/showdown_control_results/paired_inputs_control_to_matchup.csv")
+    tm = ("auc", "curves"), ("win_eval", "curves__win_eval"), ("steps_to_30", "curves__steps_to_30")
+    for key, sub_ in (("showdown_tempo_base", "base"), ("showdown_tempo", "tempo")):
+        d[key] = [
+            {"metric": m, "agent": r["agent"], "mean": r["mean"], "lo": r["lo"], "hi": r["hi"]}
+            for m, f in tm
+            for r in read(f"docs/spikes/showdown_tempo_results/{sub_}/{f}.csv") if r["agent"] in ("kairi", "kaiser")]
+    d["showdown_tempo_cross"] = read("docs/spikes/showdown_tempo_results/cross_run_paired.csv")
     return d
 
 

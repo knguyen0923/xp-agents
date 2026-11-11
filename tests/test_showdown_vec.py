@@ -106,3 +106,18 @@ def test_a_worker_reports_an_illegal_action_instead_of_hanging(pool):
             venv.step(bad)
     finally:
         venv.close()
+
+
+def test_friendly_fire_rewards_stay_bounded_and_wins_are_tracked_separately(pool):
+    env = ShowdownVecEnv(2, FORMAT, pool, "damage", seed=3, name="ff", friendly_fire=1.0)
+    try:
+        for _ in range(40):
+            a0 = env.masks[:, 0].argmax(axis=1)
+            a1 = np.array([restrict_second(env.masks[i, 1], a0[i]).argmax() for i in range(env.n)])
+            rewards, dones = env.step(np.stack([a0, a1], axis=1))
+            assert (rewards >= -2.0).all() and (rewards <= 1.0).all()     # loss -1 plus at most the -1.0 battle cap
+            assert (env.last_won <= dones).all()
+            assert (rewards[env.last_won == 1] >= 0.0).all()                          # the per-battle cap: a win never returns below 0
+            assert (rewards[(dones == 1) & (env.last_won == 0)] <= -1.0).all()        # a loss is -1 plus a penalty of at most 0
+    finally:
+        env.close()

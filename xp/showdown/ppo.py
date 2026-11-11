@@ -54,6 +54,11 @@ def gae(rewards, values, next_value, nonterm, gamma: float, lam: float):
     return adv
 
 
+def _ff_enabled(env) -> bool:
+    """True for an env that tracks per-battle friendly-fire penalties and has the penalty switched on."""
+    return hasattr(env, "recent_ff") and hasattr(env, "ff_totals") and getattr(env, "ff_active", True)
+
+
 class Learner:
     """PPO with action masks. Kairi = `rnd_coef` None; Kaiser = the same PPO plus an RND bonus (`rnd_coef` a float).
 
@@ -90,12 +95,18 @@ class Learner:
     def evaluate(self, env, n_battles: int) -> dict:
         """Win rate of the current (frozen) policy over `n_battles` finished battles on `env`. Never updates anything."""
         wins = finished = 0
+        ff = _ff_enabled(env)
+        ff_sum0, ff_n0 = env.ff_totals() if ff else (0.0, 0)
         while finished < n_battles:
             actions, _, _, _ = self.act(env.obs, env.masks)
             rewards, dones = env.step(actions)
             finished += int(dones.sum())
-            wins += int(((rewards > 0) & (dones == 1)).sum())
-        return {"win_rate": wins / finished, "battles": finished}
+            wins += int(env.last_won.sum())     # not `rewards > 0`: a friendly-fire penalty can push a win's reward below 0
+        out = {"win_rate": wins / finished, "battles": finished}
+        if ff:      # mean friendly-fire penalty over only the battles finished during this evaluation
+            ff_sum, ff_n = env.ff_totals()
+            out["ff_penalty"] = (ff_sum - ff_sum0) / max(1, ff_n - ff_n0)
+        return out
 
     def act(self, obs: np.ndarray, masks: np.ndarray):
         """Sample one joint action per env. Returns (actions (n, 2), logp (n,), value (n,), conditional masks (n, 2, 107))."""
@@ -196,7 +207,10 @@ class Learner:
             if (u + 1) % log_every == 0 or u == updates - 1:
                 win, _ = env.recent_stats()
                 done_steps = (u + 1) * batch
-                curve.append({"steps": done_steps, "win_rate_100": win})
+                row = {"steps": done_steps, "win_rate_100": win}
+                if _ff_enabled(env):
+                    row["ff_100"] = env.recent_ff()[0]      # mean friendly-fire penalty per battle over the last 100 battles
+                curve.append(row)
                 if target is not None and steps_to_target is None and env.recent_window_full() and win >= target:
                     steps_to_target = done_steps
         return {"curve": curve, "steps_to_target": steps_to_target, "steps": updates * batch}

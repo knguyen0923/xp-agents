@@ -17,11 +17,12 @@ MON_DIM = 3 + len(STATUSES) + len(BOOSTS) + len(TYPES) + len(STATS) + 1 + N_MOVE
 FIELD_DIM = len(Weather) + len(Field) + 2 * len(SideCondition) + 1
 OBS_DIM = 2 * SLOTS * MON_DIM + FIELD_DIM
 MATCHUP_DIM = 2 * (2 * N_MOVES * 2) * 2 + 2 * N_MOVES   # outgoing 32 + incoming 32 + 8 revealed flags = 72
+TEMPO_DIM = 4 + 9 + 4 * N_MOVES * 4                # speed order 4 + remaining turns 9 + 16 move flags for each of 4 active Pokemon = 77
 
 
-def obs_dim(matchup: bool = False) -> int:
-    """Length of the observation vector; the matchup block (spec 2026-10-29) is appended only when switched on."""
-    return OBS_DIM + (MATCHUP_DIM if matchup else 0)
+def obs_dim(matchup: bool = False, tempo: bool = False) -> int:
+    """Length of the observation vector; the matchup block (spec 2026-10-29) and the tempo block (spec 2026-11-02) are appended only when switched on."""
+    return OBS_DIM + (MATCHUP_DIM if matchup else 0) + (TEMPO_DIM if tempo else 0)
 
 
 def _onehot(item, order: list) -> np.ndarray:
@@ -75,8 +76,8 @@ def _conditions(table: dict, order: list) -> np.ndarray:
     return np.array([float(k in table) for k in order], dtype=np.float32)
 
 
-def encode_battle(battle, matchup: bool = False, estimator=None) -> np.ndarray:
-    """Flat float32 vector of length obs_dim(matchup) for a DoubleBattle (own side, opponent side, field[, matchup block])."""
+def encode_battle(battle, matchup: bool = False, estimator=None, tempo: bool = False) -> np.ndarray:
+    """Flat float32 vector of length obs_dim(matchup, tempo) for a DoubleBattle (own side, opponent side, field[, matchup block][, tempo block])."""
     own = _side(battle.team.values(), list(battle.active_pokemon), list(battle.can_mega_evolve))
     opp = _side(battle.opponent_team.values(), list(battle.opponent_active_pokemon), [False, False])
     field = np.concatenate([
@@ -92,5 +93,8 @@ def encode_battle(battle, matchup: bool = False, estimator=None) -> np.ndarray:
             from xp.showdown.estimate import PokeEnvEstimator
             estimator = PokeEnvEstimator(battle)
         out = np.concatenate([out, matchup_block(list(battle.active_pokemon), list(battle.opponent_active_pokemon), estimator)])
-    assert out.shape == (obs_dim(matchup),)
+    if tempo:
+        from xp.showdown.tempo import tempo_block  # lazy: tempo.py imports this module's constants
+        out = np.concatenate([out, tempo_block(battle)])
+    assert out.shape == (obs_dim(matchup, tempo),)
     return out.astype(np.float32)

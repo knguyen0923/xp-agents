@@ -14,21 +14,24 @@ class XPDoublesEnv(DoublesEnv):
     default random pick of 4 for both sides. Pair with `SingleAgentWrapper(env, opponent)` for a gymnasium env.
     """
 
-    def __init__(self, matchup: bool = False, **kwargs):
+    tempo = False   # class default so an env built without __init__ (tests) keeps the old observation
+
+    def __init__(self, matchup: bool = False, tempo: bool = False, **kwargs):
         super().__init__(**kwargs)
         self.matchup = bool(matchup)
+        self.tempo = bool(tempo)
         self.estimator_calls = 0     # matchup estimates attempted / failed over this env's life; the worker reports them on close
         self.estimator_errors = 0
-        space = Box(-2.0, 2.0, shape=(obs_dim(self.matchup),), dtype=np.float32)  # move priority reaches -7 / 5 = -1.4
+        space = Box(-2.0, 2.0, shape=(obs_dim(self.matchup, self.tempo),), dtype=np.float32)  # move priority reaches -7 / 5 = -1.4
         self.observation_spaces = {agent: space for agent in self.possible_agents}
 
     def embed_battle(self, battle) -> np.ndarray:
         if not self.matchup:
-            return encode_battle(battle)
+            return encode_battle(battle, tempo=self.tempo)
         from xp.showdown.estimate import PokeEnvEstimator
         est = PokeEnvEstimator(battle)
         try:
-            return encode_battle(battle, matchup=True, estimator=est)
+            return encode_battle(battle, matchup=True, estimator=est, tempo=self.tempo)
         finally:
             self.estimator_calls += est.calls
             self.estimator_errors += est.errors

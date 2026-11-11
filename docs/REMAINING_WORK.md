@@ -75,10 +75,12 @@ The user chose "close by decision": do the cheap checks, and close every other o
 | Item | Why it is closed |
 |---|---|
 | Size-8 DoorKey retune-at-the-shift | Timed one run on 2026-11-01: Kairi at its size-6 `ent_coef` 0.03, tune seed 0, 2M steps, 543 s on one laptop process; training success never left the floor (0.00 to 0.13, ending 0.13, no steps-to-80%). A full retune (size-8 calibration, then 36 tuning and 20 eval runs, about 8.5 h on one process) would tie at the floor and let the tie-break choose. One seed and one setting, so not conclusive; the matched-entropy check already put Kairi minus Kaiser at size 8 at 0.043 [-0.053, 0.142]. |
-| Showdown tempo features, foe ability and item fill, a Trick Room and Tailwind opponent (follow-ups 1 to 3) | Each is a spec amendment plus a 12 to 15 hour run. Showdown tied in all three runs (original, matchup, control), and the probe shows the original policies do not read the type chart, so these are new questions and not gaps in the result. Described in `docs/FUTURE_WORK.md`. |
+| Showdown tempo features, foe ability and item fill, a Trick Room and Tailwind opponent (follow-ups 1 to 3) (follow-ups 1 and 3 reopened 2026-11-02, see the update below) | Each is a spec amendment plus a 12 to 15 hour run. Showdown tied in all three runs (original, matchup, control), and the probe shows the original policies do not read the type chart, so these are new questions and not gaps in the result. Described in `docs/FUTURE_WORK.md`. |
 | MultiRoom other room counts, more DoorKey seeds, a bigger budget | MultiRoom was confirmed protocol-legally on the level it was tested on (`docs/MULTIROOM_EVALUATION.md`). DoorKey is closed, and more seeds would tighten a tie without changing the story. |
-| Reopen Crafter | It failed its pre-set gate (4.52 / 4.37 against 5). Reopening needs a spec amendment raising the budget S first, plus days of GPU time. |
+| Reopen Crafter (reopened by the user 2026-11-02, see the update below) | It failed its pre-set gate (4.52 / 4.37 against 5). Reopening needs a spec amendment raising the budget S first, plus days of GPU time. |
 | Delete `~/xp-showdown-spike/` | Kept on purpose: replays, probes and any Showdown rerun need it. Outside the repo; the user deletes it when they want. |
+
+**Update 2026-11-02:** the user reopened Showdown follow-ups 1 and 3 (the tempo observation block and a `tempo` opponent, with a friendly-fire penalty) and Crafter, so those items above are no longer closed (specs: `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`). The 2026-11-01 reasoning above stays as history. Follow-up 2 (foe ability and item fill) is still closed. **Update 2026-11-10:** both tempo runs finished and both tie (`docs/FINDINGS.md`, Phase 4; tables `docs/spikes/showdown_tempo_results/`). Crafter is still waiting on the user (push, Colab calibration, approval of S).
 
 ## Suggested order
 

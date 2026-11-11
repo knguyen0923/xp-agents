@@ -18,6 +18,7 @@ class ToyVec:
     def __init__(self, n: int, seed: int = 0):
         self.n, self.rng = n, np.random.default_rng(seed)
         self.results: deque = deque(maxlen=100)
+        self.last_won = np.zeros(n, dtype=np.float32)
         self._draw()
 
     def _draw(self):
@@ -28,6 +29,7 @@ class ToyVec:
     def step(self, actions):
         assert self.masks[np.arange(self.n), 0, actions[:, 0]].all(), "slot 0 played an illegal action"
         rewards = np.where(actions[:, 0] == GOOD, 1.0, -1.0).astype(np.float32)
+        self.last_won = (rewards > 0).astype(np.float32)
         self.results.extend((rewards > 0).astype(float).tolist())
         self._draw()
         return rewards, np.ones(self.n, dtype=np.float32)

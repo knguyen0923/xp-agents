@@ -68,7 +68,8 @@ def main(argv=None) -> None:
     rec = ShowdownVecEnv(cfg["ppo"]["n_envs"], cfg["env"]["format"], load_pool(sp.team_dir(cfg, "eval")), cfg["env"]["opponent"],
                          seed=args.seed + 1000, save_replays=str(all_dir),
                          account_labels=(agent_label, OPPONENT_LABELS.get(cfg["env"]["opponent"], "Opponent")),
-                         matchup=bool(cfg["env"].get("matchup", False)))  # new team draws; recording env
+                         matchup=bool(cfg["env"].get("matchup", False)), tempo=bool(cfg["env"].get("tempo", False)),
+                         friendly_fire=float(cfg["env"].get("friendly_fire", 0.0)))  # new team draws; recording env
     try:
         result = learner.evaluate(rec, args.battles)
     finally:

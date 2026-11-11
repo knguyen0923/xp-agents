@@ -119,3 +119,20 @@ def test_flag_off_vector_is_identical_and_flag_on_appends_the_block():
 
 def test_obs_dim_literals_are_pinned():
     assert E.OBS_DIM == 1811 and E.obs_dim(True) == 1811 + 72
+
+
+def test_obs_dim_stacks_the_optional_blocks():
+    assert E.obs_dim() == E.OBS_DIM and E.obs_dim(False, False) == E.OBS_DIM
+    assert E.obs_dim(True) == E.OBS_DIM + E.MATCHUP_DIM
+    assert E.obs_dim(False, True) == E.OBS_DIM + E.TEMPO_DIM
+    assert E.obs_dim(True, True) == E.OBS_DIM + E.MATCHUP_DIM + E.TEMPO_DIM
+
+
+def test_tempo_off_is_identical_and_tempo_on_appends_the_block():
+    own, foe = mon("garchomp", "trickroom"), mon("heatran", "flamethrower")
+    b = battle([own], [foe], [own, None], [foe, None])
+    base = E.encode_battle(b)
+    assert np.array_equal(E.encode_battle(b, tempo=False), base) and base.shape == (E.OBS_DIM,)
+    with_tempo = E.encode_battle(b, tempo=True)
+    assert with_tempo.shape == (E.OBS_DIM + E.TEMPO_DIM,)
+    assert np.array_equal(with_tempo[:E.OBS_DIM], base)
