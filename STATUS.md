@@ -4,7 +4,7 @@ Point Claude at this file after `/clear`. It is a snapshot; re-verify against th
 (`git log`, `git status`, `pytest`). If `RESUME.md` says anything other than "nothing in
 progress," read it first. Older dated notes were removed in the 2026-10-30 polish pass; they live in the git history of this file.
 
-<!-- STATUS_COMMIT: 164d818 -->
+<!-- STATUS_COMMIT: 08a8f45 -->
 
 ## Current state
 
@@ -38,4 +38,4 @@ As of 2026-11-01 nothing was in progress (superseded by the 2026-11-02 reopening
 
 ## Last updated
 
-2026-11-10 (Showdown tempo run 1 `showdown-tempo-base` reported: a tie, all CIs include 0; run 2 `showdown-tempo` FINISHED 2026-11-10 (68 of 68) and reported: also a tie (`auc` Kairi 0.353 vs Kaiser 0.356, diff -0.003 [-0.012, +0.007]; tuned Kairi `ent_coef` 0.02, Kaiser `rnd_coef` 0.03), and the paired comparison against run 1 has every CI including 0; README, `docs/FINDINGS.md` and the tables (`docs/spikes/showdown_tempo_results/`) are done for both tempo runs; `docs/WRITEUP.md`, `docs/findings.html` (rebuilt, not yet viewed in a browser), `docs/FUTURE_WORK.md` and `docs/REMAINING_WORK.md` are updated too, so all write-ups are done; `showdown-tempo` was pushed to `origin` and PR #1 opened against `main` on 2026-11-10 (https://github.com/knguyen0923/xp-agents/pull/1; fast suite 314 passed); what is left is for the user to check CI and merge it, see RESUME.md; Crafter built on branch `crafter-reopen`, its real-env smoke passed 2026-11-04 (239 steps/s, nothing tuned yet); next steps in RESUME.md)
+2026-11-11 (Crafter: workers now import `crafter` with stdout/stderr silenced (`_import_crafter` in `xp/crafter/env.py`) to hide the per-worker gym NumPy-2 banner in Colab; pushed to `crafter-reopen` as 08a8f45, not yet confirmed against the real `gym` import, so check the next Colab smoke run; earlier, 2026-11-10: Showdown tempo run 1 `showdown-tempo-base` reported: a tie, all CIs include 0; run 2 `showdown-tempo` FINISHED 2026-11-10 (68 of 68) and reported: also a tie (`auc` Kairi 0.353 vs Kaiser 0.356, diff -0.003 [-0.012, +0.007]; tuned Kairi `ent_coef` 0.02, Kaiser `rnd_coef` 0.03), and the paired comparison against run 1 has every CI including 0; README, `docs/FINDINGS.md` and the tables (`docs/spikes/showdown_tempo_results/`) are done for both tempo runs; `docs/WRITEUP.md`, `docs/findings.html` (rebuilt, not yet viewed in a browser), `docs/FUTURE_WORK.md` and `docs/REMAINING_WORK.md` are updated too, so all write-ups are done; `showdown-tempo` was pushed to `origin` and PR #1 opened against `main` on 2026-11-10 (https://github.com/knguyen0923/xp-agents/pull/1; fast suite 314 passed); what is left is for the user to check CI and merge it, see RESUME.md; Crafter built on branch `crafter-reopen`, its real-env smoke passed 2026-11-04 (239 steps/s, nothing tuned yet); next steps in RESUME.md)
