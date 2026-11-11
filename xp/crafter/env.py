@@ -51,8 +51,31 @@ def assert_world_pools_disjoint(pools: Dict[str, Iterable[int]], n_envs: int, ep
             raise ProtocolError(f"world pools {a!r} and {b!r} overlap: {frac:.4%} of worlds are shared (limit {max_overlap:.4%})")
 
 
+def _import_crafter():
+    """Import crafter with the fds silenced: it imports `gym`, whose NumPy-2 banner prints on every worker spawn."""
+    import os
+    import sys
+
+    sys.stdout.flush()
+    sys.stderr.flush()
+    saved = [os.dup(1), os.dup(2)]
+    null = os.open(os.devnull, os.O_WRONLY)
+    try:
+        os.dup2(null, 1)
+        os.dup2(null, 2)
+        import crafter
+    finally:
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os.dup2(saved[0], 1)
+        os.dup2(saved[1], 2)
+        for fd in (*saved, null):
+            os.close(fd)
+    return crafter
+
+
 def _worker(conn, area, env_seed):
-    import crafter
+    crafter = _import_crafter()
 
     env = crafter.Env(area=(area, area), seed=env_seed)
     conn.send(env.reset())
