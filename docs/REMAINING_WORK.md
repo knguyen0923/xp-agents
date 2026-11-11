@@ -80,7 +80,7 @@ The user chose "close by decision": do the cheap checks, and close every other o
 | Reopen Crafter (reopened by the user 2026-11-02, see the update below) | It failed its pre-set gate (4.52 / 4.37 against 5). Reopening needs a spec amendment raising the budget S first, plus days of GPU time. |
 | Delete `~/xp-showdown-spike/` | Kept on purpose: replays, probes and any Showdown rerun need it. Outside the repo; the user deletes it when they want. |
 
-**Update 2026-11-02:** the user reopened Showdown follow-ups 1 and 3 (the tempo observation block and a `tempo` opponent, with a friendly-fire penalty) and Crafter, so those items above are no longer closed (specs: `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`). The 2026-11-01 reasoning above stays as history. Follow-up 2 (foe ability and item fill) is still closed.
+**Update 2026-11-02:** the user reopened Showdown follow-ups 1 and 3 (the tempo observation block and a `tempo` opponent, with a friendly-fire penalty) and Crafter, so those items above are no longer closed (specs: `docs/superpowers/specs/2026-11-02-showdown-tempo-design.md`, `docs/superpowers/specs/2026-11-02-crafter-reopen-design.md`). The 2026-11-01 reasoning above stays as history. Follow-up 2 (foe ability and item fill) is still closed. **Update 2026-11-10:** both tempo runs finished and both tie (`docs/FINDINGS.md`, Phase 4; tables `docs/spikes/showdown_tempo_results/`). Crafter is still waiting on the user (push, Colab calibration, approval of S).
 
 ## Suggested order
 
